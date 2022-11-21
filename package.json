@@ -1,0 +1,63 @@
+{
+    "name": "local-module-dummy",
+    "version": "0.0.1",
+    "author": "Stanislaw Hüll",
+    "license": "",
+    "description": "",
+    "files": [
+        "dist"
+    ],
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "test": "npm run test:build && npx mocha --timeout 3000 './dist-test/tests/**/*.test.js'",
+        "test:debug": "npm run test:build && NODE_OPTIONS=--inspect-brk npx mocha --timeout 9999999 './dist-test/tests/**/*.test.js'",
+        "test:build": "rm -rf ./dist-test && npx tsc -p ./tests/tsconfig.json",
+        "start": "npm run start:build && node ./dist/main.js",
+        "start:debug": "npm run start:build && NODE_OPTIONS=--inspect-brk node ./dist/main.js",
+        "start:build": "rm -rf ./dist && npx tsc -p ./tsconfig.json"
+    },
+    "dependencies": {
+        "@types/express": "^4.17.14",
+        "@types/node": "^18.11.9",
+        "express": "^4.18.2",
+        "typescript": "^4.9.3"
+    },
+    "prettier": {
+        "endOfLine": "lf",
+        "printWidth": 180,
+        "tabWidth": 4,
+        "trailingComma": "none",
+        "semi": true,
+        "arrowParens": "always",
+        "overrides": [
+            {
+                "files": [
+                    "*.yml"
+                ],
+                "options": {
+                    "tabWidth": 2
+                }
+            }
+        ]
+    },
+    "eslintConfig": {
+        "ignorePatterns": [
+            "/*",
+            "!/src",
+            "!/test"
+        ],
+        "parserOptions": {
+            "project": [
+                "./tsconfig.json",
+                "./test/tsconfig.json"
+            ]
+        }
+    },
+    "devDependencies": {
+        "@types/chai": "^4.3.4",
+        "@types/mocha": "^10.0.0",
+        "chai": "^4.3.7",
+        "mocha": "^10.1.0"
+    }
+}
