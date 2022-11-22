@@ -1,18 +1,11 @@
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
 
-jobs:
-  trigger-release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/github-script@v5
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              'bird-wp07',
-              'win10-x64-bundle',
-              'workflows/main.yaml',
-              'main'
-            });
+# jobs:
+#   trigger-release:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - run: |
+#           # curl -XPOST -u '${{ secrets.PAT_USERNAME }}:${{ secrets.PAT_TOKEN }}' -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/YOURNAME/APPLICATION_NAME/dispatches --data '{"event_type": "build_application"}'
