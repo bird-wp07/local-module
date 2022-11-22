@@ -1,11 +1,15 @@
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
 
-# jobs:
-#   trigger-release:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - run: |
-#           # curl -XPOST -u '${{ secrets.PAT_USERNAME }}:${{ secrets.PAT_TOKEN }}' -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/YOURNAME/APPLICATION_NAME/dispatches --data '{"event_type": "build_application"}'
+jobs:
+  trigger-release:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+         curl -X POST \
+         -H 'Authorization: Bearer ${{ secrets.DAAD_WP07_PAT }}' \
+         -H 'Accept: application/vnd.github.v3+json' \
+         https://api.github.com/repos/bird-wp07/win10-x64-bundle/actions/workflows/deploy.yml/dispatches \
+         -d '{"ref": "main"}'
