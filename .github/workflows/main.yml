@@ -11,8 +11,8 @@ jobs:
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
-              'Mause',
-              'fdroidrepo',
-              'workflows/update.yaml',
+              'bird-wp07',
+              'win10-x64-bundle',
+              'workflows/main.yaml',
               'main',
             });
