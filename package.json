@@ -11,8 +11,8 @@
     "types": "dist/index.d.ts",
     "scripts": {
         "test": "npm run test:build && npx mocha --timeout 3000 './dist-test/tests/**/*.test.js'",
+        "test:build": "npx tsc -p ./tests/tsconfig.json",
         "test:debug": "npm run test:build && NODE_OPTIONS=--inspect-brk npx mocha --timeout 9999999 './dist-test/tests/**/*.test.js'",
-        "test:build": "rm -rf ./dist-test && npx tsc -p ./tests/tsconfig.json",
         "build": "npx tsc -p ./tsconfig.json",
         "start": "npx node ./dist/main.js",
         "clean": "rm -rf ./dist"
