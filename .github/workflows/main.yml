@@ -14,5 +14,5 @@ jobs:
               'bird-wp07',
               'win10-x64-bundle',
               'workflows/main.yaml',
-              'main',
+              'main'
             });
