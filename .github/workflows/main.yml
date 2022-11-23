@@ -7,12 +7,6 @@ jobs:
   trigger-release:
     runs-on: ubuntu-latest
     steps:
-      # - run: |
-      #    curl -X POST \
-      #    -H 'Authorization: Bearer ${{secrets.DAAD_WP07_PAT}}' \
-      #    -H 'Accept: application/vnd.github.v3+json' \
-      #    -d '{"ref": "main"}' \
-      #    https://api.github.com/repos/bird-wp07/win10-x64-bundle/actions/workflows/main.yml/dispatches
       - uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.RELEASE_PIPELINE_TOKEN }}

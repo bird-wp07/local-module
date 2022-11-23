@@ -4,7 +4,6 @@ const app = express();
 const port = process.env.LOCAL_MODULE_PORT ? process.env.LOCAL_MODULE_PORT : 2048;
 
 app.get("/", (_req, res) => {
-    // If run via 'npm st
     res.send(`Local module v${process.env.npm_package_version}`);
 });
 
