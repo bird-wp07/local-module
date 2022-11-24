@@ -1,11 +1,10 @@
 {
-    "name": "local-module-dummy",
+    "name": "bird-wp07-local-module",
     "version": "0.0.1",
-    "author": "Stanislaw Hüll",
     "license": "",
-    "description": "",
     "files": [
-        "dist"
+        "dist",
+        "package.json"
     ],
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -28,18 +27,8 @@
         "printWidth": 180,
         "tabWidth": 4,
         "trailingComma": "none",
-        "semi": true,
-        "arrowParens": "always",
-        "overrides": [
-            {
-                "files": [
-                    "*.yml"
-                ],
-                "options": {
-                    "tabWidth": 2
-                }
-            }
-        ]
+        "semi": false,
+        "arrowParens": "always"
     },
     "eslintConfig": {
         "ignorePatterns": [
