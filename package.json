@@ -1,13 +1,13 @@
 {
-    "name": "bird-wp07-local-module",
+    "name": "@bird-wp07/local-module",
     "version": "0.0.1",
     "license": "",
     "files": [
         "dist",
         "package.json"
     ],
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "dist/main.js",
+    "types": "dist/main.d.ts",
     "scripts": {
         "test": "npm run test:build && npx mocha --timeout 3000 './dist-test/tests/**/*.test.js'",
         "test:build": "npx tsc -p ./tests/tsconfig.json",
