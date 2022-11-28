@@ -1,4 +1,6 @@
 import { ok, err, Result } from "neverthrow"
+import { isIP, isIPv6 } from "net"
+import isValidHostname from "is-valid-hostname"
 
 export namespace Settings {
     export namespace Errors {
@@ -10,22 +12,47 @@ export namespace Settings {
     }
 
     export interface IApplicationSettings {
-        /* Local port to expose the local module http interface at. */
+        /* Local module address to expose the local module http interface at.
+         * Parsed from the 'WP07_LOCAL_MODULE_ADDRESS' envvar. */
+        localModuleIp: string
         localModulePort: number
 
-        /* IP address of the DSS module in <HOST>:<PORT> format. */
-        dssAddress: string
+        /* Address of the DSS module. Parsed from the 'WP07_DSS_ADDRESS' envvar. */
+        dssIp: string
+        dssPort: number
     }
 
     export function parseApplicationSettings(env = process.env): Result<IApplicationSettings, Errors.InvalidSettings> {
-        /* Validate local module port setting. */
-        if (typeof env.WP07_LOCAL_MODULE_PORT !== "number" || env.WP07_LOCAL_MODULE_PORT < 1 || env.WP07_LOCAL_MODULE_PORT > 65535 ){
-                return err(new Errors.InvalidSettings(`Mandatory environment variable 'WP07_LOCAL_MODULE_PORT' must be a valid port.`))
+        const reMatches = []
+        for (const envvar of ["WP07_LOCAL_MODULE_ADDRESS", "WP07_DSS_ADDRESS"]) {
+            if (env[envvar] == undefined) {
+                return err(new Errors.InvalidSettings(`Mandatory environment variable '${envvar}' is not set.`))
+            }
+
+            const match = (env[envvar] as string).match(/^(.+):(\d+)$/)
+            if (match == null) {
+                return err(new Errors.InvalidSettings(`Mandatory environment variable '${envvar}' does not match the pattern '<IP/HOSTNAME>:<PORT>'.`))
+            }
+
+            const ip = match[1]
+            if (!isIP(ip) && !isValidHostname(ip)) {
+                return err(new Errors.InvalidSettings(`Mandatory environment variable '${envvar}' carries an invalid IP or hostname: '${ip}'.`))
+            }
+
+            const port = Number(match[2])
+            if (port < 0 || 65535 < port) {
+                return err(new Errors.InvalidSettings(`Mandatory environment variable '${envvar}' carries an invalid port: '${port}'.`))
+            }
+
+            reMatches.push(match)
         }
 
-        /* Validate DSS address setting. */
-        if (typeof env.WP07_LOCAL_MODULE_PORT !== "string" /* TODO: Check for <HOST>:<PORT> format via regex. */){
-                return err(new Errors.InvalidSettings(`Mandatory environment variable 'WP07_DSS_ADDRESS' must be a valid address .`))
+        const result: IApplicationSettings = {
+            localModuleIp: reMatches[0][1],
+            localModulePort: Number(reMatches[0][2]),
+            dssIp: reMatches[1][1],
+            dssPort: Number(reMatches[1][2])
         }
+        return ok(result)
     }
 }
