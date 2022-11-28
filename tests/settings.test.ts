@@ -34,7 +34,7 @@ describe(`Application settings parser`, () => {
             localModuleIps: ["-foo.example.com", "_dnslink.ipfs.io", "Eins, zwei", "*Polizei.de"],
             localModulePorts: [80800, 0, -80, 32768.4],
             dssIps: ["-foo.example.com", "_dnslink.ipfs.io", "Eins, zwei", "*Polizei.de"],
-            dssPorts: [80800, 0, -80, 32768.4],
+            dssPorts: [80800, 0, -80, 32768.4]
         }
 
         for (let ii = 0; ii < inputs.localModuleIps.length; ii++) {

@@ -1,6 +1,8 @@
+import fs from "fs"
 import { ok, err, Result } from "neverthrow"
-import { isIP, isIPv6 } from "net"
+import { isIP } from "net"
 import isValidHostname from "is-valid-hostname"
+import { Utility } from "./utility"
 
 export namespace Settings {
     export namespace Errors {
@@ -22,7 +24,18 @@ export namespace Settings {
         dssPort: number
     }
 
-    export function parseApplicationSettings(env = process.env): Result<IApplicationSettings, Errors.InvalidSettings> {
+    export function parseApplicationSettings(env = process.env): Result<IApplicationSettings, Errors.InvalidSettings | Error> {
+        /* Merge environment with .env file, if provided. Existing envvars are
+         * not overwritten by the contents of the .env file. */
+        if (fs.existsSync(".env")) {
+            const parseRes = Utility.parseKeyValueFile(".env")
+            if (parseRes.isErr()) {
+                return err(parseRes.error)
+            }
+            env = { ...parseRes.value, ...env }
+        }
+
+        /* Validate and parse environment variables. */
         const reMatches = []
         for (const envvar of ["WP07_LOCAL_MODULE_ADDRESS", "WP07_DSS_ADDRESS"]) {
             if (env[envvar] == undefined) {

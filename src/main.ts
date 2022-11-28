@@ -1,14 +1,31 @@
-import express from "express";
+import { Settings } from "./settings"
+import { Dss } from "./dss"
+// import express from "express"
 
-const app = express();
-const port = process.env.LOCAL_MODULE_PORT ? process.env.LOCAL_MODULE_PORT : 2048;
+async function main() {
+    /* Parse application settings. */
+    const settingsRes = Settings.parseApplicationSettings()
+    if (settingsRes.isErr()) {
+        console.error(settingsRes.error.message)
+        process.exit(1)
+    }
+    const settings = settingsRes.value
 
+    const isOnline = await Dss.isOnline(settings.dssIp, settings.dssPort, { waitSeconds: 360 })
+    if (isOnline) {
+        console.log("YEAHHH BOY")
+    } else {
+        console.log("SHIEEEEt")
+    }
+}
 
+main()
+// const app = express()
 
-app.get("/", (_req, res) => {
-    res.send(`Local module v${process.env.npm_package_version}`);
-});
+// app.get("/", (_req, res) => {
+//     res.send(`Local module v${process.env.npm_package_version}`)
+// })
 
-app.listen(port, () => {
-    console.log(`Listening on port ${port}.`);
-});
+// app.listen(port, () => {
+//     console.log(`Listening on port ${port}.`)
+// })
