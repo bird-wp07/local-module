@@ -13,9 +13,9 @@ async function main() {
 
     const isOnline = await Dss.isOnline(settings.dssIp, settings.dssPort, { waitSeconds: 360 })
     if (isOnline) {
-        console.log("YEAHHH BOY")
+        console.log("OK")
     } else {
-        console.log("SHIEEEEt")
+        console.log("Nope")
     }
 }
 
