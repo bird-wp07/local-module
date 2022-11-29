@@ -21,7 +21,7 @@ jobs:
       - name: Install local-module npm package
         run: |
           cd ".\zip\"
-          npm install @bird-wp07/local-module
+          npm install --prefix . @bird-wp07/local-module
 
       - name: Create zipfile
         run: |
