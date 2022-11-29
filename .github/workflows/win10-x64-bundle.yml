@@ -1,0 +1,46 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  release-win-x64-bundle:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - run: |
+          New-Item -Path . -Name "bundle" -ItemType "directory"
+          Copy-Item ".\bundle\win10-x64\start.ps1" -Destination ".\bundle\"
+          cd ".\bundle"
+          curl -o .\node-v18.12.1-win-x64.zip https://nodejs.org/dist/v18.12.1/node-v18.12.1-win-x64.zip
+          7z x .\node-v18.12.1-win-x64.zip
+          Add-Content $env:GITHUB_PATH $(Resolve-Path .\node-v18.12.1-win-x64\)
+
+      # Install local-module npm package. The -g flag causes the package to be
+      # installed into the node directory which we extracted above.
+      - run: |
+          cd ".\bundle"
+          npm install -g @bird-wp07/local-module
+
+      # Create zipfile.
+      - run: |
+          cd ".\bundle"
+          7z a release.zip .\node-v18.12.1-win-x64\ start.ps1
+
+      - name: Configure release title and name of zip file
+        run: |
+          cd ".\bundle\"
+          $dateString = Get-Date -Format yyyy-MM-ddTHH:mm:ssK
+          $zipFile = "wp07-local-module-win10-x64.zip"
+          Rename-Item -Path ".\release.zip" -NewName $zipFile
+          Add-Content $env:GITHUB_ENV "RELEASE_TITLE=wp07-local-module-win10-x64-v$($dateString)"
+          Add-Content $env:GITHUB_ENV "RELEASE_ZIP_FILENAME=$($zipFile)"
+
+      - name: Release archive
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ${{ env.RELEASE_ZIP_FILENAME }}
+          name: ${{ env.RELEASE_TITLE }}
+          allowUpdates: true
+          tag: main
