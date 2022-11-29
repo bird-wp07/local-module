@@ -1,9 +1,11 @@
 {
     "name": "@bird-wp07/local-module",
-    "version": "0.0.4",
+    "version": "0.0.12",
     "license": "",
+    "bin": "./bin/start",
     "files": [
-        "dist",
+        "bin/",
+        "dist/",
         "package.json"
     ],
     "main": "dist/main.js",
@@ -15,7 +17,8 @@
         "test:clean": "rm -rf ./dist-test",
         "build": "npx tsc -p ./tsconfig.json",
         "start": "node ./dist/main.js",
-        "clean": "rm -rf ./dist"
+        "clean": "rm -rf ./dist",
+        "pub": "npm run clean && npm run build && npm publish"
     },
     "dependencies": {
         "@types/express": "^4.17.14",
@@ -31,7 +34,17 @@
         "tabWidth": 4,
         "trailingComma": "none",
         "semi": false,
-        "arrowParens": "always"
+        "arrowParens": "always",
+        "overrides": [
+            {
+                "files": [
+                    "*.yml"
+                ],
+                "options": {
+                    "tabWidth": 2
+                }
+            }
+        ]
     },
     "eslintConfig": {
         "ignorePatterns": [
