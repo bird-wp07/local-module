@@ -9,6 +9,7 @@ jobs:
         with:
           ref: main
 
+      - name: Set up temporary directory and download and extract standalone node
       - run: |
           New-Item -Path . -Name ".\zip\" -ItemType "directory"
           Copy-Item ".\bundle\win10-x64\start.ps1" -Destination ".\zip\"
@@ -17,13 +18,13 @@ jobs:
           7z x .\node-v18.12.1-win-x64.zip
           Add-Content $env:GITHUB_PATH $(Resolve-Path .\node-v18.12.1-win-x64\)
 
-      # Install local-module npm package into the standalone node directory.
-      - run: |
+      - name: Install local-module npm package
+        run: |
           cd ".\zip\"
-          npm install --prefix .\node-v18.12.1-win-x64\ @bird-wp07/local-module
+          npm install @bird-wp07/local-module
 
-      # Create zipfile.
-      - run: |
+      - name: Create zipfile
+        run: |
           cd ".\zip\"
           7z a release.zip .\node-v18.12.1-win-x64\ start.ps1
 
