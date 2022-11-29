@@ -1,6 +1,8 @@
 import { Settings } from "./settings"
 import { Dss } from "./dss"
-// import express from "express"
+import express from "express"
+import http from "http"
+import https from "https"
 
 async function main() {
     /* Parse application settings. */
@@ -11,21 +13,35 @@ async function main() {
     }
     const settings = settingsRes.value
 
-    const isOnline = await Dss.isOnline(settings.dssIp, settings.dssPort, { waitSeconds: 360 })
+    /* Wait for DSS startup to fininsh. */
+    const wait = 360
+    const isOnline = await Dss.isOnline(settings.dssBaseUrl, { waitSeconds: wait })
     if (isOnline) {
-        console.log("OK")
+        console.log("DSS responded. Starting HTTP server.")
     } else {
-        console.log("Nope")
+        console.error(`Could not reach DSS after ${wait} seconds. Abort.`)
+        process.exit(1)
+    }
+
+    /* Start http server. */
+    const app = express()
+    app.get("/", (_req, res) => {
+        res.send(`Local module v${process.env.npm_package_version}`)
+    })
+
+    let protocol = "http"
+    if (settings.localModuleUseHttps) {
+        protocol += "s"
+    }
+    const initCallback = () => {
+        console.log(`Listening on ${protocol}://${settings.localModuleIp}:${settings.localModulePort}.`)
+    }
+    if (settings.localModuleUseHttps) {
+        // NOTE: This code path is currently inactive.
+        https.createServer(app).listen(settings.localModulePort, settings.localModuleIp, initCallback)
+    } else {
+        http.createServer(app).listen(settings.localModulePort, settings.localModuleIp, initCallback)
     }
 }
 
 main()
-// const app = express()
-
-// app.get("/", (_req, res) => {
-//     res.send(`Local module v${process.env.npm_package_version}`)
-// })
-
-// app.listen(port, () => {
-//     console.log(`Listening on port ${port}.`)
-// })

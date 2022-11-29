@@ -10,19 +10,16 @@ export namespace Dss {
      * passed or a reply is received from the server.
      */
     export async function isOnline(
-        ip: string,
-        port: number,
+        baseUrl: string,
         options?: {
             waitSeconds?: number
-            https?: boolean
         }
     ): Promise<boolean> {
-        const protocol = options?.https ? "https" : "http"
         const waitSeconds = options?.waitSeconds ? options.waitSeconds : 0
         const start = new Date().getTime() // returns unix seconds
 
         const config = {
-            url: `${protocol}://${ip}:${port}`,
+            url: baseUrl,
             method: "GET",
             timeout: 3000
         }

@@ -3,49 +3,61 @@ import { expect } from "chai"
 import { Settings } from "../src/settings"
 
 describe(`Application settings parser`, () => {
-    test(`accepts valid addresses`, () => {
-        const inputs = {
-            localModuleIps: ["localhost", "127.0.0.1", "127.255.0.1", "192.168.178.22"],
-            localModulePorts: [8080, 2048, 80, 32768],
-            dssIps: ["localhost", "127.0.0.1", "127.255.0.1", "192.168.178.22"],
-            dssPorts: [8080, 2048, 80, 32768]
-        }
+    test(`accepts valid settings`, () => {
+        const localModulePorts = ["8080", "2248", "2048", "80", "32768", "1234"]
+        const dssBaseUrls = ["http://localhost:2214", "http://localhost", "https://localhost", "https://localhost:443", "http://127.255.0.1:8192", "https://192.168.178.22:12345"]
 
-        for (let ii = 0; ii < inputs.localModuleIps.length; ii++) {
+        for (let ii = 0; ii < localModulePorts.length; ii++) {
             const env = {
-                WP07_LOCAL_MODULE_ADDRESS: `${inputs.localModuleIps[ii]}:${inputs.localModulePorts[ii]}`,
-                WP07_DSS_ADDRESS: `${inputs.dssIps[ii]}:${inputs.dssPorts[ii]}`
+                WP07_LOCAL_MODULE_PORT: localModulePorts[ii],
+                WP07_DSS_BASE_URL: dssBaseUrls[ii]
             }
             const result = Settings.parseApplicationSettings(env)
             expect(result.isOk()).to.be.true
             const have = result._unsafeUnwrap()
             const want = {
-                localModuleIp: inputs.localModuleIps[ii],
-                localModulePort: inputs.localModulePorts[ii],
-                dssIp: inputs.dssIps[ii],
-                dssPort: inputs.dssPorts[ii]
+                localModuleUseHttps: false,
+                localModuleIp: "localhost",
+                localModulePort: Number(localModulePorts[ii]),
+                dssBaseUrl: dssBaseUrls[ii]
             }
             expect(have).to.deep.equal(want)
         }
     })
 
-    test(`rejects invalid addresses`, () => {
-        const inputs = {
-            localModuleIps: ["-foo.example.com", "_dnslink.ipfs.io", "Eins, zwei", "*Polizei.de"],
-            localModulePorts: [80800, 0, -80, 32768.4],
-            dssIps: ["-foo.example.com", "_dnslink.ipfs.io", "Eins, zwei", "*Polizei.de"],
-            dssPorts: [80800, 0, -80, 32768.4]
-        }
+    test(`rejects invalid local module ports`, () => {
+        const localModulePorts = ["0", "99999", "-132", ":123"]
+        const dssBaseUrls = ["http://localhost:2214", "https://localhost:443", "http://127.255.0.1:8192", "https://192.168.178.22:12345"]
 
-        for (let ii = 0; ii < inputs.localModuleIps.length; ii++) {
+        for (let ii = 0; ii < localModulePorts.length; ii++) {
             const env = {
-                WP07_LOCAL_MODULE_ADDRESS: `${inputs.localModuleIps[ii]}:${inputs.localModulePorts[ii]}`,
-                WP07_DSS_ADDRESS: `${inputs.dssIps[ii]}:${inputs.dssPorts[ii]}`
+                WP07_LOCAL_MODULE_PORT: localModulePorts[ii],
+                WP07_DSS_BASE_URL: dssBaseUrls[ii]
             }
             const result = Settings.parseApplicationSettings(env)
             expect(result.isErr()).to.be.true
-            const error = result._unsafeUnwrapErr()
-            expect(error).to.be.instanceOf(Settings.Errors.InvalidSettings)
+            const have = result._unsafeUnwrapErr()
+            expect(have).to.be.instanceOf(Settings.Errors.InvalidEnvvarValue)
+            expect((have as Settings.Errors.InvalidEnvvarValue).envvar).to.be.equal(Settings.localModulePortEnvvar)
+            expect((have as Settings.Errors.InvalidEnvvarValue).value).to.be.equal(String(localModulePorts[ii]))
+        }
+    })
+
+    test(`rejects invalid dss base urls`, () => {
+        const localModulePorts = ["8080", "2048", "80", "32768"]
+        const dssBaseUrls = ["unix:///run/user/1000/dss.sock", "file:///usr/local/share/foo.txt", "http://127.255.0.2.1", "https://192.168.178.22::12345"]
+
+        for (let ii = 0; ii < localModulePorts.length; ii++) {
+            const env = {
+                WP07_LOCAL_MODULE_PORT: localModulePorts[ii],
+                WP07_DSS_BASE_URL: dssBaseUrls[ii]
+            }
+            const result = Settings.parseApplicationSettings(env)
+            expect(result.isErr()).to.be.true
+            const have = result._unsafeUnwrapErr()
+            expect(have).to.be.instanceOf(Settings.Errors.InvalidEnvvarValue)
+            expect((have as Settings.Errors.InvalidEnvvarValue).envvar).to.be.equal(Settings.dssBaseUrlEnvvar)
+            expect((have as Settings.Errors.InvalidEnvvarValue).value).to.be.equal(String(dssBaseUrls[ii]))
         }
     })
 })
