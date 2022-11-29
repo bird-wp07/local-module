@@ -19,7 +19,6 @@ $nodeBin = Resolve-Path $nodeBinPath
 $env:Path = "$($nodeBin);$($env:Path)"
 
 # Start the local module's http server.
-Push-Location $localModulePath
 $env:WP07_LOCAL_MODULE_PORT = $LOCAL_MODULE_PORT
 $env:WP07_DSS_BASE_URL = $DSS_BASE_URL
 npx "@bird-wp07/local-module"
