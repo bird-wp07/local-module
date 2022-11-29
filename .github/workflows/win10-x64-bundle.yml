@@ -40,7 +40,7 @@ jobs:
       - name: Release archive
         uses: ncipollo/release-action@v1
         with:
-          artifacts: ${{ env.RELEASE_ZIP_FILENAME }}
+          artifacts: .\zip\${{ env.RELEASE_ZIP_FILENAME }}
           name: ${{ env.RELEASE_TITLE }}
           allowUpdates: true
           tag: main
