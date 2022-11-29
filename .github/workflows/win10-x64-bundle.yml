@@ -17,13 +17,10 @@ jobs:
           7z x .\node-v18.12.1-win-x64.zip
           Add-Content $env:GITHUB_PATH $(Resolve-Path .\node-v18.12.1-win-x64\)
 
-      # Install local-module npm package. The -g flag causes the package to be
-      # installed into the node directory which we extracted above.
+      # Install local-module npm package into the standalone node directory.
       - run: |
           cd ".\zip\"
-          npm install -g @bird-wp07/local-module
-          npm root -g
-          $(Get-Command npm).Source
+          npm install --prefix .\node-v18.12.1-win-x64\ @bird-wp07/local-module
 
       # Create zipfile.
       - run: |
