@@ -14,7 +14,8 @@ async function main() {
     const settings = settingsRes.value
 
     /* Wait for DSS startup to fininsh. */
-    const wait = 360
+    const wait = 60
+    console.log("Waiting for DSS to start up ... ")
     const isOnline = await Dss.isOnline(settings.dssBaseUrl, { waitSeconds: wait })
     if (isOnline) {
         console.log("DSS responded. Starting HTTP server.")
