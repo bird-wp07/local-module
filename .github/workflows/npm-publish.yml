@@ -9,11 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          - tag: main
       - uses: actions/setup-node@v3
         with:
           node-version: 18.12.1
       - run: npm install
       - run: npm run build
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm config set _authToken="${{ secrets.NPM_TOKEN }}"
+      - run: npx enhanced-publish --if-possible

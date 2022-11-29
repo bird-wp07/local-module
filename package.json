@@ -1,6 +1,6 @@
 {
     "name": "@bird-wp07/local-module",
-    "version": "0.0.1",
+    "version": "0.0.3",
     "license": "",
     "files": [
         "dist",
@@ -50,6 +50,7 @@
         "@types/chai": "^4.3.4",
         "@types/mocha": "^10.0.0",
         "chai": "^4.3.7",
+        "enhanced-publish": "^1.1.1",
         "mocha": "^10.1.0"
     }
 }
