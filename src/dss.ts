@@ -9,12 +9,7 @@ export namespace Dss {
      * If 'waitSeconds' is set, this request is repeated until the set time has
      * passed or a reply is received from the server.
      */
-    export async function isOnline(
-        baseUrl: string,
-        options?: {
-            waitSeconds?: number
-        }
-    ): Promise<boolean> {
+    export async function isOnline(baseUrl: string, options?: { waitSeconds?: number }): Promise<boolean> {
         const waitSeconds = options?.waitSeconds ? options.waitSeconds : 0
         const start = new Date().getTime() // returns unix seconds
 
