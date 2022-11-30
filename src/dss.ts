@@ -30,6 +30,8 @@ export namespace Dss {
             }
             Utility.sleepms(1000)
         } while ((new Date().getTime() - start) / 1000 < waitSeconds)
+
+        // TODO: Check for title tag '<title>DSS Demonstration WebApp</title>'
         return false
     }
 }
