@@ -48,7 +48,6 @@ function main {
         $env:WP07_LOCAL_MODULE_PORT = $LOCAL_MODULE_PORT
         $env:WP07_DSS_BASE_URL = $DSS_BASE_URL
         npx "@bird-wp07/local-module"
-
     }
     finally {
         # Finally ensures cleanup even if the script was ungracefully killed

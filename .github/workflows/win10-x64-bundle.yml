@@ -23,10 +23,15 @@ jobs:
           cd ".\zip\"
           npm install --prefix . @bird-wp07/local-module
 
+      - name: Download and unpack standalone DSS into .\zip\dss\
+          cd ".\zip\"
+          curl -o .\dss-standalone.zip "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip"
+          7z x .\dss-standalone.zip
+
       - name: Create zipfile
         run: |
           cd ".\zip\"
-          7z a release.zip .\node-v18.12.1-win-x64\ .\node_modules\ .\package.json .\start.ps1
+          7z a release.zip .\node-v18.12.1-win-x64\ \dss-demo-bundle-5.11.1\ .\node_modules\ .\package.json .\start.ps1
 
       - name: Configure release title and name of zip file
         run: |
