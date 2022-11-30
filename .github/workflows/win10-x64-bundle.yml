@@ -24,7 +24,7 @@ jobs:
           npm install --prefix . @bird-wp07/local-module
 
       - name: Download and unpack standalone DSS into .\zip\dss\
-        run:
+        run: |
           cd ".\zip\"
           curl -o .\dss-standalone.zip "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip"
           7z x .\dss-standalone.zip
