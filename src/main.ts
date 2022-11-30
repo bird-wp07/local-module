@@ -1,4 +1,4 @@
-import { Settings } from "./settings"
+import { logger, Settings } from "./settings"
 import { Dss } from "./dss"
 import express from "express"
 import http from "http"
@@ -14,13 +14,13 @@ async function main() {
     const settings = settingsRes.value
 
     /* Wait for DSS startup to fininsh. */
-    const wait = 60
-    console.log("Waiting for DSS to start up ... ")
+    const wait = 3600
+    logger.info("Waiting for DSS to respond ... ")
     const isOnline = await Dss.isOnline(settings.dssBaseUrl, { waitSeconds: wait })
     if (isOnline) {
-        console.log("DSS responded. Starting HTTP server.")
+        logger.info("DSS responded. Starting HTTP server.")
     } else {
-        console.error(`Could not reach DSS after ${wait} seconds. Abort.`)
+        logger.crit(`Could not reach DSS after ${wait} seconds. Abort.`)
         process.exit(1)
     }
 
@@ -35,7 +35,7 @@ async function main() {
         protocol += "s"
     }
     const initCallback = () => {
-        console.log(`Listening on ${protocol}://${settings.localModuleIp}:${settings.localModulePort}.`)
+        logger.info(`Listening on ${protocol}://${settings.localModuleIp}:${settings.localModulePort}.`)
     }
     if (settings.localModuleUseHttps) {
         // NOTE: This code path is currently inactive.
