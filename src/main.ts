@@ -1,5 +1,5 @@
 import { logger, Settings } from "./settings"
-import { Dss } from "./dss"
+import { Dss, Errors as DssErrors } from "./dss"
 import express from "express"
 import http from "http"
 import https from "https"
@@ -17,12 +17,15 @@ async function main() {
     const wait = 3600
     logger.info("Waiting for DSS to respond ... ")
     const isOnline = await Dss.isOnline(settings.dssBaseUrl, { waitSeconds: wait })
-    if (isOnline) {
-        logger.info("DSS responded. Starting HTTP server.")
-    } else {
-        logger.crit(`Could not reach DSS after ${wait} seconds. Abort.`)
+    if (isOnline.isErr()) {
+        if (isOnline.error instanceof DssErrors.NoResponse) {
+            logger.error(`DSS server did not respond for ${wait} seconds. Abort.`)
+        } else {
+            logger.error(`DSS server sent an unexpected response. Abort.`)
+        }
         process.exit(1)
     }
+    logger.info("DSS responded. Starting HTTP server ... ")
 
     /* Start http server. */
     const app = express()
