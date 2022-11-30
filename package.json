@@ -6,7 +6,8 @@
     "files": [
         "bin/",
         "dist/",
-        "package.json"
+        "package.json",
+        "README.md"
     ],
     "main": "dist/main.js",
     "types": "dist/main.d.ts",
