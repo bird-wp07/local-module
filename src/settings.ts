@@ -2,6 +2,7 @@ import fs from "fs"
 import url from "url"
 import { ok, err, Result } from "neverthrow"
 import { Utility } from "./utility"
+import { createLogger, transports, format } from "winston"
 
 export namespace Settings {
     export namespace Errors {
@@ -38,9 +39,20 @@ export namespace Settings {
         }
     }
 
-    /* Export names of envvars for testing purposes.. */
+    /* Export names of envvars for testing purposes. */
     export const localModulePortEnvvar = "WP07_LOCAL_MODULE_PORT"
     export const dssBaseUrlEnvvar = "WP07_DSS_BASE_URL"
+
+    /* Initialize project-wide logger. */
+    export let logger = createLogger({
+        transports: [new transports.Console()],
+        format: format.combine(
+            format.timestamp(),
+            format.printf(({ timestamp, level, message }) => {
+                return `[local-module] ${level.slice(0, 4)}: ${message}`
+            })
+        )
+    })
 
     export interface IApplicationSettings {
         /* Local module configuration. Parsed from the 'WP07_LOCAL_MODULE_PORT'
@@ -113,3 +125,6 @@ export namespace Settings {
         return ok(result)
     }
 }
+
+/* Add separate export for simple importing. */
+export const logger = Settings.logger
