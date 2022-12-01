@@ -2,19 +2,29 @@
 # ADMINISTRATOR SETTINGS
 # ######################
 $LOCAL_MODULE_PORT = 2048
-$DSS_PORT = 8080
+$DSS_PORT = 8085
 
 # Constants
 $nodeBinPath = ".\node-v18.12.1-win-x64"
 $dssRootDir = ".\dss-demo-bundle-5.11.1"
+$serverConfigPath = "$dssRootDir\apache-tomcat-8.5.82\conf\server.xml"
 
 # Change into the directory containing this script for constistent execution
 # irrspective of the working directory from where this script is run.
 $rootDir = Split-Path $MyInvocation.MyCommand.Path
 Set-Location $rootDir
 
-# Runs the included startup batch file from it's own directory.
 function Start-DSS {
+    # HACK: Replace the server's default port by in-file substitution.
+    #       Unfortunately, there is no easier method as we're not in control of
+    #       the server's configuration.
+    $content = Get-Content $serverConfigPath
+    $lineNr = ($content | Select-String "<!-- ====").LineNumber # pwsh's indexing is off-by-one -_-
+    $buffer = $content[$lineNr] -replace 'port="[^"]*"', "port=`"$DSS_PORT`""
+    $content[$lineNr] = $buffer
+    Set-Content $serverConfigPath $content
+
+    # Run the included startup batch file from its own directory.
     Push-Location $dssRootDir
     Start-Process -FilePath cmd.exe -ArgumentList "/c", ".\Webapp-Startup.bat"
     Pop-Location
@@ -51,11 +61,6 @@ function main {
     }
     finally {
         # Finally ensures cleanup even if the script was ungracefully killed
-        # (e.g. ctrl-c). Unfortunately, this will not work if the powershell
-        # window is closed by the user by clicking the [x] button. As it seems,
-        # there is no way to achieve this consistently. See
-        #
-        #     https://stackoverflow.com/questions/2436510/powershell-profile-on-exit-event
         Stop-DSS
     }
 }
