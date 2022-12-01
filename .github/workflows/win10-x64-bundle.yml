@@ -29,6 +29,11 @@ jobs:
           curl -o .\dss-standalone.zip "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip"
           7z x .\dss-standalone.zip
 
+      - name: Replace the server's default configuration file
+        run: |
+          Remove-Item -Path .\zip\dss-demo-bundle-5.11.1\apache-tomcat-8.5.82\conf\server.xml -Force
+          Copy-Item ".\bundle\win10-x64\server.xml" -Destination ".\zip\dss-demo-bundle-5.11.1\apache-tomcat-8.5.82\conf\"
+
       - name: Create zipfile
         run: |
           cd ".\zip\"
