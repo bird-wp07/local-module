@@ -1,2 +1,2 @@
-export * as Errors from "./errors"
-export * from "./dss"
+import * as Dss from "./namespace"
+export { Dss }
