@@ -14,4 +14,5 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npm config set _authToken="${{ secrets.NPM_TOKEN }}"
-      - run: npx enhanced-publish --if-possible
+      - run: npm publish
+      # TODO: trigger release pipeline after successful publish

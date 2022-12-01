@@ -31,8 +31,14 @@ jobs:
 
       - name: Replace the server's default configuration file
         run: |
+<<<<<<< HEAD
           Remove-Item -Path .\zip\dss-demo-bundle-5.11.1\apache-tomcat-8.5.82\conf\server.xml -Force
           Copy-Item ".\bundle\win10-x64\server.xml" -Destination ".\zip\dss-demo-bundle-5.11.1\apache-tomcat-8.5.82\conf\"
+=======
+          $configPath = ".\zip\dss-demo-bundle-5.11.1\apache-tomcat-8.5.82\conf\server.xml"
+          Remove-Item -Path $configPath
+          Copy-Item ".\bundle\win10-x64\server.xml" -Destination $configPath
+>>>>>>> develop
 
       - name: Create zipfile
         run: |
