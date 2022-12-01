@@ -3,22 +3,28 @@ import { AxiosRequestConfig, AxiosResponse } from "axios"
 import { Utility } from "../utility"
 import { Dss } from "."
 
-export namespace DssClient {
+export class DssClient {
+    public baseUrl: string
+    constructor(baseUrl: string) {
+        this.baseUrl = baseUrl
+    }
+
     /*
-     * Checks whether the DSS API is accessible at the specified ip/hostname
-     * and port by querying the DSS's default browser API.
+     * Checks whether the DSS API is accessible at the specified base url by
+     * querying the DSS's default browser API.
      *
-     * If 'waitSeconds' is set, this request is repeated until the set time has
-     * passed or a reply is received from the server.
+     * If 'waitSeconds' is set, this request is repeated with brief pauses in
+     * between until the set time has passed or a reply is received from the
+     * server.
      */
-    export async function isOnline(baseUrl: string, options?: { waitSeconds?: number }): Promise<Result<null, Dss.Errors.NoResponse | Dss.Errors.UnexpectedResponse>> {
+    async isOnline(options?: { waitSeconds?: number }): Promise<Result<null, Dss.Errors.NoResponse | Dss.Errors.UnexpectedResponse>> {
         const waitSeconds = options?.waitSeconds ? options.waitSeconds : 0
         const start = new Date().getTime() // returns unix seconds
 
         let responseData = ""
         let gotResponse = false
         const config: AxiosRequestConfig = {
-            baseURL: baseUrl,
+            baseURL: this.baseUrl,
             method: "GET",
             timeout: 3000
         }
