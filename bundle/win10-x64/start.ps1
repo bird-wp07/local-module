@@ -2,7 +2,7 @@
 # ADMINISTRATOR SETTINGS
 # ######################
 $LOCAL_MODULE_PORT = 2048
-$DSS_PORT = 8085
+$DSS_PORT = 8080
 
 # Constants
 $nodeBinPath = ".\node-v18.12.1-win-x64"
