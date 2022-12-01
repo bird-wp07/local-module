@@ -56,11 +56,7 @@ function main {
 
         # Start the local module's http server.
         $env:WP07_LOCAL_MODULE_PORT = $LOCAL_MODULE_PORT
-<<<<<<< HEAD
-        $env:WP07_DSS_BASE_URL = "127.0.0.1:$DSS_PORT"
-=======
         $env:WP07_DSS_BASE_URL = "http://127.0.0.1:$DSS_PORT"
->>>>>>> develop
         npx "@bird-wp07/local-module"
     }
     finally {
