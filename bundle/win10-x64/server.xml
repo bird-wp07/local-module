@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This file replaces the default apache configuration file during the
+    build of the win10-x64 pipeline in order to provide a stable setup
+    for the hacky in-file substitution of the webserver port.
+ -->
 <Server port="8005" shutdown="SHUTDOWN">
   <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
   <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />

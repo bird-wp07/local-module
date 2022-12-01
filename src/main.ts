@@ -16,7 +16,7 @@ async function main() {
     /* Wait for DSS startup to fininsh. */
     const dssClient = new Dss.DssClient(settings.dssBaseUrl)
     const wait = 3600
-    logger.info("Waiting for DSS to respond ... ")
+    logger.info(`Waiting for DSS to respond at '${settings.dssBaseUrl}' ... `)
     const isOnline = await dssClient.isOnline({ waitSeconds: wait })
     if (isOnline.isErr()) {
         if (isOnline.error instanceof Dss.Errors.NoResponse) {
