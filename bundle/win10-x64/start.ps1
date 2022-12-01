@@ -2,7 +2,7 @@
 # ADMINISTRATOR SETTINGS
 # ######################
 $LOCAL_MODULE_PORT = 2048
-$DSS_BASE_URL = "http://localhost:8080"
+$DSS_PORT = 8080
 
 # Constants
 $nodeBinPath = ".\node-v18.12.1-win-x64"
@@ -46,11 +46,16 @@ function main {
 
         # Start the local module's http server.
         $env:WP07_LOCAL_MODULE_PORT = $LOCAL_MODULE_PORT
-        $env:WP07_DSS_BASE_URL = $DSS_BASE_URL
+        $env:WP07_DSS_BASE_URL = "127.0.0.1:$DSS_PORT"
         npx "@bird-wp07/local-module"
     }
     finally {
         # Finally ensures cleanup even if the script was ungracefully killed
+        # (e.g. ctrl-c). Unfortunately, this will not work if the powershell
+        # window is closed by the user by clicking the [x] button. As it seems,
+        # there is no way to achieve this consistently. See
+        #
+        #     https://stackoverflow.com/questions/2436510/powershell-profile-on-exit-event
         Stop-DSS
     }
 }
