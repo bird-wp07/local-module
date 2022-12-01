@@ -3,6 +3,7 @@
 # ######################
 $LOCAL_MODULE_PORT = 2048
 $DSS_PORT = 8080
+$DEBUG = 0
 
 # Constants
 $nodeBinPath = ".\node-v18.12.1-win-x64"
@@ -53,9 +54,20 @@ function Start-DSS {
     $content[$lineNr] = $buffer
     Set-Content $serverConfigPath $content
 
-    # Run the included startup batch file from its own directory.
+    # Run the included startup batch file from its own directory. Depdending on
+    # the debug setting, show or hide the dss cmd.exe window.
     Push-Location $dssRootDir
-    Start-Process -FilePath cmd.exe -ArgumentList "/c", ".\Webapp-Startup.bat"
+    $env:JRE_HOME = ".\java"
+    $env:CATALINA_HOME = ".\apache-tomcat-8.5.82"
+    if ($DEBUG -eq 1) {
+        Start-Process -FilePath cmd.exe -ArgumentList "/c", ".\apache-tomcat-8.5.82\bin\catalina.bat run"
+    }
+    else {
+        Start-Process -FilePath cmd.exe -ArgumentList "/c", ".\apache-tomcat-8.5.82\bin\catalina.bat run" `
+            -RedirectStandardError "NUL" -RedirectStandardOut "..\NUL" -NoNewWindow
+            #                       ^^^~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^~~~~~~~~~~~~~~ lol, windows
+            # See https://stackoverflow.com/questions/49375418/start-process-redirect-output-to-null
+    }
     Pop-Location
 }
 
