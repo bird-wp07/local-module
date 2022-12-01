@@ -37,11 +37,11 @@ jobs:
       - name: Configure release title and name of zip file
         run: |
           cd ".\zip\"
-          $dateString = Get-Date -Format yyyy-MM-ddTHH:mm:ssK
-          $zipFile = "wp07-local-module-win10-x64.zip"
+          $localModuleVersion = npm view "@bird-wp07/local-module" version
+          $zipFile = "wp07-local-module-win10-x64-v$localModuleVersion.zip"
           Rename-Item -Path ".\release.zip" -NewName $zipFile
-          Add-Content $env:GITHUB_ENV "RELEASE_TITLE=wp07-local-module-win10-x64-v$($dateString)"
-          Add-Content $env:GITHUB_ENV "RELEASE_ZIP_FILENAME=$($zipFile)"
+          Add-Content $env:GITHUB_ENV "RELEASE_TITLE=v$localModuleVersion"
+          Add-Content $env:GITHUB_ENV "RELEASE_ZIP_FILENAME=$zipFile"
 
       - name: Release archive
         uses: ncipollo/release-action@v1
