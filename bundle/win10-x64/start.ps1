@@ -113,7 +113,7 @@ function Stop-DSS {
 # The contents of a directory, if it exists, are not further inspected. In
 # order to issue a full re-download of a component delete its directory.
 function Install-Dependencies ($what) {
-    if (($what -eq "node") -or (!$what)) {
+    if (($what -eq "node") -or ($what -eq "all")) {
         if (Test-Path -Path $nodeBinPath) {
             Write-Host "Standalone nodejs distribution found at '$nodeBinPath'."
         }
@@ -125,7 +125,7 @@ function Install-Dependencies ($what) {
         }
     }
 
-    if (($what -eq "dss") -or (!$what)) {
+    if (($what -eq "dss") -or ($what -eq "all")) {
         if (Test-Path -Path $dssRootPath) {
             Write-Host "DSS installation found at '$dssRootPath'."
         }
@@ -137,7 +137,7 @@ function Install-Dependencies ($what) {
         }
     }
 
-    if (($what -eq "local-module") -or (!$what)) {
+    if (($what -eq "local-module") -or ($what -eq "all")) {
         if (Test-Path -Path $localModulePath) {
             Write-Host "Local module installation found at '$localModulePath'."
         }
@@ -186,6 +186,6 @@ Set-Location $rootDir
 Switch ($args[0]) {
     stop-dss { Stop-DSS }
     start-dss { Start-DSS }
-    install-dependencies { Install-Dependencies }
+    install-dependencies { Install-Dependencies $args[1]}
     default { main }
 }
