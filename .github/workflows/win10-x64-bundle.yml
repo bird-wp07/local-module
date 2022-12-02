@@ -19,14 +19,13 @@ jobs:
         working-directory: zip
         run: |
           7z a release.zip ".\start.ps1" ".\README"
-          Rename-Item -Path ".\release.zip" -NewName $zipFile
-          $localModuleVersion = npm view "@bird-wp07/local-module" version
-          Add-Content $env:GITHUB_ENV "LOCAL_MODULE_VERSION=$localModuleVersion"
 
       - name: Configure release title and name of zip file
+        working-directory: zip
         run: |
           $localModuleVersion = npm view "@bird-wp07/local-module" version
-          $zipFile = "wp07-local-module-win10-x64-v${{ env.LOCAL_MODULE_VERSION }}.zip"
+          $zipFile = "wp07-local-module-win10-x64-standalone-v$localModuleVersion.zip"
+          Rename-Item -Path ".\release.zip" -NewName $zipFile
           Add-Content $env:GITHUB_ENV "RELEASE_TITLE=v$localModuleVersion"
           Add-Content $env:GITHUB_ENV "RELEASE_ZIP_FILENAME=$zipFile"
 
