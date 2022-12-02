@@ -31,7 +31,7 @@ async function main() {
     /* Start http server. */
     const app = express()
     app.get("/", (_req, res) => {
-        res.send(`Local module v${process.env.npm_package_version}`)
+        res.send(`Local module listening.`)
     })
 
     let protocol = "http"
