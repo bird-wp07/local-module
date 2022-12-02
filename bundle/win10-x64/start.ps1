@@ -150,7 +150,7 @@ function Install-Dependencies ($what) {
 }
 
 function main {
-    Set-XButton 0
+    Install-Dependencies all
 
     # Prepend the nodejs binary abspath to PATH to guarantee that our installed
     # nodejs is used.
@@ -159,6 +159,7 @@ function main {
 
     try {
         # Start DSS in the background in a separate cmd.exe window.
+        Set-XButton 0
         Start-DSS
 
         # Start the local module's http server.
