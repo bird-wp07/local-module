@@ -14,36 +14,30 @@ jobs:
           New-Item -Path . -Name ".\zip\" -ItemType "directory"
           Copy-Item ".\bundle\win10-x64\start.ps1" -Destination ".\zip\"
           Copy-Item ".\bundle\win10-x64\README" -Destination ".\zip\"
-          cd ".\zip\"
-          curl -o .\node-v18.12.1-win-x64.zip https://nodejs.org/dist/v18.12.1/node-v18.12.1-win-x64.zip
-          7z x .\node-v18.12.1-win-x64.zip
-          Add-Content $env:GITHUB_PATH $(Resolve-Path .\node-v18.12.1-win-x64\)
+
+      - name: Install standalone dss
+        working-directory: zip
+        run: |
+          & .\start.ps1 install-dependencies dss
+
+      - name: Install standalone node
+        working-directory: zip
+        run: |
+          & .\start.ps1 install-dependencies node
 
       - name: Install local-module npm package
+        working-directory: zip
         run: |
-          cd ".\zip\"
-          npm install --prefix . @bird-wp07/local-module
+          & .\start.ps1 install-dependencies local-module
 
-      - name: Download and unpack standalone DSS into .\zip\dss\
+      - name: Build archive
+        working-directory: zip
         run: |
-          cd ".\zip\"
-          curl -o .\dss-standalone.zip "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip"
-          7z x .\dss-standalone.zip
-
-      - name: Replace the server's default configuration file
-        run: |
-          $configPath = ".\zip\dss-demo-bundle-5.11.1\apache-tomcat-8.5.82\conf\server.xml"
-          Remove-Item -Path $configPath
-          Copy-Item ".\bundle\win10-x64\server.xml" -Destination $configPath
-
-      - name: Create zipfile
-        run: |
-          cd ".\zip\"
-          7z a release.zip .\node-v18.12.1-win-x64\ .\dss-demo-bundle-5.11.1\ .\node_modules\ .\package.json .\start.ps1 .\README
+          7z a release.zip ".\local-module" ".\dss-demo-bundle-5.11.1" ".\node-v18.12.1-win-x64" ".\start.ps1" ".\README"
 
       - name: Configure release title and name of zip file
+        working-directory: zip
         run: |
-          cd ".\zip\"
           $localModuleVersion = npm view "@bird-wp07/local-module" version
           $zipFile = "wp07-local-module-win10-x64-v$localModuleVersion.zip"
           Rename-Item -Path ".\release.zip" -NewName $zipFile

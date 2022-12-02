@@ -10,6 +10,7 @@ Die Applikation kann durch wiederholte Eingabe der Tastenkombination Ctrl-c im
 Powershell Fenster unterbrochen werden. Hierbei werden auch alle
 Hintergrunddienste beendet.
 
+
 ZUSÄTZLICHE INFORMATIONEN
 =========================
 
@@ -22,6 +23,7 @@ abgesetzt werden, wobei <BASIS_PFAD> den Pfad zur 'start.ps1' Datei vom
 Arbeitsverzeichnis der Powershell darstellt. Abhängig von den
 Nutzerberechtigungen kann hierfür eine Administrator Powershell notwendig sein.
 
-Für weitere Informationen über die Freigabe der Ausführung von Powershell Skripten siehe
+Für weitere Informationen über die Freigabe der Ausführung von Powershell
+Skripten siehe
 
     https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy

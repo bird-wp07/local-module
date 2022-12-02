@@ -3,17 +3,17 @@
 # ######################
 $LOCAL_MODULE_PORT = 2048
 $DSS_PORT = 8089
-$DEBUG = 1
+$DEBUG = 0
 
 # Constants
 # ---------
 
 # Path of the standalone node root directory extracted from the archive.
-# Contains, among other files, the 'node.exe' and 'npm.exe' executables.
+# Contains, among other files, the 'node.exe' and 'npm' executables.
 $nodeBinPath = ".\node-v18.12.1-win-x64"
 
 # Path of the dss root directory extracted from the archive. Contains, among
-# other files, the 'node.exe' and 'npm.exe' executables.
+# other files, the 'Webapp-Startup.bat' and 'Webapp-Shutdown.bat' batch files.
 $dssRootPath = ".\dss-demo-bundle-5.11.1"
 
 # Path of the local module installed via
@@ -72,7 +72,7 @@ function Start-DSS {
     #       the server's configuration.
     [xml]$cfg = Get-Content $serverConfigPath
     $cfg.Server.Service.Connector.port = "$DSS_PORT"
-    $cfg.Save((Resolve-Path $serverConfigPath))
+    $cfg.Save((Resolve-Path $serverConfigPath)) # Writeback requires abspath
 
     # Run the included startup batch file from its own directory. Depdending on
     # the debug setting, show or hide the dss cmd.exe window.
@@ -180,12 +180,11 @@ function main {
 
 # Change into the directory containing this script for constistent execution
 # irrspective of the working directory from where this script is run.
-$rootDir = Split-Path $MyInvocation.MyCommand.Path
-Set-Location $rootDir
+Set-Location $PSScriptRoot
 
 Switch ($args[0]) {
     stop-dss { Stop-DSS }
     start-dss { Start-DSS }
-    install-dependencies { Install-Dependencies $args[1]}
+    install-dependencies { Install-Dependencies $args[1] }
     default { main }
 }
