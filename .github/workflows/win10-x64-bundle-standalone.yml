@@ -2,7 +2,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  release-win-x64-bundle:
+  release-win-x64-standalone-bundle:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -15,16 +15,31 @@ jobs:
           Copy-Item ".\bundle\win10-x64\start.ps1" -Destination ".\zip\"
           Copy-Item ".\bundle\win10-x64\README" -Destination ".\zip\"
 
+      - name: Install standalone dss
+        working-directory: zip
+        run: |
+          & .\start.ps1 install-dependencies dss
+
+      - name: Install standalone node
+        working-directory: zip
+        run: |
+          & .\start.ps1 install-dependencies node
+
+      - name: Install local-module npm package
+        working-directory: zip
+        run: |
+          & .\start.ps1 install-dependencies local-module
+
       - name: Build archive
         working-directory: zip
         run: |
-          7z a release.zip ".\start.ps1" ".\README"
+          7z a release.zip ".\local-module" ".\dss-demo-bundle-5.11.1" ".\node-v18.12.1-win-x64" ".\start.ps1" ".\README"
 
       - name: Configure release title and name of zip file
         working-directory: zip
         run: |
           $localModuleVersion = npm view "@bird-wp07/local-module" version
-          $zipFile = "wp07-local-module-win10-x64-v$localModuleVersion.zip"
+          $zipFile = "wp07-local-module-win10-x64-standalone-v$localModuleVersion.zip"
           Rename-Item -Path ".\release.zip" -NewName $zipFile
           Add-Content $env:GITHUB_ENV "RELEASE_TITLE=v$localModuleVersion"
           Add-Content $env:GITHUB_ENV "RELEASE_ZIP_FILENAME=$zipFile"
