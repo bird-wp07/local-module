@@ -2,6 +2,7 @@ import { ok, err, Result } from "neverthrow"
 import { AxiosRequestConfig, AxiosResponse } from "axios"
 import { Utility } from "../utility"
 import { Dss } from "."
+import { IDigestRequest, IDigestResponse } from "./types"
 
 export class DssClient {
     public baseUrl: string
@@ -46,5 +47,20 @@ export class DssClient {
             return err(new Dss.Errors.UnexpectedResponse())
         }
         return ok(null)
+    }
+
+    public async digestXml(request: IDigestRequest): Promise<Result<IDigestResponse, Error>> {
+        const config: AxiosRequestConfig = {
+            method: "POST",
+            url: "/services/rest/signature/one-document/getDataToSign",
+            baseURL: this.baseUrl
+        }
+        const response = await Utility.httpReq(config)
+        if (response.isErr()) {
+            return err(response.error)
+        }
+
+        // TODO: Validate response data
+        return ok(response.value.data)
     }
 }
