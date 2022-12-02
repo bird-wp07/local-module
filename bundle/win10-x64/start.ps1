@@ -32,10 +32,9 @@ $nodeZipFileName = ".\node-standalone-v18.12.1-win-x64.zip"
 $dssUrl = "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip"
 $dssZipFileName = ".\dss-standalone-v5.11.1.zip"
 
-# HACK: Disables the pwsh window's [x] button to guarantee that cleanup is
-#       performed. See
+# Control the [x] button of the Powershell window, in order to guarantee cleanup. See
 #
-#           https://stackoverflow.com/questions/73746912/disable-the-close-x-button-in-powershell
+#     https://stackoverflow.com/questions/73746912
 function Set-XButton {
     #Calling user32.dll methods for Windows and Menus
     $MethodsCall = '
@@ -66,7 +65,6 @@ function Set-XButton {
     }
     [Win32.NativeMethods]::EnableMenuItem($hMenu, $SC_CLOSE, $state) | Out-Null
 }
-
 
 function Start-DSS {
     # HACK: Replace the server's default port by in-file substitution.
@@ -114,34 +112,40 @@ function Stop-DSS {
 #
 # The contents of a directory, if it exists, are not further inspected. In
 # order to issue a full re-download of a component delete its directory.
-function Install-Dependencies {
-    if (Test-Path -Path $nodeBinPath) {
-        Write-Host "Standalone nodejs distribution found at '$nodeBinPath'."
-    }
-    else {
-        Write-Host "Standalone nodejs distribution not found at '$nodeBinPath'. Starting download ..."
-        Invoke-WebRequest -Uri $nodeUrl -OutFile $nodeZipFileName
-        Write-Host "Extracting archive ..."
-        Expand-Archive -Path $nodeZipFileName -DestinationPath .
-    }
-
-    if (Test-Path -Path $dssRootPath) {
-        Write-Host "DSS installation found at '$dssRootPath'."
-    }
-    else {
-        Write-Host "Dss installation not found at '$dssRootPath'. Starting download ..."
-        Invoke-WebRequest -Uri $dssUrl -OutFile $dssZipFileName
-        Write-Host "Extracting archive ..."
-        Expand-Archive -Path $dssZipFileName -DestinationPath .
+function Install-Dependencies ($what) {
+    if (($what -eq "node") -or (!$what)) {
+        if (Test-Path -Path $nodeBinPath) {
+            Write-Host "Standalone nodejs distribution found at '$nodeBinPath'."
+        }
+        else {
+            Write-Host "Standalone nodejs distribution not found at '$nodeBinPath'. Starting download ..."
+            Invoke-WebRequest -Uri $nodeUrl -OutFile $nodeZipFileName
+            Write-Host "Extracting archive ..."
+            Expand-Archive -Path $nodeZipFileName -DestinationPath .
+        }
     }
 
-    if (Test-Path -Path $localModulePath) {
-        Write-Host "Local module installation found at '$localModulePath'."
+    if (($what -eq "dss") -or (!$what)) {
+        if (Test-Path -Path $dssRootPath) {
+            Write-Host "DSS installation found at '$dssRootPath'."
+        }
+        else {
+            Write-Host "Dss installation not found at '$dssRootPath'. Starting download ..."
+            Invoke-WebRequest -Uri $dssUrl -OutFile $dssZipFileName
+            Write-Host "Extracting archive ..."
+            Expand-Archive -Path $dssZipFileName -DestinationPath .
+        }
     }
-    else {
-        Write-Host "Local module installation not found at '$localModulePath'. Starting download ..."
-        # We're using the full path, as the node root hasn't been exported to PATH.
-        Start-Process -FilePath "$nodeBinPath\npm" -ArgumentList "install", "--prefix", $localModulePath, "@bird-wp07/local-module" -Wait
+
+    if (($what -eq "local-module") -or (!$what)) {
+        if (Test-Path -Path $localModulePath) {
+            Write-Host "Local module installation found at '$localModulePath'."
+        }
+        else {
+            Write-Host "Local module installation not found at '$localModulePath'. Starting download ..."
+            # We're using the full path, as the node root hasn't been exported to PATH.
+            Start-Process -FilePath "$nodeBinPath\npm" -ArgumentList "install", "--prefix", $localModulePath, "@bird-wp07/local-module" -Wait
+        }
     }
 }
 
