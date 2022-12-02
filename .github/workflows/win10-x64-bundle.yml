@@ -39,7 +39,7 @@ jobs:
       - name: Create zipfile
         run: |
           cd ".\zip\"
-          7z a release.zip .\node-v18.12.1-win-x64\ .\dss-demo-bundle-5.11.1\ .\node_modules\ .\package.json .\start.ps1
+          7z a release.zip .\node-v18.12.1-win-x64\ .\dss-demo-bundle-5.11.1\ .\node_modules\ .\package.json .\start.ps1 .\README
 
       - name: Configure release title and name of zip file
         run: |
