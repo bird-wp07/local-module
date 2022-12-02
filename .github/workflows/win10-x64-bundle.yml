@@ -9,7 +9,7 @@ jobs:
         with:
           ref: main
 
-      - name: Set up temporary directory and download and extract standalone node
+      - name: Set up temporary directory and copy static files
         run: |
           New-Item -Path . -Name ".\zip\" -ItemType "directory"
           Copy-Item ".\bundle\win10-x64\start.ps1" -Destination ".\zip\"
@@ -24,7 +24,7 @@ jobs:
         working-directory: zip
         run: |
           $localModuleVersion = npm view "@bird-wp07/local-module" version
-          $zipFile = "wp07-local-module-win10-x64-standalone-v$localModuleVersion.zip"
+          $zipFile = "wp07-local-module-win10-x64-v$localModuleVersion.zip"
           Rename-Item -Path ".\release.zip" -NewName $zipFile
           Add-Content $env:GITHUB_ENV "RELEASE_TITLE=v$localModuleVersion"
           Add-Content $env:GITHUB_ENV "RELEASE_ZIP_FILENAME=$zipFile"
