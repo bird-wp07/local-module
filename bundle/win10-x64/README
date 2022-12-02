@@ -1,0 +1,23 @@
+INSTRUKTIONEN
+=============
+
+Zum Starten des lokalen Moduls Rechtsclick auf 'start.ps1' und im Kontextmenü
+'Mit PowerShell ausführen' wählen. Die Ports des lokalen Moduls, sowie des DSS
+Servers können über die Kopfzeilen in der Date 'start.ps1' selbst konfiguriert
+werden.
+
+ZUSÄTZLICHE INFORMATIONEN
+=========================
+
+Möglicherweise muss die Ausführung des Skripts manuell erlaubt werden. Hierfür
+muss in einer weiteren Powershell Instanz der Befehl
+
+    Unblock-File -Path .\<BASIS_PFAD>\start.ps1
+
+abgesetzt werden, wobei <BASIS_PFAD> den Pfad zur 'start.ps1' Datei vom
+Arbeitsverzeichnis der Powershell darstellt. Abhängig von den
+Nutzerberechtigungen kann hierfür eine Administrator Powershell notwendig sein.
+
+Für weitere Informationen über die Freigabe der Ausführung von Powershell Skripten siehe
+
+    https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy
