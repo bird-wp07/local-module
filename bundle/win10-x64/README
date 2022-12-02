@@ -6,6 +6,10 @@ Zum Starten des lokalen Moduls Rechtsclick auf 'start.ps1' und im Kontextmenü
 Servers können über die Kopfzeilen in der Date 'start.ps1' selbst konfiguriert
 werden.
 
+Die Applikation kann durch wiederholte Eingabe der Tastenkombination Ctrl-c im
+Powershell Fenster unterbrochen werden. Hierbei werden auch alle
+Hintergrunddienste beendet.
+
 ZUSÄTZLICHE INFORMATIONEN
 =========================
 
