@@ -4,5 +4,5 @@
         "outDir": "../dist-test",
         "typeRoots": ["../node_modules/@types"],
     },
-    "include": ["../src/**/*", "../tests/**/*"]
+    "include": ["../src/**/*", "../tests/**/*", "../generated/version.ts"]
 }

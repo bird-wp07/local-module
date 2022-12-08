@@ -17,14 +17,14 @@
         "test:all": "npm run test:build && npx mocha 'dist-test/**/*.test.js'",
         "test:build": "npm run test:clean && npm run build:tsoa && npm run build:version.ts && npx tsc -p ./tests/tsconfig.json",
         "test:all:debug": "npm run test:build && NODE_OPTIONS=--inspect-brk npx mocha --timeout 9999999",
-        "test:clean": "rm -rf ./dist-test ./generated ./src/version.ts",
-        "build:version.ts": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
+        "test:clean": "rm -rf ./dist-test ./generated",
+        "build:version.ts": "mkdir -p generated && node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > generated/version.ts",
         "build:tsoa": "npx tsoa spec-and-routes",
         "build": "npm run clean && npm run build:version.ts && npm run build:tsoa && npx tsc -p ./tsconfig.json",
         "start": "npm run build && node ./dist/src/main.js",
         "start:debug": "npm run build && NOTE_OPTIONS=--inspect-brk node ./dist/src/main.js",
         "lint": "npx eslint 'src/**/*.ts' 'tests/**/*.ts'",
-        "clean": "rm -rf ./dist ./generated ./src/version.ts"
+        "clean": "rm -rf ./dist ./generated"
     },
     "dependencies": {
         "@types/node": "^18.11.9",

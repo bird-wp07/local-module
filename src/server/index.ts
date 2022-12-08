@@ -2,7 +2,7 @@ import swaggerUi from "swagger-ui-express"
 import swaggerDoc from "../../generated/swagger.json"
 import express, { json, urlencoded } from "express"
 import { RegisterRoutes } from "../../generated/routes"
-import { LIB_VERSION } from "../version"
+import { LIB_VERSION } from "../../generated/version"
 
 const app = express()
 
