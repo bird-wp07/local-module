@@ -1,5 +1,3 @@
-export type Base64 = string // TODO: bessere Lösung
-
 export enum EDigestAlgorithm { //DSS offers much more options, see public enum DigestAlgorithm
     SHA1 = "SHA1",
     SHA224 = "SHA224",
@@ -29,33 +27,29 @@ export enum ESignaturePackaging {
     enveloping = "ENVELOPING"
 }
 
-export interface ISigningCertificate {
-    encodedCertificate: Base64
-}
-
-export interface IDigestParameters {
-    signingCertificate?: ISigningCertificate
-    signatureLevel?: ESignatureLevel
-    signaturePackaging?: ESignaturePackaging
-    signatureAlgorithm?: ESignatureAlgorithm
-    digestAlgorithm?: EDigestAlgorithm.SHA256 | EDigestAlgorithm.SHA512
-    encryptionAlgorithm?: EEncryptionAlgorithm
-    blevelParams: {
-        signingDate: number
+export interface IGetDataToSignRequest {
+    toSignDocument: {
+        bytes: Base64
+        name?: string
+    }
+    parameters?: {
+        signingCertificate?: {
+            encodedCertificate: Base64
+        }
+        signatureLevel?: ESignatureLevel
+        signaturePackaging?: ESignaturePackaging
+        signatureAlgorithm?: ESignatureAlgorithm
+        digestAlgorithm?: EDigestAlgorithm.SHA256 | EDigestAlgorithm.SHA512
+        encryptionAlgorithm?: EEncryptionAlgorithm
+        generateTBSWithoutCertificate?: boolean
+        blevelParams?: {
+            signingDate: number
+        }
     }
 }
 
-export interface IDocument {
-    /**
-     * base64 encoded document
-     */
+export interface IGetDataToSignResponse {
     bytes: Base64
-    name: string
-}
-
-export interface IDigestRequest {
-    toSignDocument: IDocument
-    parameters?: IDigestParameters
 }
 
 export interface IDigestResponse {

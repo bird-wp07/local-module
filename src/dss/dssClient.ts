@@ -1,8 +1,9 @@
+import * as xml2js from "xml2js"
 import { ok, err, Result } from "neverthrow"
-import { AxiosRequestConfig, AxiosResponse } from "axios"
+import { AxiosRequestConfig } from "axios"
 import { Utility } from "../utility"
 import { Dss } from "."
-import { IDigestRequest, IDigestResponse } from "./types"
+import { IGetDataToSignRequest, IGetDataToSignResponse } from "./types"
 
 export class DssClient {
     public baseUrl: string
@@ -36,7 +37,7 @@ export class DssClient {
                 gotResponse = true
                 break
             }
-            Utility.sleepms(1000)
+            await Utility.sleepms(1000)
         } while ((new Date().getTime() - start) / 1000 < waitSeconds)
 
         /* Fail if we timed out or if we didn't get the expected response. */
@@ -49,7 +50,7 @@ export class DssClient {
         return ok(null)
     }
 
-    public async getDataToSign(request: IDigestRequest): Promise<Result<IDigestResponse, Error>> {
+    public async getDataToSign(request: IGetDataToSignRequest): Promise<Result<IGetDataToSignResponse, Error>> {
         const config: AxiosRequestConfig = {
             method: "POST",
             url: "/services/rest/signature/one-document/getDataToSign",
@@ -60,9 +61,15 @@ export class DssClient {
         if (response.isErr()) {
             return err(response.error)
         }
-
-        // TODO: Validate response data
         return ok(response.value.data)
     }
-    
+
+    public static async getDigestValueFromXmldsig(xml: string): Promise<Base64> {
+        /* eslint-disable */ // xml2js declarations suck
+        const xmlStruct = await xml2js.parseStringPromise(xml)
+        const digest64: string = xmlStruct["ds:SignedInfo"]["ds:Reference"].filter((e: any) => e.$.Type === "http://www.w3.org/2000/09/xmldsig#Object")[0]["ds:DigestValue"][0]
+        /* eslint-enable */
+
+        return digest64
+    }
 }
