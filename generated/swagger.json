@@ -45,6 +45,34 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"IDigestPDFResponse": {
+				"properties": {
+					"bytes": {
+						"$ref": "#/components/schemas/Base64"
+					}
+				},
+				"required": [
+					"bytes"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IDigestPDFRequest": {
+				"properties": {
+					"bytes": {
+						"$ref": "#/components/schemas/Base64"
+					},
+					"digestAlgorithm": {
+						"$ref": "#/components/schemas/EDigestAlgorithm"
+					}
+				},
+				"required": [
+					"bytes",
+					"digestAlgorithm"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -80,6 +108,35 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/IDigestBlobRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/digest/pdf": {
+			"post": {
+				"operationId": "DigestPDF",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IDigestPDFResponse"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IDigestPDFRequest"
 							}
 						}
 					}

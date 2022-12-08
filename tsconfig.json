@@ -17,7 +17,8 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "typeRoots": ["./node_modules/@types"],
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
     },
     "ts-node": { "compiler": "typescript" },
     "include": ["./src/**/*"]

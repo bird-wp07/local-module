@@ -37,6 +37,23 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IDigestPDFResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "bytes": {"ref":"Base64","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IDigestPDFRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "bytes": {"ref":"Base64","required":true},
+            "digestAlgorithm": {"ref":"EDigestAlgorithm","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const validationService = new ValidationService(models);
 
@@ -54,7 +71,6 @@ export function RegisterRoutes(app: express.Router) {
             function DigestController_digestBlob(request: any, response: any, next: any) {
             const args = {
                     body: {"in":"body","name":"body","required":true,"ref":"IDigestBlobRequest"},
-                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -67,6 +83,31 @@ export function RegisterRoutes(app: express.Router) {
 
 
               const promise = controller.digestBlob.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/digest/pdf',
+            ...(fetchMiddlewares<RequestHandler>(DigestController)),
+            ...(fetchMiddlewares<RequestHandler>(DigestController.prototype.DigestPDF)),
+
+            function DigestController_DigestPDF(request: any, response: any, next: any) {
+            const args = {
+                    request: {"in":"body","name":"request","required":true,"ref":"IDigestPDFRequest"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new DigestController();
+
+
+              const promise = controller.DigestPDF.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

@@ -1,11 +1,14 @@
 import { logger, Settings } from "./settings"
+import swaggerDoc from "../generated/swagger.json"
+import swaggerUi from "swagger-ui-express"
 import { Dss } from "./dss"
-import express, { json, urlencoded } from "express"
+import express, { json, urlencoded, Request, Response } from "express"
 import http from "http"
 import https from "https"
 
 import { RegisterRoutes } from "../generated/routes"
 import { DssClient } from "./dss/dssClient"
+import { LIB_VERSION } from "./version"
 
 let dssClient: DssClient
 
@@ -37,9 +40,10 @@ async function main() {
     const app = express()
     app.use(urlencoded({ extended: true }))
     app.use(json())
+    app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc as object))
     RegisterRoutes(app)
     app.get("/", (_req, res) => {
-        res.send(`Local module listening.`)
+        res.send(`Local module ${LIB_VERSION} listening.`)
     })
 
     let protocol = "http"
@@ -59,5 +63,5 @@ async function main() {
 
 void main()
 
-// HACK: Make dssClient available in controller
+// HACK: Make dssClient available in digestController
 export { dssClient }
