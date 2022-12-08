@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-DOCKERFILE_PATH="./docker/dss.Dockerfile"
+DOCKERFILE_PATH="./docker/dss.Dockerfile" # relative to project root
 IMAGE_NAME="wp07-dss"
 
 _die() {
