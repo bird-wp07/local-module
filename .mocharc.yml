@@ -1,6 +1,4 @@
 enable-source-maps: true
 bail: true
-spec:
-  - "dist-test/**/*.test.js"
 timeout: "3600000"
 reporter: "progress"
