@@ -1,36 +1,30 @@
 import { Base64 } from "../../types/common"
-import { Body, Controller, Post, Route } from "tsoa"
+import { Body, Request, Controller, Post, Route } from "tsoa"
 import { DssClient } from "../../dss/dssClient"
 import { ESignatureLevel, ESignaturePackaging, IGetDataToSignRequest } from "../../dss/types"
 import { IDigestBlobRequest, IDigestBlobResponse, IDigestPDFRequest, IDigestPDFResponse } from "./types"
+import { dssClient } from "../../main"
 
 @Route("digest")
 export class DigestController extends Controller {
-    dssClient: DssClient
-
-    public constructor(dssBaseUrl?: string) {
-        super()
-
-        // TODO: How can the DssClient dependency be systematically resolved?
-        dssBaseUrl = process.env.DSS_BASEURL ?? "http://127.0.0.1:8080"
-        this.dssClient = new DssClient(dssBaseUrl)
-    }
-
+    /**
+     * Returns the base64 encoded digest of a base64 encoded sequence of bytes.
+     */
     @Post("blob")
-    public async digestBlob(@Body() request: IDigestBlobRequest): Promise<IDigestBlobResponse> {
+    public async digestBlob(@Body() body: IDigestBlobRequest, @Request() request: any): Promise<IDigestBlobResponse> {
         // TODO: Validate base64
         const requestData: IGetDataToSignRequest = {
             parameters: {
                 signatureLevel: ESignatureLevel.XAdES_B,
-                digestAlgorithm: request.digestAlgorithm,
+                digestAlgorithm: body.digestAlgorithm,
                 signaturePackaging: ESignaturePackaging.enveloping,
                 generateTBSWithoutCertificate: true
             },
             toSignDocument: {
-                bytes: request.bytes
+                bytes: body.bytes
             }
         }
-        const getDataToSignRes = await this.dssClient.getDataToSign(requestData)
+        const getDataToSignRes = await dssClient.getDataToSign(requestData)
         if (getDataToSignRes.isErr()) {
             throw getDataToSignRes.error
         }
@@ -40,9 +34,9 @@ export class DigestController extends Controller {
         return response
     }
 
-    @Post("pdf")
-    public async DigestPDF(@Body() request: IDigestPDFRequest): Promise<IDigestPDFResponse> {
-        // FIXME: Bogus implementation
-        return await this.digestBlob(request)
-    }
+    // @Post("pdf")
+    // public async DigestPDF(@Body() request: IDigestPDFRequest): Promise<IDigestPDFResponse> {
+    //     // FIXME: Bogus implementation
+    //     return await this.digestBlob(request)
+    // }
 }

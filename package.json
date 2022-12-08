@@ -21,7 +21,8 @@
         "build:version.ts": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
         "build:tsoa": "npx tsoa spec-and-routes",
         "build": "npm run clean && npm run build:version.ts && npm run build:tsoa && npx tsc -p ./tsconfig.json",
-        "start": "npm run build && node ./dist/main.js",
+        "start": "npm run build && node ./dist/src/main.js",
+        "start:debug": "npm run build && NOTE_OPTIONS=--inspect-brk node ./dist/src/main.js",
         "lint": "npx eslint 'src/**/*.ts' 'tests/**/*.ts'",
         "clean": "rm -rf ./dist ./generated ./src/version.ts"
     },

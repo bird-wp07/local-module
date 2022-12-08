@@ -1,8 +1,13 @@
 import { logger, Settings } from "./settings"
 import { Dss } from "./dss"
-import express from "express"
+import express, { json, urlencoded } from "express"
 import http from "http"
 import https from "https"
+
+import { RegisterRoutes } from "../generated/routes"
+import { DssClient } from "./dss/dssClient"
+
+let dssClient: DssClient
 
 async function main() {
     /* Parse application settings. */
@@ -14,7 +19,7 @@ async function main() {
     const settings = settingsRes.value
 
     /* Wait for DSS startup to fininsh. */
-    const dssClient = new Dss.DssClient(settings.dssBaseUrl)
+    dssClient = new Dss.DssClient(settings.dssBaseUrl)
     const wait = 3600
     logger.info(`Waiting for DSS to respond at '${settings.dssBaseUrl}' ... `)
     const isOnline = await dssClient.isOnline({ waitSeconds: wait })
@@ -28,8 +33,11 @@ async function main() {
     }
     logger.info("DSS responded. Starting HTTP server ... ")
 
-    /* Start http server. */
+    /* Start our http server. */
     const app = express()
+    app.use(urlencoded({ extended: true }))
+    app.use(json())
+    RegisterRoutes(app)
     app.get("/", (_req, res) => {
         res.send(`Local module listening.`)
     })
@@ -49,4 +57,7 @@ async function main() {
     }
 }
 
-main()
+void main()
+
+// HACK: Make dssClient available in controller
+export { dssClient }
