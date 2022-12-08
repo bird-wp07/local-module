@@ -1,9 +1,4 @@
-export enum EDigestAlgorithm { //DSS offers much more options, see public enum DigestAlgorithm
-    SHA1 = "SHA1",
-    SHA224 = "SHA224",
-    SHA256 = "SHA256",
-    SHA512 = "SHA512"
-}
+export type Base64 = string
 
 export enum ESignatureAlgorithm {
     SHA256 = "RSA_SHA256"
@@ -27,6 +22,14 @@ export enum ESignaturePackaging {
     enveloping = "ENVELOPING"
 }
 
+/* DSS offers much more options, see public enum DigestAlgorithm */
+export enum EDigestAlgorithm {
+    SHA1 = "SHA1",
+    SHA224 = "SHA224",
+    SHA256 = "SHA256",
+    SHA512 = "SHA512"
+}
+
 export interface IGetDataToSignRequest {
     toSignDocument: {
         bytes: Base64
@@ -39,7 +42,7 @@ export interface IGetDataToSignRequest {
         signatureLevel?: ESignatureLevel
         signaturePackaging?: ESignaturePackaging
         signatureAlgorithm?: ESignatureAlgorithm
-        digestAlgorithm?: EDigestAlgorithm.SHA256 | EDigestAlgorithm.SHA512
+        digestAlgorithm?: EDigestAlgorithm
         encryptionAlgorithm?: EEncryptionAlgorithm
         generateTBSWithoutCertificate?: boolean
         blevelParams?: {

@@ -4,6 +4,7 @@ import { AxiosRequestConfig } from "axios"
 import { Utility } from "../utility"
 import { Dss } from "."
 import { IGetDataToSignRequest, IGetDataToSignResponse } from "./types"
+import { Base64 } from "./types"
 
 export class DssClient {
     public baseUrl: string

@@ -15,14 +15,15 @@
         "test": "npm run test:build && scripts/run_tests.sh",
         "test:debug": "npm run test:build && NODE_OPTIONS=--inspect-brk scripts/run_tests.sh",
         "test:all": "npm run test:build && npx mocha 'dist-test/**/*.test.js'",
-        "test:build": "npm run test:clean && npm run version.ts && npx tsc -p ./tests/tsconfig.json",
+        "test:build": "npm run test:clean && npm run build:tsoa && npm run build:version.ts && npx tsc -p ./tests/tsconfig.json",
         "test:all:debug": "npm run test:build && NODE_OPTIONS=--inspect-brk npx mocha --timeout 9999999",
-        "test:clean": "rm -rf ./dist-test",
-        "version.ts": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
-        "build": "npm run clean && npm run version.ts && npx tsc -p ./tsconfig.json",
+        "test:clean": "rm -rf ./dist-test ./generated ./src/version.ts",
+        "build:version.ts": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
+        "build:tsoa": "npx tsoa spec-and-routes",
+        "build": "npm run clean && npm run build:version.ts && npm run build:tsoa && npx tsc -p ./tsconfig.json",
         "start": "npm run build && node ./dist/main.js",
         "lint": "npx eslint 'src/**/*.ts' 'tests/**/*.ts'",
-        "clean": "rm -rf ./dist ./src/version.ts"
+        "clean": "rm -rf ./dist ./generated ./src/version.ts"
     },
     "dependencies": {
         "@types/node": "^18.11.9",
