@@ -2,4 +2,5 @@ node_modules/
 dist/
 dist-test/
 *.env
-.$architecture.png.bkp
+.$architecture.png.bkpsrc/version.ts
+src/version.ts

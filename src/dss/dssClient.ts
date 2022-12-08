@@ -49,11 +49,12 @@ export class DssClient {
         return ok(null)
     }
 
-    public async digestXml(request: IDigestRequest): Promise<Result<IDigestResponse, Error>> {
+    public async getDataToSign(request: IDigestRequest): Promise<Result<IDigestResponse, Error>> {
         const config: AxiosRequestConfig = {
             method: "POST",
             url: "/services/rest/signature/one-document/getDataToSign",
-            baseURL: this.baseUrl
+            baseURL: this.baseUrl,
+            data: request
         }
         const response = await Utility.httpReq(config)
         if (response.isErr()) {
@@ -63,4 +64,5 @@ export class DssClient {
         // TODO: Validate response data
         return ok(response.value.data)
     }
+    
 }
