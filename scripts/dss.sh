@@ -64,8 +64,10 @@ usage() {
 
 cd $(dirname ${0:A:h})
 case $1 in
-ls) ;;
-run) ;;
-stop) ;;
+ls|run|stop)
+    cmd=$1
+    shift
+    dss_$cmd $@
+;;
 *) usage; exit ;;
 esac
