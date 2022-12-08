@@ -1,14 +1,9 @@
 import { logger, Settings } from "./settings"
-import swaggerDoc from "../generated/swagger.json"
-import swaggerUi from "swagger-ui-express"
 import { Dss } from "./dss"
-import express, { json, urlencoded, Request, Response } from "express"
 import http from "http"
 import https from "https"
-
-import { RegisterRoutes } from "../generated/routes"
 import { DssClient } from "./dss/dssClient"
-import { LIB_VERSION } from "./version"
+import { app } from "./server"
 
 let dssClient: DssClient
 
@@ -37,15 +32,6 @@ async function main() {
     logger.info("DSS responded. Starting HTTP server ... ")
 
     /* Start our http server. */
-    const app = express()
-    app.use(urlencoded({ extended: true }))
-    app.use(json())
-    app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc as object))
-    RegisterRoutes(app)
-    app.get("/", (_req, res) => {
-        res.send(`Local module ${LIB_VERSION} listening.`)
-    })
-
     let protocol = "http"
     if (settings.localModuleUseHttps) {
         protocol += "s"
