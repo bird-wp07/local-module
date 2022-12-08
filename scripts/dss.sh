@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+cd $(dirname ${0:A:h})
 
 DOCKERFILE_PATH="./docker/dss.Dockerfile" # relative to project root
 IMAGE_NAME="wp07-dss"
@@ -23,7 +24,7 @@ dss_run() {
         port=8080
     fi
 
-    docker build -t $IMAGE_NAME -f $DOCKERFILE_PATH .
+    docker build -t $IMAGE_NAME - < ./docker/dss.Dockerfile
     docker container run $detach -p $port:8080 --rm -t --name "$IMAGE_NAME-$port" $IMAGE_NAME
 }
 
@@ -62,7 +63,6 @@ usage() {
         only the containers' ids."
 }
 
-cd $(dirname ${0:A:h})
 case $1 in
 ls|run|stop)
     cmd=$1
