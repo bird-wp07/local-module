@@ -17,14 +17,14 @@ jobs:
       - name: Build archive
         working-directory: zip
         run: |
-          tar -cJf release.tar.xz start.sh README
+          tar -cf release.tar start.sh README
 
       - name: Configure release title and name of zip file
         working-directory: zip
         run: |
           localModuleVersion="$(npm view "@bird-wp07/local-module" version)"
-          tarFile="wp07-local-module-linux-x64-v$localModuleVersion.tar.xz"
-          mv "release.tar.xz" "$tarFile"
+          tarFile="wp07-local-module-linux-x64-v$localModuleVersion.tar"
+          mv "release.tar" "$tarFile"
           echo "RELEASE_TITLE=v$localModuleVersion" >>"$GITHUB_ENV"
           echo "RELEASE_ZIP_FILENAME=$tarFile" >>"$GITHUB_ENV"
 
