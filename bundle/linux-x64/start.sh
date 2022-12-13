@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # ######################
 # ADMINISTRATOR SETTINGS
 # ######################
@@ -42,6 +44,14 @@ localModulePath="./local-module"
 serverConfigPath="$dssRootPath/apache-tomcat-8.5.82/conf/server.xml"
 
 install_dependencies() {
+    # TODO: Remove dependency on xz for standalone bundle
+    for prog in curl xz; do
+        if ! command -v $prog >/dev/null; then
+            echo "Cannot find required '$prog' binary." >&2
+            return 1
+        fi
+    done
+    
     what="${1:-all}"
     if [ "$what" = "7zip" ] || [ "$what" = "all" ]; then
         if [ -d "$p7zipBinPath" ]; then
