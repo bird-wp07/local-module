@@ -18,8 +18,14 @@ export enum ESignatureLevel {
     XAdES_B = "XAdES_BASELINE_B"
 }
 
+/**
+ * See https://ec.europa.eu/digital-building-blocks/wikis/display/ESIGKB/What+is+the+packaging+enveloped+-+detached+-+enveloping+and+internally+detached+of+a+signature
+ */
 export enum ESignaturePackaging {
-    enveloping = "ENVELOPING"
+    enveloping = "ENVELOPING",
+    enveloped = "ENVELOPED",
+    detached = "DETACHED",
+    internallyDetached = "INTERNALLY_DETACHED"
 }
 
 /* DSS offers much more options, see public enum DigestAlgorithm */
