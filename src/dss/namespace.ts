@@ -1,5 +1,5 @@
 export * as Errors from "./errors"
-export * from "./dss-client"
+export * from "./dssClient"
 
 /* NOTE: This file suits as a workaround for typescript's inability to split members
  *       of a namespace up into different files. In order to have the dss-specific

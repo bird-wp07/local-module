@@ -1,8 +1,11 @@
 import { logger, Settings } from "./settings"
 import { Dss } from "./dss"
-import express from "express"
 import http from "http"
 import https from "https"
+import { DssClient } from "./dss/dssClient"
+import { app } from "./server"
+
+let dssClient: DssClient
 
 async function main() {
     /* Parse application settings. */
@@ -14,7 +17,7 @@ async function main() {
     const settings = settingsRes.value
 
     /* Wait for DSS startup to fininsh. */
-    const dssClient = new Dss.DssClient(settings.dssBaseUrl)
+    dssClient = new Dss.DssClient(settings.dssBaseUrl)
     const wait = 3600
     logger.info(`Waiting for DSS to respond at '${settings.dssBaseUrl}' ... `)
     const isOnline = await dssClient.isOnline({ waitSeconds: wait })
@@ -28,12 +31,7 @@ async function main() {
     }
     logger.info("DSS responded. Starting HTTP server ... ")
 
-    /* Start http server. */
-    const app = express()
-    app.get("/", (_req, res) => {
-        res.send(`Local module listening.`)
-    })
-
+    /* Start our http server. */
     let protocol = "http"
     if (settings.localModuleUseHttps) {
         protocol += "s"
@@ -49,4 +47,7 @@ async function main() {
     }
 }
 
-main()
+void main()
+
+// HACK: Make dssClient available in digestController
+export { dssClient }
