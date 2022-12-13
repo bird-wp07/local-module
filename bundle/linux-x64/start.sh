@@ -43,15 +43,30 @@ localModulePath="./local-module"
 # Path of the apache server's configuration file.
 serverConfigPath="$dssRootPath/apache-tomcat-8.5.82/conf/server.xml"
 
-log() {
-	printf -- "$@\n" | sed 's/^/[start.sh] /'
-}
+# Configure logging. Depending on whether we're running inside a terminal use
+# colors or don't.
+if [ -t 1 ]; then
+	__log() {
+		prefix="$1"
+		code="$2"
+		shift 2
+		printf -- "$*\n" | sed 's/^/[start.sh] '"$(printf "$code")""$prefix""$(printf "\033[0m")"': /'
+	}
+else
+	__log() {
+		prefix="$1"
+		shift 2
+		printf -- "$*\n" | sed 's/^/[start.sh] '"$prefix"': /'
+	}
+fi
+log.info() { __log "info" "\033[32;1m" "$*"; }
+log.err() { __log "err " "\033[31;1m" "$*"; }
 
 install_dependencies() {
     # TODO: Remove dependency on xz for standalone bundle
     for prog in curl xz; do
         if ! command -v $prog >/dev/null; then
-            log "Cannot find required '$prog' binary." >&2
+            log.err "Cannot find required '$prog' binary." >&2
             return 1
         fi
     done
@@ -59,9 +74,9 @@ install_dependencies() {
     what="${1:-all}"
     if [ "$what" = "7zip" ] || [ "$what" = "all" ]; then
         if [ -d "$p7zipBinPath" ]; then
-            log "7zip binary path found at '$p7zipBinPath'."
+            log.info "7zip binary path found at '$p7zipBinPath'."
         else
-            log "7zip binary path not found at '$p7zipBinPath'. Starting download ..."
+            log.info "7zip binary path not found at '$p7zipBinPath'. Starting download ..."
             curl -Lo "$p7zipTarFileName" "$p7zipUrl"
             mkdir -p "$p7zipBinPath"
             tar -C "$p7zipBinPath" -xvf "$p7zipTarFileName"
@@ -70,9 +85,9 @@ install_dependencies() {
     
     if [ "$what" = "node" ] || [ "$what" = "all" ]; then
         if [ -d "$nodeBinPath" ]; then
-            log "Standalone nodejs distribution found at '$nodeBinPath'."
+            log.info "Standalone nodejs distribution found at '$nodeBinPath'."
         else
-            log "Standalone nodejs distribution not found at '$nodeBinPath'. Starting download ..."
+            log.info "Standalone nodejs distribution not found at '$nodeBinPath'. Starting download ..."
             curl -Lo "$nodeTarFileName" "$nodeUrl"
             tar -xvf "$nodeTarFileName"
         fi
@@ -80,9 +95,9 @@ install_dependencies() {
     
     if [ "$what" = "dss" ] || [ "$what" = "all" ]; then
         if [ -d "$dssRootPath" ]; then
-            log "DSS installation found at '$dssRootPath'."
+            log.info "DSS installation found at '$dssRootPath'."
         else
-            log "DSS installation not found at '$dssRootPath'. Starting download ..."
+            log.info "DSS installation not found at '$dssRootPath'. Starting download ..."
             curl -Lo "$dssZipFileName" "$dssUrl"
             PATH="$p7zipBinPath:$PATH" 7zz x "$dssZipFileName" # the portable 7z's binary is named '7zz', not '7z' (???)
             chmod +x "$dssRootPath/apache-tomcat-8.5.82/bin/catalina.sh"
@@ -91,9 +106,9 @@ install_dependencies() {
     
     if [ "$what" = "java" ] || [ "$what" = "all" ]; then
         if [ -d "$javaRootPath" ]; then
-            log "Java installation found at '$javaRootPath'."
+            log.info "Java installation found at '$javaRootPath'."
         else
-            log "Java installation not found at '$javaRootPath'. Starting download ..."
+            log.info "Java installation not found at '$javaRootPath'. Starting download ..."
             curl -Lo "$javaTarFileName" "$javaUrl"
             tar -xvzf "$javaTarFileName"
         fi
@@ -101,9 +116,9 @@ install_dependencies() {
     
     if [ "$what" = "local-module" ] || [ "$what" = "all" ]; then
         if [ -d "$localModulePath" ]; then
-            log "Local module installation found at '$localModulePath'."
+            log.info "Local module installation found at '$localModulePath'."
         else
-            log "Local module installation not found at '$localModulePath'. Starting download ..."
+            log.info "Local module installation not found at '$localModulePath'. Starting download ..."
             PATH="$nodeBinPath:$PATH" npm install --prefix "$localModulePath" "@bird-wp07/local-module"
         fi
     fi
@@ -137,7 +152,7 @@ ls_proc() {
 # Match all DSS processes by their commandlines and terminate them.
 stop_dss() {
     ls_proc dss | cut -d' ' -f1 | while read pid; do
-        log "killing DSS process '$pid'"
+        log.info "killing DSS process '$pid'"
         kill $pid >/dev/null 2>&1
     done
 }
