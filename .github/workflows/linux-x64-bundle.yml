@@ -17,7 +17,7 @@ jobs:
       - name: Build archive
         working-directory: zip
         run: |
-          tar -cJf release.tar start.sh README
+          tar -cJf release.tar.xz start.sh README
 
       - name: Configure release title and name of zip file
         working-directory: zip
