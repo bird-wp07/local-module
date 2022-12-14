@@ -2,7 +2,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  release-win-x64-bundle:
+  release-linux-x64-bundle:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
