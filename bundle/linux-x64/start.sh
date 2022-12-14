@@ -131,7 +131,7 @@ build_standalone_bundle() {
     archive_filename="${1:-archive.tar.xz}"
     install_dependencies
     rm -rf "$dss_root_path/java" # remove embedded java for windows
-    tar -cvJf "$archive_filename" "$java_root_path" "$node_root_path" "$p7zip_root_path" "$local_module_root_path" "README"
+    tar -cvJf "$archive_filename" "$java_root_path" "$node_root_path" "$p7zip_root_path" "$local_module_root_path" "README" "start.sh"
     log.info "Built standalone archive '$archive_filename'."
 }
 
