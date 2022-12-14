@@ -1,9 +1,8 @@
 import { Base64 } from "../../types/common"
 import { Body, Controller, Post, Route } from "tsoa"
-import { DssClient } from "../../dss/dssClient"
-import { ESignatureLevel, ESignaturePackaging, IGetDataToSignRequest } from "../../dss/types"
+import * as Dss from "../../dss"
 import { IDigestBlobRequest, IDigestBlobResponse, IDigestPDFRequest, IDigestPDFResponse } from "./types"
-import { dssClient } from "../../main"
+import { dssClient } from "../../main" // HACK
 
 @Route("digest")
 export class DigestController extends Controller {
@@ -13,11 +12,11 @@ export class DigestController extends Controller {
     @Post("blob")
     public async digestBlob(@Body() body: IDigestBlobRequest): Promise<IDigestBlobResponse> {
         // TODO: Validate base64
-        const requestData: IGetDataToSignRequest = {
+        const requestData: Dss.IGetDataToSignRequest = {
             parameters: {
-                signatureLevel: ESignatureLevel.XAdES_B,
+                signatureLevel: Dss.ESignatureLevel.XAdES_B,
                 digestAlgorithm: body.digestAlgorithm,
-                signaturePackaging: ESignaturePackaging.enveloping,
+                signaturePackaging: Dss.ESignaturePackaging.enveloping,
                 generateTBSWithoutCertificate: true
             },
             toSignDocument: {
@@ -29,7 +28,7 @@ export class DigestController extends Controller {
             throw getDataToSignRes.error
         }
         const xmldsig = Buffer.from(getDataToSignRes.value.bytes, "base64").toString("utf8")
-        const digest: Base64 = await DssClient.getDigestValueFromXmldsig(xmldsig)
+        const digest: Base64 = await Dss.getDigestValueFromXmldsig(xmldsig)
         const response: IDigestBlobResponse = { bytes: digest }
         return response
     }

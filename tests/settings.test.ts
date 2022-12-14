@@ -1,6 +1,6 @@
 import { describe, test } from "mocha"
 import { expect } from "chai"
-import { Settings } from "../src/settings"
+import * as Settings from "../src/settings"
 
 describe(`Application settings parser`, () => {
     test(`accepts valid settings`, () => {

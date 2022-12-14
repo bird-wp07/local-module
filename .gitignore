@@ -1,6 +1,4 @@
 node_modules/
 dist/
-dist-test/
 *.env
-.$architecture.png.bkpsrc/version.ts
 generated/

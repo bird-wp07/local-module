@@ -1,11 +1,11 @@
-import { logger, Settings } from "./settings"
-import { Dss } from "./dss"
+import * as Settings from "./settings"
+import { logger } from "./settings"
+import * as Dss from "./dss"
 import http from "http"
 import https from "https"
-import { DssClient } from "./dss/dssClient"
 import { app } from "./server"
 
-let dssClient: DssClient
+let dssClient: Dss.DssClient
 
 async function main() {
     /* Parse application settings. */

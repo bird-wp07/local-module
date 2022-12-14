@@ -1,30 +1,27 @@
 {
     "name": "@bird-wp07/local-module",
-    "version": "0.0.20",
+    "version": "0.0.21",
     "license": "",
     "bin": "./bin/start",
     "files": [
         "bin/",
-        "dist/",
+        "dist/src/",
+        "dist/generated/",
         "package.json",
         "README.md"
     ],
     "main": "dist/main.js",
     "types": "dist/main.d.ts",
     "scripts": {
-        "test": "npm run test:build && scripts/run_tests.sh",
-        "test:debug": "npm run test:build && NODE_OPTIONS=--inspect-brk scripts/run_tests.sh",
-        "test:all": "npm run test:build && npx mocha 'dist-test/**/*.test.js'",
-        "test:build": "npm run test:clean && npm run build:tsoa && npm run build:version.ts && npx tsc -p ./tests/tsconfig.json",
-        "test:all:debug": "npm run test:build && NODE_OPTIONS=--inspect-brk npx mocha --timeout 9999999",
-        "test:clean": "rm -rf ./dist-test ./generated",
+        "test": "npm run build && scripts/run_tests.sh",
+        "test:debug": "npm run build && scripts/run_tests.sh -d",
+        "build:clean": "rm -rf ./dist ./generated",
         "build:version.ts": "mkdir -p generated && node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > generated/version.ts",
         "build:tsoa": "npx tsoa spec-and-routes",
-        "build": "npm run clean && npm run build:version.ts && npm run build:tsoa && npx tsc -p ./tsconfig.json",
+        "build": "npm run build:clean && npm run build:version.ts && npm run build:tsoa && npx tsc -p ./tsconfig.json",
         "start": "npm run build && node ./dist/src/main.js",
         "start:debug": "npm run build && NOTE_OPTIONS=--inspect-brk node ./dist/src/main.js",
-        "lint": "npx eslint 'src/**/*.ts' 'tests/**/*.ts'",
-        "clean": "rm -rf ./dist ./generated"
+        "lint": "npm run build && npx eslint 'src/**/*.ts' 'tests/**/*.ts'"
     },
     "dependencies": {
         "@types/node": "^18.11.9",
