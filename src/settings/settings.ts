@@ -34,6 +34,7 @@ export interface IApplicationSettings {
     /* Local module configuration. Parsed from the 'WP07_LOCAL_MODULE_PORT'
      * envvar. */
     localModuleUseHttps: boolean
+    // TODO: expose ip so that containers can use 0.0.0.0
     localModuleIp: string // hostname or ip
     localModulePort: number
 
