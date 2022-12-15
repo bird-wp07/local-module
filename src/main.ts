@@ -37,7 +37,7 @@ async function main() {
         protocol += "s"
     }
     const initCallback = () => {
-        logger.info(`Listening on ${protocol}://${settings.localModuleIp}:${settings.localModulePort}.`)
+        logger.info(`Listening on ${protocol}://${settings.localModuleIp}:${settings.localModulePort}. See '/swagger'.`)
     }
     if (settings.localModuleUseHttps) {
         // NOTE: This code path is currently inactive.

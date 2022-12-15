@@ -7,7 +7,7 @@ const app = express()
 
 app.use(urlencoded({ extended: true }))
 app.use(json())
-app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerDoc as object))
+app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerDoc as object))
 
 RegisterRoutes(app)
 
