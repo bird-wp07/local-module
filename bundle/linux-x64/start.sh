@@ -153,11 +153,12 @@ start_dss() {
 ls_proc() {
     what="${1:-all}"
     if [ "$what" = "dss" ] || [ "$what" = "all" ]; then
-        pgrep -af -- "-Djava.util.logging.config.file=./dss-demo-bundle-5.11.1/apache-tomcat-8.5.82"
+        pgrep -af -- '-Djava\.util\.logging\.config\.file=.+dss-demo-bundle-5\.11\.1/apache-tomcat-8\.5\.82'
+        #                                                 ^^~~~~ changes depending on startup command
     fi
     
     if [ "$what" = "local-module" ] || [ "$what" = "all" ]; then
-        pgrep -af node | grep -E '^[[:digit:]]+ node .*/local-module'
+        pgrep -af -- 'node .*/local-module'
     fi
     return 0
 }
