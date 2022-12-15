@@ -3,7 +3,7 @@ INSTRUKTIONEN
 
 Zum Starten des lokalen Moduls Rechtsclick auf 'start.ps1' und im Kontextmenü
 'Mit PowerShell ausführen' wählen. Die Ports des lokalen Moduls, sowie des DSS
-Servers können über die Kopfzeilen in der Date 'start.ps1' selbst konfiguriert
+Servers können über die Kopfzeilen der Datei 'start.ps1' selbst konfiguriert
 werden.
 
 Die Applikation kann durch wiederholte Eingabe der Tastenkombination Ctrl-c im

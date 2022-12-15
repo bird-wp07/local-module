@@ -21,5 +21,5 @@
         "resolveJsonModule": true,
     },
     "ts-node": { "compiler": "typescript" },
-    "include": ["./src/**/*", "generated/version.ts"]
+    "include": ["./src/**/*", "./generated/**/*", "./tests/**/*"]
 }

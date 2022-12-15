@@ -1,6 +1,8 @@
 node_modules/
 dist/
-dist-test/
 *.env
+<<<<<<< HEAD
 .$architecture.png.bkpsrc/version.ts
+=======
+>>>>>>> main
 generated/

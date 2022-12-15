@@ -68,6 +68,9 @@ ls|run|stop)
     cmd=$1
     shift
     dss_$cmd $@
-;;
-*) usage; exit ;;
+    ;;
+*)
+    usage
+    exit
+    ;;
 esac

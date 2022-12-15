@@ -1,2 +1,3 @@
-import * as Dss from "./namespace"
-export { Dss }
+export * as Errors from "./errors"
+export * from "./dssClient"
+export * from "./types"

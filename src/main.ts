@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { logger, Settings } from "./settings"
 import { Dss } from "./dss"
 import http from "http"
@@ -6,6 +7,16 @@ import { DssClient } from "./dss/dssClient"
 import { app } from "./server"
 
 let dssClient: DssClient
+=======
+import * as Settings from "./settings"
+import { logger } from "./settings"
+import * as Dss from "./dss"
+import http from "http"
+import https from "https"
+import { app } from "./server"
+
+let dssClient: Dss.DssClient
+>>>>>>> main
 
 async function main() {
     /* Parse application settings. */
@@ -37,7 +48,7 @@ async function main() {
         protocol += "s"
     }
     const initCallback = () => {
-        logger.info(`Listening on ${protocol}://${settings.localModuleIp}:${settings.localModulePort}.`)
+        logger.info(`Listening on ${protocol}://${settings.localModuleIp}:${settings.localModulePort}. See '/swagger'.`)
     }
     if (settings.localModuleUseHttps) {
         // NOTE: This code path is currently inactive.
