@@ -12,7 +12,7 @@ jobs:
       - name: Set up temporary directory and copy static files
         run: |
           mkdir ./zip
-          cp ./bundle/linux-x64/start.sh ./bundle/linux-x64/README ./zip
+          cp ./bundle/linux-x64/start.sh ./bundle/linux-x64/README ./postman.json ./zip
 
       - name: Download dependencies and build archive
         working-directory: zip
