@@ -53,8 +53,8 @@ describe(Dss.DssClient.name, () => {
     })
 
     describe("#validateSignature()", () => {
-        test("handles a valid QES-signed PDF correctly", async () => {
-            const originalFileB64 = fs.readFileSync(`./assets/signed-qes-steinmetz.pdf`).toString("base64")
+        test.skip("handles a valid QES-signed PDF correctly", async () => {
+            const originalFileB64 = fs.readFileSync(`./assets/TODO.pdf`).toString("base64")
             const request: IValidateSignatureRequest = {
                 signedDocument: {
                     bytes: originalFileB64,
