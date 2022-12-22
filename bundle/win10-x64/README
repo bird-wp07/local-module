@@ -2,28 +2,39 @@ INSTRUKTIONEN
 =============
 
 Zum Starten des lokalen Moduls Rechtsclick auf 'start.ps1' und im Kontextmenü
-'Mit PowerShell ausführen' wählen. Die Ports des lokalen Moduls, sowie des DSS
-Servers können über die Kopfzeilen der Datei 'start.ps1' selbst konfiguriert
-werden.
+'Mit PowerShell ausführen' wählen. Etwaige Meldungen des Windows Defender
+können ignoriert werden ("Abbrechen" klicken oder Fenster schließend).
+
+Die Ports des lokalen Moduls, sowie des im Hintergrund laufenden DSS Servers
+können über die Kopfzeilen der Datei 'start.ps1' selbst konfiguriert werden,
+falls Kollisionen mit belegten Ports auftreten sollten.
 
 Die Applikation kann durch wiederholte Eingabe der Tastenkombination Ctrl-c im
 Powershell Fenster unterbrochen werden. Hierbei werden auch alle
 Hintergrunddienste beendet.
 
+Mögliche Probleme beim Ausführen des Skriptes werden im nachfolgenden Abschnitt
+erläutert.
 
-ZUSÄTZLICHE INFORMATIONEN
-=========================
 
-Möglicherweise muss die Ausführung des Skripts manuell erlaubt werden. Hierfür
-muss in einer weiteren Powershell Instanz der Befehl
+ZUSÄTZLICHE INFORMATIONEN ZUM AUSFÜHREN VON POWERSHELL SKRIPTEN
+===============================================================
+
+Um die Ausführung beliebiger Powershell Skripte zu erlauben, muss in einer
+Administrator Powershell der Befehl
+
+    Set-ExecutionPolicy unrestricted
+
+ausgeführt werden. Für weitere Informationen über die Freigabe der Ausführung
+von Powershell Skripten siehe
+
+    https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy
+
+Möglicherweise muss auch die Ausführung des Skripts manuell erlaubt werden.
+Hierfür muss in einer Powershell der Befehl
 
     Unblock-File -Path .\<BASIS_PFAD>\start.ps1
 
 abgesetzt werden, wobei <BASIS_PFAD> den Pfad zur 'start.ps1' Datei vom
 Arbeitsverzeichnis der Powershell darstellt. Abhängig von den
 Nutzerberechtigungen kann hierfür eine Administrator Powershell notwendig sein.
-
-Für weitere Informationen über die Freigabe der Ausführung von Powershell
-Skripten siehe
-
-    https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy

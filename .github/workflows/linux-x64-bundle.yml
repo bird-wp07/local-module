@@ -12,12 +12,12 @@ jobs:
       - name: Set up temporary directory and copy static files
         run: |
           mkdir ./zip
-          cp ./bundle/linux-x64/start.sh ./bundle/linux-x64/README ./zip
+          cp ./bundle/linux-x64/start.sh ./bundle/linux-x64/README ./postman.json ./zip
 
       - name: Build archive
         working-directory: zip
         run: |
-          tar -cJf release.tar.xz start.sh README
+          tar -cJf release.tar.xz start.sh README postman.json
 
       - name: Configure release title and name of zip file
         working-directory: zip
