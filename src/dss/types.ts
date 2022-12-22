@@ -75,6 +75,12 @@ export interface IGetDataToSignResponse {
     bytes: Base64
 }
 
+export interface ISignDataResponse {
+    bytes: Base64
+}
+export interface IDigestResponse {
+    digest: string
+}
 /**
  * Possible results ("indications") of a signature validation. See
  *
