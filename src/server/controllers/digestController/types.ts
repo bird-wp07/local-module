@@ -1,3 +1,4 @@
+import { ESignatureLevel, IGetDataToSignRequest } from "src/dss"
 import { Base64 } from "../types"
 
 export enum EDigestAlgorithm {
@@ -17,10 +18,27 @@ export interface IDigestBlobResponse {
 }
 
 export interface IDigestPDFRequest {
-    bytes: Base64
-    digestAlgorithm: EDigestAlgorithm
+    digestAlgorithm: EDigestAlgorithm,
+    base64: Base64,
+    signingTimestamp: Date
 }
 
 export interface IDigestPDFResponse {
     bytes: Base64
+}
+
+export function dtbsFromDigestRequest (dto: IDigestPDFRequest): IGetDataToSignRequest {
+    return {
+        toSignDocument: {
+            bytes: dto.base64
+        },
+        parameters: {
+            digestAlgorithm: dto.digestAlgorithm,
+            signatureLevel: ESignatureLevel.PAdES_B,
+            generateTBSWithoutCertificate: true,
+            blevelParams : {
+                signingDate : dto.signingTimestamp.getMilliseconds()
+              }
+        }
+    }
 }
