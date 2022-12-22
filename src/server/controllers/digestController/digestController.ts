@@ -1,8 +1,12 @@
 import { Base64 } from "../../../types/common"
 import { Body, Controller, Post, Route } from "tsoa"
 import * as Dss from "../../../dss"
-import { IDigestBlobRequest, IDigestBlobResponse, IDigestPDFRequest, IDigestPDFResponse } from "./types"
+import { dtbsFromDigestRequest, IDigestBlobRequest, IDigestBlobResponse, IDigestPDFRequest, IDigestPDFResponse } from "./types"
 import { dssClient } from "../../../main" // HACK
+import { IGetDataToSignRequest } from "../../../dss"
+import ASN1 from "@lapo/asn1js"
+import * as ASNSchema from "@peculiar/asn1-schema"
+import { DigestFacade } from "./digestFacade"
 
 @Route("digest")
 export class DigestController extends Controller {
@@ -35,7 +39,6 @@ export class DigestController extends Controller {
 
     @Post("pdf")
     public async DigestPDF(@Body() request: IDigestPDFRequest): Promise<IDigestPDFResponse> {
-        // FIXME: Bogus implementation
-        return await this.digestBlob(request)
+        return await new DigestFacade(dssClient).digestPDF(request)
     }
 }
