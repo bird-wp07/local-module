@@ -3,8 +3,9 @@ import { ok, err, Result } from "neverthrow"
 import { AxiosRequestConfig } from "axios"
 import * as Utility from "../utility"
 import * as Dss from "."
-import { IGetDataToSignRequest, IGetDataToSignResponse, IValidateSignatureRequest, IValidateSignatureResponse } from "./types"
+import { IGetDataToSignRequest, IGetDataToSignResponse, ISignDataResponse, IValidateSignatureRequest, IValidateSignatureResponse } from "./types"
 import { Base64 } from "./types"
+import { DSSParams } from "../utility"
 
 export class DssClient {
     public baseUrl: string
@@ -64,6 +65,20 @@ export class DssClient {
         }
         return ok(response.value.data)
     }
+
+    public async signData(request: DSSParams): Promise<Result<ISignDataResponse, Error>> {
+        const config: AxiosRequestConfig = {
+            method: "POST",
+            url: "/services/rest/signature/one-document/signDocument",
+                baseURL: this.baseUrl,
+                data: request
+            }
+            const response = await Utility.httpReq(config)
+            if (response.isErr()) {
+                return err(response.error)
+            }
+            return ok(response.value.data)
+        }
 
     public async validateSignature(request: IValidateSignatureRequest): Promise<Result<IValidateSignatureResponse, Error>> {
         const config: AxiosRequestConfig = {
