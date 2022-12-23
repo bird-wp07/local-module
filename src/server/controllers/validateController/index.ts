@@ -1,2 +1,1 @@
-export * from "./validateController"
-export * from "./types"
+export * from "./validateFacade"

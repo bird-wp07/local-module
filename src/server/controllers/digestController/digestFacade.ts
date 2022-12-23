@@ -1,4 +1,4 @@
-import { dtbsFromDigestRequest, IDigestPDFRequest, IDigestPDFResponse } from "./types";
+import { dtbsFromDigestRequest, IDigestPDFRequest, IDigestPDFResponse } from "../types";
 import * as ASNSchema from "@peculiar/asn1-schema"
 import ASN1 from "@lapo/asn1js"
 import { DssClient, IGetDataToSignRequest } from "../../../dss";
@@ -27,6 +27,6 @@ export class DigestFacade {
         const octetString = encodedDigest.sub![1].sub![1].sub![0]
         const messageDigest = ASNSchema.AsnParser.parse(Buffer.from(octetString.toB64String(), "base64"), MessageDigest)
         const documentHash = Buffer.from(new Uint8Array(messageDigest.buffer)).toString("base64")
-        return { bytes: documentHash } as IDigestPDFResponse
+        return { digest: documentHash } as IDigestPDFResponse
     }
 }

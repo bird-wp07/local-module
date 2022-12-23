@@ -1,7 +1,7 @@
 import { Base64 } from "../../../types/common"
 import { Body, Controller, Post, Route } from "tsoa"
 import * as Dss from "../../../dss"
-import { dtbsFromDigestRequest, IDigestBlobRequest, IDigestBlobResponse, IDigestPDFRequest, IDigestPDFResponse } from "./types"
+import { dtbsFromDigestRequest, IDigestBlobRequest, IDigestBlobResponse, IDigestPDFRequest, IDigestPDFResponse } from "../types"
 import { dssClient } from "../../../main" // HACK
 import { IGetDataToSignRequest } from "../../../dss"
 import ASN1 from "@lapo/asn1js"
@@ -24,7 +24,7 @@ export class DigestController extends Controller {
                 generateTBSWithoutCertificate: true
             },
             toSignDocument: {
-                bytes: body.bytes
+                bytes: body.base64
             }
         }
         const getDataToSignRes = await dssClient.getDataToSign(requestData)
@@ -33,7 +33,7 @@ export class DigestController extends Controller {
         }
         const xmldsig = Buffer.from(getDataToSignRes.value.bytes, "base64").toString("utf8")
         const digest: Base64 = await Dss.getDigestValueFromXmldsig(xmldsig)
-        const response: IDigestBlobResponse = { bytes: digest }
+        const response: IDigestBlobResponse = { digest: digest }
         return response
     }
 

@@ -1,5 +1,5 @@
 import { DssClient, ESignatureValidationIndication, IValidateSignatureRequest } from "../../../dss"
-import { IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "./types"
+import { IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "../types"
 
 export class ValidateFacade {
     private dssClient: DssClient

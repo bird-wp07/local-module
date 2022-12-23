@@ -1,39 +1,61 @@
 // FIXME: tsoa does not recognize globally defined types in src/types/global.d.ts
 //        It would be nice to define Base64 globally as it's used everywhere,
+
+import * as Dss from "../../dss"
+
 //        literally.
 export type Base64 = string
 
-export enum EDigestAlgorithm {
-    SHA1 = "SHA1",
-    SHA224 = "SHA224",
-    SHA256 = "SHA256",
-    SHA512 = "SHA512"
-}
-
 export interface IDigestBlobRequest {
-    bytes: Base64
-    digestAlgorithm: EDigestAlgorithm
+    base64: Base64
+    digestAlgorithm: Dss.EDigestAlgorithm
 }
 
 export interface IDigestBlobResponse {
-    bytes: Base64
+    digest: Base64
 }
 
 export interface IDigestPDFRequest {
-    bytes: Base64
-    digestAlgorithm: EDigestAlgorithm
+    digestAlgorithm: Dss.EDigestAlgorithm,
+    base64: Base64,
+    signingTimestamp: number
 }
 
 export interface IDigestPDFResponse {
-    bytes: Base64
+    digest: Base64
+}
+
+export function dtbsFromDigestRequest (dto: IDigestPDFRequest): Dss.IGetDataToSignRequest {
+    return {
+        toSignDocument: {
+            bytes: dto.base64
+        },
+        parameters: {
+            digestAlgorithm: dto.digestAlgorithm,
+            signatureLevel: Dss.ESignatureLevel.PAdES_B,
+            generateTBSWithoutCertificate: true,
+            blevelParams : {
+                signingDate : dto.signingTimestamp
+              }
+        }
+    }
 }
 
 export interface IMergePDFRequest {
-    bytes: Base64
+    base64: Base64
     signatureAsCMS: Base64
     timestamp: number
 }
 
 export interface IMergePDFResponse {
+    base64: Base64
+}
+
+export interface IValidateSignedPdfResponse {
+    result: Dss.ESignatureValidationIndication
+    reason: Dss.ESignatureValidationSubIndication | "NO_SIGNATURE" | null
+}
+
+export interface IValidateSignedPdfRequest {
     bytes: Base64
 }

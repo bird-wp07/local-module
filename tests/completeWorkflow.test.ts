@@ -1,16 +1,10 @@
 import { describe, test } from "mocha"
 import * as Dss from "../src/dss/"
-import { EDigestAlgorithm, ESignatureLevel, ESignaturePackaging, ESignatureValidationIndication, ESignatureValidationSubIndication, IGetDataToSignRequest, IValidateSignatureRequest } from "../src/dss/"
-import { IDigestPDFRequest } from "../src/server/controllers/digestController"
 import * as fs from "fs"
-import { DigestFacade } from "../src/server/controllers/digestController/digestFacade"
 import { centralServiceClient, ISignatureRequest } from "./centralServiceClient"
-import { IMergePDFRequest } from "../src/server/controllers/types"
-import { MergeFacade } from "../src/server/controllers/mergeController/mergeFacade"
-import { IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "../src/server/controllers/validateController"
-import { ValidateFacade } from "../src/server/controllers/validateController/validateFacade"
-import { ValidateError } from "tsoa"
+import * as service from "../src/server/controllers"
 import { expect } from "chai"
+import { IDigestPDFRequest, IMergePDFRequest, IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "../src/server/controllers/types"
 
 const dssBaseUrl = process.env.DSS_BASEURL ?? "http://127.0.0.1:8080"
 
@@ -26,8 +20,8 @@ describe(Dss.DssClient.name, () => {
         test("happy path", async () => {
             const base64PDF = fs.readFileSync(`./tests/unsigned.pdf`).toString('base64')
             getDataToSignRequest.base64 = base64PDF
-            const digestResponse = await new DigestFacade(dssClient).digestPDF(getDataToSignRequest)
-            const digest = digestResponse.bytes
+            const digestResponse = await new service.DigestFacade(dssClient).digestPDF(getDataToSignRequest)
+            const digest = digestResponse.digest
 
             const getsignedCMSRequest = exampleSignatureRequest
             getsignedCMSRequest.hash = digest
@@ -37,16 +31,16 @@ describe(Dss.DssClient.name, () => {
             }
             const cms = signature.value.cms.toString()
 
-            getSignedDocumentRequest.bytes = base64PDF
+            getSignedDocumentRequest.base64 = base64PDF
             getSignedDocumentRequest.signatureAsCMS = cms
-            const signedPDF = await new MergeFacade(dssClient).mergePDF(getSignedDocumentRequest)
+            const signedPDF = await new service.MergeFacade(dssClient).mergePDF(getSignedDocumentRequest)
 
-            validateSignedPDFRequest.bytes = signedPDF.bytes
-            const validationResult = await new ValidateFacade(dssClient).validateSignature(validateSignedPDFRequest)
+            validateSignedPDFRequest.bytes = signedPDF.base64
+            const validationResult = await new service.ValidateFacade(dssClient).validateSignature(validateSignedPDFRequest)
             const have = validationResult
             const want: IValidateSignedPdfResponse = {
-                result: ESignatureValidationIndication.INDETERMINATE,
-                reason: ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
+                result: Dss.ESignatureValidationIndication.INDETERMINATE,
+                reason: Dss.ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
             }
             expect(have).to.deep.equal(want)
         })
@@ -57,7 +51,7 @@ const signatureTimestamp: number = 1670594222000
 
 const getDataToSignRequest: IDigestPDFRequest = {
     base64: "",
-    digestAlgorithm: EDigestAlgorithm.SHA256,
+    digestAlgorithm: Dss.EDigestAlgorithm.SHA256,
     signingTimestamp: signatureTimestamp
 }
 
@@ -69,7 +63,7 @@ const exampleSignatureRequest: ISignatureRequest = {
 }
 
 const getSignedDocumentRequest: IMergePDFRequest = {
-    bytes: "toBeInserted",
+    base64: "toBeInserted",
     signatureAsCMS: "toBeInserted",
     timestamp: signatureTimestamp
 }
