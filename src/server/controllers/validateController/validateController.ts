@@ -1,7 +1,8 @@
 import { Body, Controller, Post, Route } from "tsoa"
 import * as Dss from "../../../dss"
 import { dssClient } from "../../../main" // HACK
-import { IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "./types"
+import { IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "../types"
+import { ValidateFacade } from "./validateFacade"
 
 @Route("validate")
 export class ValidateController extends Controller {
@@ -25,39 +26,6 @@ export class ValidateController extends Controller {
      */
     @Post("pdf")
     public async validateSignedPdf(@Body() body: IValidateSignedPdfRequest): Promise<IValidateSignedPdfResponse> {
-        const request: Dss.IValidateSignatureRequest = {
-            signedDocument: {
-                bytes: body.bytes,
-                digestAlgorithm: null
-            },
-            originalDocuments: [],
-            policy: null,
-            signatureId: null
-        }
-        const response = await dssClient.validateSignature(request)
-        if (response.isErr()) {
-            throw response.error
-        }
-
-        let result: IValidateSignedPdfResponse
-        const signatures = response.value.SimpleReport.signatureOrTimestamp
-
-        /* Check for checked signature. If none are returned, we respond with
-         * an error, in contrast to DSS. */
-        if (signatures == undefined || signatures.length === 0) {
-            result = {
-                result: Dss.ESignatureValidationIndication.TOTAL_FAILED,
-                reason: "NO_SIGNATURE"
-            }
-        } else if (signatures.length === 1) {
-            result = {
-                result: signatures[0].Signature.Indication,
-                reason: signatures[0].Signature.SubIndication
-            }
-        } else {
-            throw new Error("Multiple signatures not yet supported.")
-        }
-
-        return result
+        return await new ValidateFacade(dssClient).validateSignature(body)
     }
 }

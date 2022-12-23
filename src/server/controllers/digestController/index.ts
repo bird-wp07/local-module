@@ -1,2 +1,1 @@
-export * from "./digestController"
-export * from "./types"
+export * from "./digestFacade"
