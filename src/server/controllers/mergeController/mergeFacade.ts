@@ -1,5 +1,5 @@
 import { DssClient } from "../../../dss"
-import { CMS2DSS, DSSParams } from "src/utility"
+import { CMS2DSS, DSSParams } from "../../../utility"
 import { IDigestBlobResponse, IMergePDFRequest, IMergePDFResponse } from "../types"
 
 export class MergeFacade {

@@ -1,14 +1,13 @@
-import { ok } from "assert";
 import { AxiosRequestConfig } from "axios";
-import { err } from "neverthrow";
+import { ok, err, Result } from "neverthrow"
 import { Base64 } from "../src/types/common";
 import * as Utility from "../src/utility"
 
 export class centralServiceClient {
-    public async getSignedCMS(request: ISignatureRequest) {
+    public async getSignedCMS(request: ISignatureRequest): Promise<Result<ISignatureResponse, Error>> {
         const config: AxiosRequestConfig = {
             method: "POST",
-            url: "/v1/signing/issuances",
+            url: "/api/v1/signer/issuances",
             baseURL: "https://46.83.201.35.bc.googleusercontent.com",
             data: request
         }
@@ -32,10 +31,3 @@ export interface ISignatureResponse {
         signature: String,
         cms: String
 }
-
-export const exampleSignatureRequest: ISignatureRequest = {
-    auditLog: "Signing of Test Document",
-    issuerId: "ID-OF-YOUR-KEY",
-    hash: "toBeInserted",
-    digestMethod: "SHA256"
-  }
