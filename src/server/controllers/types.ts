@@ -44,7 +44,7 @@ export function dtbsFromDigestRequest (dto: IDigestPDFRequest): Dss.IGetDataToSi
 export interface IMergePDFRequest {
     base64: Base64
     signatureAsCMS: Base64
-    timestamp: number
+    signingTimestamp: number
 }
 
 export interface IMergePDFResponse {
@@ -57,5 +57,5 @@ export interface IValidateSignedPdfResponse {
 }
 
 export interface IValidateSignedPdfRequest {
-    bytes: Base64
+    base64: Base64
 }

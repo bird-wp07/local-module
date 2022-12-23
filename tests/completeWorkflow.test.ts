@@ -35,7 +35,7 @@ describe(Dss.DssClient.name, () => {
             getSignedDocumentRequest.signatureAsCMS = cms
             const signedPDF = await new service.MergeFacade(dssClient).mergePDF(getSignedDocumentRequest)
 
-            validateSignedPDFRequest.bytes = signedPDF.base64
+            validateSignedPDFRequest.base64 = signedPDF.base64
             const validationResult = await new service.ValidateFacade(dssClient).validateSignature(validateSignedPDFRequest)
             const have = validationResult
             const want: IValidateSignedPdfResponse = {
@@ -65,9 +65,9 @@ const exampleSignatureRequest: ISignatureRequest = {
 const getSignedDocumentRequest: IMergePDFRequest = {
     base64: "toBeInserted",
     signatureAsCMS: "toBeInserted",
-    timestamp: signatureTimestamp
+    signingTimestamp: signatureTimestamp
 }
 
 const validateSignedPDFRequest: IValidateSignedPdfRequest = {
-    bytes: "toBeInserted"
+    base64: "toBeInserted"
 }

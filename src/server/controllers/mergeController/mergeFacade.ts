@@ -15,7 +15,7 @@ export class MergeFacade {
             bytes: body.base64
         }
         requestData.parameters.blevelParams = {
-            signingDate: body.timestamp
+            signingDate: body.signingTimestamp
         }
         const signDataRes = await this.dssClient.signData(requestData)
         if (signDataRes.isErr()) {
