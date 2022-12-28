@@ -1,18 +1,15 @@
 import { describe, test } from "mocha"
+import { expect } from "chai"
+import { makeDssClient } from "./testsHelper"
 import fs from "fs"
 import * as service from "../src/server/controllers"
-import * as Dss from "../src/dss/"
-import { expect } from "chai"
+import * as Dss from "../src/dss"
 import { IDigestPDFRequest } from "../src/server/controllers/types"
 
-const dssBaseUrl = process.env.DSS_BASEURL ?? "http://127.0.0.1:8080"
-
-describe(Dss.DssClient.name, () => {
-    const dssClient = new Dss.DssClient(dssBaseUrl)
-    before("Verify DSS is online", async () => {
-        if ((await dssClient.isOnline()).isErr()) {
-            throw new Error("DSS cannot be reached.")
-        }
+describe("Digest Facade", () => {
+    let dssClient: Dss.DssClient
+    before("Init", async () => {
+        dssClient = await makeDssClient()
     })
 
     describe("/digest/pdf", () => {

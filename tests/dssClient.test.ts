@@ -1,3 +1,4 @@
+import { makeDssClient } from "./testsHelper"
 import { createHash } from "node:crypto"
 import fs from "fs"
 import { describe, test } from "mocha"
@@ -18,14 +19,10 @@ import {
 
 chai.use(chaiSubset)
 
-const dssBaseUrl = process.env.DSS_BASEURL ?? "http://127.0.0.1:8080"
-
 describe(Dss.DssClient.name, () => {
-    const dssClient = new Dss.DssClient(dssBaseUrl)
-    before("Verify DSS is online", async () => {
-        if ((await dssClient.isOnline()).isErr()) {
-            throw new Error("DSS cannot be reached.")
-        }
+    let dssClient: Dss.DssClient
+    before("Init", async () => {
+        dssClient = await makeDssClient()
     })
 
     describe("#getDataToSign()", () => {

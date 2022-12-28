@@ -21,12 +21,8 @@ async function main() {
     const wait = 3600
     logger.info(`Waiting for DSS to respond at '${settings.dssBaseUrl}' ... `)
     const isOnline = await dssClient.isOnline({ waitSeconds: wait })
-    if (isOnline.isErr()) {
-        if (isOnline.error instanceof Dss.Errors.NoResponse) {
-            logger.error(`DSS server did not respond for ${wait} seconds. Abort.`)
-        } else {
-            logger.error(`DSS server sent an unexpected response. Abort.`)
-        }
+    if (!isOnline) {
+        logger.error("DSS didn't respond. Abort.")
         process.exit(1)
     }
     logger.info("DSS responded. Starting HTTP server ... ")
