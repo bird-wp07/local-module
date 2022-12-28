@@ -16,8 +16,8 @@ export interface IDigestBlobResponse {
 }
 
 export interface IDigestPDFRequest {
-    digestAlgorithm: Dss.EDigestAlgorithm,
-    base64: Base64,
+    digestAlgorithm: Dss.EDigestAlgorithm
+    base64: Base64
     signingTimestamp: number
 }
 
@@ -25,7 +25,7 @@ export interface IDigestPDFResponse {
     digest: Base64
 }
 
-export function dtbsFromDigestRequest (dto: IDigestPDFRequest): Dss.IGetDataToSignRequest {
+export function dtbsFromDigestRequest(dto: IDigestPDFRequest): Dss.IGetDataToSignRequest {
     return {
         toSignDocument: {
             bytes: dto.base64
@@ -34,9 +34,9 @@ export function dtbsFromDigestRequest (dto: IDigestPDFRequest): Dss.IGetDataToSi
             digestAlgorithm: dto.digestAlgorithm,
             signatureLevel: Dss.ESignatureLevel.PAdES_B,
             generateTBSWithoutCertificate: true,
-            blevelParams : {
-                signingDate : dto.signingTimestamp
-              }
+            blevelParams: {
+                signingDate: dto.signingTimestamp
+            }
         }
     }
 }

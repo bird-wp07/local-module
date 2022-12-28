@@ -1,5 +1,4 @@
 import { Body, Controller, Post, Route } from "tsoa"
-import * as Dss from "../../../dss"
 import { dssClient } from "../../../main" // HACK
 import { IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "../types"
 import { ValidateFacade } from "./validateFacade"

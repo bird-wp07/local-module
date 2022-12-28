@@ -1,14 +1,14 @@
-import { dtbsFromDigestRequest, IDigestPDFRequest, IDigestPDFResponse } from "../types";
+import { dtbsFromDigestRequest, IDigestPDFRequest, IDigestPDFResponse } from "../types"
 import * as ASNSchema from "@peculiar/asn1-schema"
 import ASN1 from "@lapo/asn1js"
-import { DssClient, IGetDataToSignRequest } from "../../../dss";
+import { DssClient, IGetDataToSignRequest } from "../../../dss"
 
 /**
  * ```asn
  * MessageDigest ::= OCTET STRING
  * ```
  */
-class MessageDigest extends ASNSchema.OctetString { }
+class MessageDigest extends ASNSchema.OctetString {}
 
 export class DigestFacade {
     private dssClient: DssClient

@@ -2,7 +2,6 @@ import { describe, test } from "mocha"
 import fs from "fs"
 import * as service from "../src/server/controllers"
 import * as Dss from "../src/dss/"
-import { createHash } from "crypto"
 import { expect } from "chai"
 import { IDigestPDFRequest } from "../src/server/controllers/types"
 
@@ -17,10 +16,10 @@ describe(Dss.DssClient.name, () => {
     })
 
     describe("/digest/pdf", () => {
-        test(`get the SHA256 hash of a valid pdf`, async () =>  {
+        test(`get the SHA256 hash of a valid pdf`, async () => {
             const bytes = fs.readFileSync(`./assets/unsigned.pdf`)
             const request: IDigestPDFRequest = {
-                base64: bytes.toString('base64'),
+                base64: bytes.toString("base64"),
                 digestAlgorithm: Dss.EDigestAlgorithm.SHA256,
                 signingTimestamp: 1670594222000
             }

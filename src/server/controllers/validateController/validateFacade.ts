@@ -8,39 +8,39 @@ export class ValidateFacade {
     }
 
     public async validateSignature(request: IValidateSignedPdfRequest): Promise<IValidateSignedPdfResponse> {
-    const dssRequest: IValidateSignatureRequest = {
-        signedDocument: {
-            bytes: request.base64,
-            digestAlgorithm: null
-        },
-        originalDocuments: [],
-        policy: null,
-        signatureId: null
-    }
-    const response = await this.dssClient.validateSignature(dssRequest)
-    if (response.isErr()) {
-        throw response.error
-    }
-
-    let result: IValidateSignedPdfResponse
-    const signatures = response.value.SimpleReport.signatureOrTimestamp
-
-    /* Check for checked signature. If none are returned, we respond with
-     * an error, in contrast to DSS. */
-    if (signatures == undefined || signatures.length === 0) {
-        result = {
-            result: ESignatureValidationIndication.TOTAL_FAILED,
-            reason: "NO_SIGNATURE"
+        const dssRequest: IValidateSignatureRequest = {
+            signedDocument: {
+                bytes: request.base64,
+                digestAlgorithm: null
+            },
+            originalDocuments: [],
+            policy: null,
+            signatureId: null
         }
-    } else if (signatures.length === 1) {
-        result = {
-            result: signatures[0].Signature.Indication,
-            reason: signatures[0].Signature.SubIndication
+        const response = await this.dssClient.validateSignature(dssRequest)
+        if (response.isErr()) {
+            throw response.error
         }
-    } else {
-        throw new Error("Multiple signatures not yet supported.")
-    }
 
-    return result
+        let result: IValidateSignedPdfResponse
+        const signatures = response.value.SimpleReport.signatureOrTimestamp
+
+        /* Check for checked signature. If none are returned, we respond with
+         * an error, in contrast to DSS. */
+        if (signatures == undefined || signatures.length === 0) {
+            result = {
+                result: ESignatureValidationIndication.TOTAL_FAILED,
+                reason: "NO_SIGNATURE"
+            }
+        } else if (signatures.length === 1) {
+            result = {
+                result: signatures[0].Signature.Indication,
+                reason: signatures[0].Signature.SubIndication
+            }
+        } else {
+            throw new Error("Multiple signatures not yet supported.")
+        }
+
+        return result
     }
 }
