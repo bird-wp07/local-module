@@ -8,7 +8,7 @@ import { IDigestPDFRequest, IMergePDFRequest, IValidateSignedPdfRequest, IValida
 
 const dssBaseUrl = process.env.DSS_BASEURL ?? "http://127.0.0.1:8080"
 
-describe(Dss.DssClient.name, () => {
+describe("Complete workflow", () => {
     const dssClient = new Dss.DssClient(dssBaseUrl)
     before("Verify DSS is online", async () => {
         if ((await dssClient.isOnline()).isErr()) {
