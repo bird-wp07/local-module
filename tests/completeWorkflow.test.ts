@@ -18,7 +18,7 @@ describe("Complete workflow", () => {
 
     describe("run poc workflow", () => {
         test("happy path", async () => {
-            const base64PDF = fs.readFileSync(`./tests/unsigned.pdf`).toString("base64")
+            const base64PDF = fs.readFileSync(`./assets/unsigned.pdf`).toString("base64")
             getDataToSignRequest.base64 = base64PDF
             const digestResponse = await new service.DigestFacade(dssClient).digestPDF(getDataToSignRequest)
             const digest = digestResponse.digest
