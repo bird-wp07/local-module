@@ -1,11 +1,8 @@
 import { Base64 } from "../../../types/common"
 import { Body, Controller, Post, Route } from "tsoa"
 import * as Dss from "../../../dss"
-import { dtbsFromDigestRequest, IDigestBlobRequest, IDigestBlobResponse, IDigestPDFRequest, IDigestPDFResponse } from "../types"
+import { IDigestBlobRequest, IDigestBlobResponse, IDigestPDFRequest, IDigestPDFResponse } from "../types"
 import { dssClient } from "../../../main" // HACK
-import { IGetDataToSignRequest } from "../../../dss"
-import ASN1 from "@lapo/asn1js"
-import * as ASNSchema from "@peculiar/asn1-schema"
 import { DigestFacade } from "./digestFacade"
 
 @Route("digest")

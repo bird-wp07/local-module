@@ -70,15 +70,15 @@ export class DssClient {
         const config: AxiosRequestConfig = {
             method: "POST",
             url: "/services/rest/signature/one-document/signDocument",
-                baseURL: this.baseUrl,
-                data: request
-            }
-            const response = await Utility.httpReq(config)
-            if (response.isErr()) {
-                return err(response.error)
-            }
-            return ok(response.value.data)
+            baseURL: this.baseUrl,
+            data: request
         }
+        const response = await Utility.httpReq(config)
+        if (response.isErr()) {
+            return err(response.error)
+        }
+        return ok(response.value.data)
+    }
 
     public async validateSignature(request: IValidateSignatureRequest): Promise<Result<IValidateSignatureResponse, Error>> {
         const config: AxiosRequestConfig = {

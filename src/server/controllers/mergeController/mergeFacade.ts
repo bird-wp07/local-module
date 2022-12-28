@@ -1,6 +1,6 @@
 import { DssClient } from "../../../dss"
 import { CMS2DSS, DSSParams } from "../../../utility"
-import { IDigestBlobResponse, IMergePDFRequest, IMergePDFResponse } from "../types"
+import { IMergePDFRequest, IMergePDFResponse } from "../types"
 
 export class MergeFacade {
     private dssClient: DssClient
@@ -8,7 +8,7 @@ export class MergeFacade {
         this.dssClient = dssClient
     }
 
-    public async mergePDF(body:IMergePDFRequest):Promise<IMergePDFResponse> {
+    public async mergePDF(body: IMergePDFRequest): Promise<IMergePDFResponse> {
         const convertedCMS = CMS2DSS.convert(body.signatureAsCMS)
         const requestData: DSSParams = convertedCMS.dssParams
         requestData.toSignDocument = {

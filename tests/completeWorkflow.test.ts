@@ -18,14 +18,14 @@ describe(Dss.DssClient.name, () => {
 
     describe("run poc workflow", () => {
         test("happy path", async () => {
-            const base64PDF = fs.readFileSync(`./tests/unsigned.pdf`).toString('base64')
+            const base64PDF = fs.readFileSync(`./tests/unsigned.pdf`).toString("base64")
             getDataToSignRequest.base64 = base64PDF
             const digestResponse = await new service.DigestFacade(dssClient).digestPDF(getDataToSignRequest)
             const digest = digestResponse.digest
 
             const getsignedCMSRequest = exampleSignatureRequest
             getsignedCMSRequest.hash = digest
-            const signature = await new centralServiceClient().getSignedCMS(getsignedCMSRequest)
+            const signature = new centralServiceClient().getSignedCMS(getsignedCMSRequest)
             if (signature.isErr()) {
                 throw signature.error
             }
@@ -47,7 +47,7 @@ describe(Dss.DssClient.name, () => {
     })
 })
 
-const signatureTimestamp: number = 1670594222000
+const signatureTimestamp = 1670594222000
 
 const getDataToSignRequest: IDigestPDFRequest = {
     base64: "",
