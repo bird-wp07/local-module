@@ -19,7 +19,6 @@ export class CsClient {
             url: "/swagger-ui/index.html",
             baseURL: this.baseUrl
         }
-
         const response = await Utility.httpReq(config)
         if (response.isErr()) {
             return false
@@ -27,17 +26,18 @@ export class CsClient {
         return true
     }
 
-    private async getResponseOfActualCentralService(request: ISignatureRequest): Promise<Result<ISignatureResponse, Error>> {
-        const config: AxiosRequestConfig = {
-            method: "POST",
-            url: "/api/v1/signing/issuances",
-            baseURL: "https://46.83.201.35.bc.googleusercontent.com",
-            data: request
-        }
-        const response = await Utility.httpReq(config)
-        if (response.isErr()) {
-            return err(response.error)
-        }
-        return ok(response.value.data)
-    }
+    // TODO: Refactor
+    // private async getResponseOfActualCentralService(request: ISignatureRequest): Promise<Result<ISignatureResponse, Error>> {
+    //     const config: AxiosRequestConfig = {
+    //         method: "POST",
+    //         url: "/api/v1/signing/issuances",
+    //         baseURL: "https://46.83.201.35.bc.googleusercontent.com",
+    //         data: request
+    //     }
+    //     const response = await Utility.httpReq(config)
+    //     if (response.isErr()) {
+    //         return err(response.error)
+    //     }
+    //     return ok(response.value.data)
+    // }
 }

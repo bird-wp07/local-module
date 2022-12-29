@@ -6,13 +6,15 @@ import { IGetDataToSignRequest, IGetDataToSignResponse, ISignDataResponse, IVali
 import { Base64 } from "./types"
 import { DSSParams } from "../utility"
 
+// TODO: makeDssClient()
+
 export class DssClient {
     public baseUrl: string
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl
     }
 
-    /*
+    /**
      * Checks whether the DSS API is accessible at the specified base url by
      * querying the DSS's default browser API.
      *
