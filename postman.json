@@ -152,6 +152,29 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "system",
+			"item": [
+				{
+					"name": "Check Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{LOCAL_MODULE_BASEURL}}/system/health",
+							"host": [
+								"{{LOCAL_MODULE_BASEURL}}"
+							],
+							"path": [
+								"system",
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }

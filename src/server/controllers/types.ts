@@ -42,3 +42,7 @@ export interface IValidateSignedPdfResponse {
 export interface IValidateSignedPdfRequest {
     bytes: Base64
 }
+
+export interface IGetHealthResponse {
+    status: "ok"
+}
