@@ -11,7 +11,7 @@ import { makeCsClient, makeDssClient } from "./testsHelper"
 const signatureTimestamp = 1670594222000
 
 const getDataToSignRequest: IDigestPDFRequest = {
-    base64: "",
+    bytes: "",
     digestAlgorithm: Dss.EDigestAlgorithm.SHA256,
     signingTimestamp: signatureTimestamp
 }
@@ -24,13 +24,13 @@ const exampleSignatureRequest: Cs.ISignatureRequest = {
 }
 
 const getSignedDocumentRequest: IMergePDFRequest = {
-    base64: "toBeInserted",
+    bytes: "toBeInserted",
     signatureAsCMS: "toBeInserted",
     signingTimestamp: signatureTimestamp
 }
 
 const validateSignedPDFRequest: IValidateSignedPdfRequest = {
-    base64: "toBeInserted"
+    bytes: "toBeInserted"
 }
 
 describe("Complete workflow", () => {

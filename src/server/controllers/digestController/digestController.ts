@@ -21,7 +21,7 @@ export class DigestController extends Controller {
                 generateTBSWithoutCertificate: true
             },
             toSignDocument: {
-                bytes: body.base64
+                bytes: body.bytes
             }
         }
         const getDataToSignRes = await dssClient.getDataToSign(requestData)

@@ -1,7 +1,7 @@
-import { dtbsFromDigestRequest, IDigestPDFRequest, IDigestPDFResponse } from "../types"
+import { IDigestPDFRequest, IDigestPDFResponse } from "../types"
 import * as ASNSchema from "@peculiar/asn1-schema"
 import ASN1 from "@lapo/asn1js"
-import { DssClient, IGetDataToSignRequest } from "../../../dss"
+import { DssClient, ESignatureLevel, IGetDataToSignRequest } from "../../../dss"
 
 /**
  * ```asn
@@ -16,17 +16,34 @@ export class DigestFacade {
         this.dssClient = dssClient
     }
 
+    // TODO: neverthrow
     public async digestPDF(request: IDigestPDFRequest): Promise<IDigestPDFResponse> {
-        const DSSrequest: IGetDataToSignRequest = dtbsFromDigestRequest(request)
-        const DSSReponse = await this.dssClient.getDataToSign(DSSrequest)
-        if (DSSReponse.isErr()) {
-            throw DSSReponse.error
+        const dssRequest: IGetDataToSignRequest = dtbsFromDigestRequest(request)
+        const dssResponse = await this.dssClient.getDataToSign(dssRequest)
+        if (dssResponse.isErr()) {
+            throw dssResponse.error
         }
 
-        const encodedDigest = ASN1.decode(Buffer.from(DSSReponse.value.bytes, "base64"))
+        const encodedDigest = ASN1.decode(Buffer.from(dssResponse.value.bytes, "base64"))
         const octetString = encodedDigest.sub![1].sub![1].sub![0]
         const messageDigest = ASNSchema.AsnParser.parse(Buffer.from(octetString.toB64String(), "base64"), MessageDigest)
         const documentHash = Buffer.from(new Uint8Array(messageDigest.buffer)).toString("base64")
         return { digest: documentHash } as IDigestPDFResponse
+    }
+}
+
+function dtbsFromDigestRequest(dto: IDigestPDFRequest): IGetDataToSignRequest {
+    return {
+        toSignDocument: {
+            bytes: dto.bytes
+        },
+        parameters: {
+            digestAlgorithm: dto.digestAlgorithm,
+            signatureLevel: ESignatureLevel.PAdES_B,
+            generateTBSWithoutCertificate: true,
+            blevelParams: {
+                signingDate: dto.signingTimestamp ?? 0
+            }
+        }
     }
 }

@@ -1,14 +1,13 @@
-// FIXME: tsoa does not recognize globally defined types in src/types/global.d.ts
-//        It would be nice to define Base64 globally as it's used everywhere,
+// HACK: Local namespace imports (import * as Dss from "../../dss") bug out tsoa
+//       Generated models, which use types that referred to via prefix (e.g.
+//       Dss.EDigestAlgorithm), are wrong and will mess up validation.
 
-import * as Dss from "../../dss"
-
-//        literally.
+import { EDigestAlgorithm, ESignatureValidationIndication, ESignatureValidationSubIndication } from "../../dss"
 export type Base64 = string
 
 export interface IDigestBlobRequest {
-    base64: Base64
-    digestAlgorithm: Dss.EDigestAlgorithm
+    bytes: Base64
+    digestAlgorithm: EDigestAlgorithm
 }
 
 export interface IDigestBlobResponse {
@@ -16,46 +15,30 @@ export interface IDigestBlobResponse {
 }
 
 export interface IDigestPDFRequest {
-    digestAlgorithm: Dss.EDigestAlgorithm
-    base64: Base64
-    signingTimestamp: number
+    digestAlgorithm: EDigestAlgorithm
+    bytes: Base64
+    signingTimestamp?: number // TODOC: What time format is this?
 }
 
 export interface IDigestPDFResponse {
     digest: Base64
 }
 
-export function dtbsFromDigestRequest(dto: IDigestPDFRequest): Dss.IGetDataToSignRequest {
-    return {
-        toSignDocument: {
-            bytes: dto.base64
-        },
-        parameters: {
-            digestAlgorithm: dto.digestAlgorithm,
-            signatureLevel: Dss.ESignatureLevel.PAdES_B,
-            generateTBSWithoutCertificate: true,
-            blevelParams: {
-                signingDate: dto.signingTimestamp
-            }
-        }
-    }
-}
-
 export interface IMergePDFRequest {
-    base64: Base64
+    bytes: Base64
     signatureAsCMS: Base64
     signingTimestamp: number
 }
 
 export interface IMergePDFResponse {
-    base64: Base64
+    bytes: Base64
 }
 
 export interface IValidateSignedPdfResponse {
-    result: Dss.ESignatureValidationIndication
-    reason: Dss.ESignatureValidationSubIndication | "NO_SIGNATURE" | null
+    result: ESignatureValidationIndication
+    reason: ESignatureValidationSubIndication | "NO_SIGNATURE" | null
 }
 
 export interface IValidateSignedPdfRequest {
-    base64: Base64
+    bytes: Base64
 }

@@ -10,7 +10,7 @@ export class ValidateFacade {
     public async validateSignature(request: IValidateSignedPdfRequest): Promise<IValidateSignedPdfResponse> {
         const dssRequest: IValidateSignatureRequest = {
             signedDocument: {
-                bytes: request.base64,
+                bytes: request.bytes,
                 digestAlgorithm: null
             },
             originalDocuments: [],

@@ -7,6 +7,7 @@ import { OIDS } from "./oids"
 import { OIDS2DSS, OIDS2DSSMappingType } from "./oids2dss"
 
 import ASN1 from "@lapo/asn1js"
+import { Base64 } from "../types/common"
 
 export interface CMS2DSSResponse {
     cmsContent: CMSContent
@@ -63,7 +64,7 @@ export interface DSSSignatureValue {
 }
 
 export interface DSSBytes {
-    bytes: string
+    bytes: Base64
 }
 export interface DSSParams {
     toSignDocument?: DSSBytes

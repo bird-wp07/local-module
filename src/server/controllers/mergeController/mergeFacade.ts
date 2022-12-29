@@ -12,7 +12,7 @@ export class MergeFacade {
         const convertedCMS = CMS2DSS.convert(body.signatureAsCMS)
         const requestData: DSSParams = convertedCMS.dssParams
         requestData.toSignDocument = {
-            bytes: body.base64
+            bytes: body.bytes
         }
         requestData.parameters.blevelParams = {
             signingDate: body.signingTimestamp
@@ -21,7 +21,7 @@ export class MergeFacade {
         if (signDataRes.isErr()) {
             throw signDataRes.error
         }
-        const response: IMergePDFResponse = { base64: signDataRes.value.bytes }
+        const response: IMergePDFResponse = { bytes: signDataRes.value.bytes }
         return response
     }
 }

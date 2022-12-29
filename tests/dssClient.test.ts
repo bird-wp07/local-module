@@ -40,8 +40,10 @@ describe(Dss.DssClient.name, () => {
                         bytes: bytes.toString("base64")
                     }
                 }
-                const response = (await dssClient.getDataToSign(request))._unsafeUnwrap()
-                const xmldsig = Buffer.from(response.bytes, "base64").toString("utf8")
+                const response = await dssClient.getDataToSign(request)
+                expect(response.isOk()).to.be.true
+                const data = response._unsafeUnwrap()
+                const xmldsig = Buffer.from(data.bytes, "base64").toString("utf8")
                 const have = await Dss.getDigestValueFromXmldsig(xmldsig)
                 const want = createHash("sha256").update(bytes).digest("base64")
                 expect(have).to.equal(want)

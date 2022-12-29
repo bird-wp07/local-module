@@ -16,7 +16,7 @@ describe("Digest Facade", () => {
         test(`get the SHA256 hash of a valid pdf`, async () => {
             const bytes = fs.readFileSync(`./assets/unsigned.pdf`)
             const request: IDigestPDFRequest = {
-                base64: bytes.toString("base64"),
+                bytes: bytes.toString("base64"),
                 digestAlgorithm: Dss.EDigestAlgorithm.SHA256,
                 signingTimestamp: 1670594222000
             }
