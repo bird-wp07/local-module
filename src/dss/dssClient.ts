@@ -2,10 +2,11 @@ import * as xml2js from "xml2js"
 import { ok, err, Result } from "neverthrow"
 import { AxiosRequestConfig } from "axios"
 import * as Utility from "../utility"
-import * as Dss from "."
 import { IGetDataToSignRequest, IGetDataToSignResponse, ISignDataResponse, IValidateSignatureRequest, IValidateSignatureResponse } from "./types"
 import { Base64 } from "./types"
 import { DSSParams } from "../utility"
+
+// TODO: makeDssClient()
 
 export class DssClient {
     public baseUrl: string
@@ -13,7 +14,7 @@ export class DssClient {
         this.baseUrl = baseUrl
     }
 
-    /*
+    /**
      * Checks whether the DSS API is accessible at the specified base url by
      * querying the DSS's default browser API.
      *
@@ -21,7 +22,7 @@ export class DssClient {
      * between until the set time has passed or a reply is received from the
      * server.
      */
-    async isOnline(options?: { waitSeconds?: number }): Promise<Result<null, Dss.Errors.NoResponse | Dss.Errors.UnexpectedResponse>> {
+    async isOnline(options?: { waitSeconds?: number }): Promise<boolean> {
         const waitSeconds = options?.waitSeconds ? options.waitSeconds : 0
         const start = new Date().getTime() // returns unix seconds
 
@@ -43,13 +44,10 @@ export class DssClient {
         } while ((new Date().getTime() - start) / 1000 < waitSeconds)
 
         /* Fail if we timed out or if we didn't get the expected response. */
-        if (!gotResponse) {
-            return err(new Dss.Errors.NoResponse())
+        if (!gotResponse || responseData.length == 0 || !responseData.includes("<title>DSS Demonstration WebApp</title>")) {
+            return false
         }
-        if (responseData.length == 0 || !responseData.includes("<title>DSS Demonstration WebApp</title>")) {
-            return err(new Dss.Errors.UnexpectedResponse())
-        }
-        return ok(null)
+        return true
     }
 
     public async getDataToSign(request: IGetDataToSignRequest): Promise<Result<IGetDataToSignResponse, Error>> {

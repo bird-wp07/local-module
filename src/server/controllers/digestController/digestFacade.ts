@@ -11,7 +11,7 @@ import { DssClient, IGetDataToSignRequest } from "../../../dss"
 class MessageDigest extends ASNSchema.OctetString {}
 
 export class DigestFacade {
-    private dssClient: DssClient
+    public dssClient: DssClient
     constructor(dssClient: DssClient) {
         this.dssClient = dssClient
     }
