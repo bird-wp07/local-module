@@ -1,20 +1,24 @@
 export type Base64 = string
 
 export enum ESignatureAlgorithm {
-    SHA256 = "RSA_SHA256"
+    RSA_SHA256 = "RSA_SHA256",
+    ECDSA_SHA256 = "ECDSA_SHA256"
 }
 
 export enum EEncryptionAlgorithm {
-    RSA = "RSA"
+    RSA = "RSA",
+    ECDSA = "ECDSA"
 }
 
-export enum ASiCContainerType {
+export enum EASiCContainerType {
     ASiC_S,
     ASiC_E
 }
 
 export enum ESignatureLevel {
     PAdES_B = "PAdES_BASELINE_B",
+    PAdES_LT = "PAdES_BASELINE_LT",
+    PAdES_LTA = "PAdES_BASELINE_LTA",
     XAdES_B = "XAdES_BASELINE_B"
 }
 
@@ -22,10 +26,10 @@ export enum ESignatureLevel {
  * See https://ec.europa.eu/digital-building-blocks/wikis/display/ESIGKB/What+is+the+packaging+enveloped+-+detached+-+enveloping+and+internally+detached+of+a+signature
  */
 export enum ESignaturePackaging {
-    enveloping = "ENVELOPING",
-    enveloped = "ENVELOPED",
-    detached = "DETACHED",
-    internallyDetached = "INTERNALLY_DETACHED"
+    ENVELOPING = "ENVELOPING",
+    ENVELOPED = "ENVELOPED",
+    DETACHED = "DETACHED",
+    INTERNALLY_DETACHED = "INTERNALLY_DETACHED"
 }
 
 /** DSS offers much more options, see public enum DigestAlgorithm */

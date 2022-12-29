@@ -17,7 +17,7 @@ export class DigestController extends Controller {
             parameters: {
                 signatureLevel: Dss.ESignatureLevel.XAdES_B,
                 digestAlgorithm: body.digestAlgorithm,
-                signaturePackaging: Dss.ESignaturePackaging.enveloping,
+                signaturePackaging: Dss.ESignaturePackaging.ENVELOPING,
                 generateTBSWithoutCertificate: true
             },
             toSignDocument: {

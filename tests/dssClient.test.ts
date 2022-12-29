@@ -33,7 +33,7 @@ describe(Dss.DssClient.name, () => {
                     parameters: {
                         signatureLevel: ESignatureLevel.XAdES_B,
                         digestAlgorithm: EDigestAlgorithm.SHA256,
-                        signaturePackaging: ESignaturePackaging.enveloping,
+                        signaturePackaging: ESignaturePackaging.ENVELOPING,
                         generateTBSWithoutCertificate: true
                     },
                     toSignDocument: {
