@@ -1,6 +1,7 @@
-// HACK: Local namespace imports (import * as Dss from "../../dss") bug out tsoa
-//       Generated models, which use types that referred to via prefix (e.g.
+// HACK: Local namespace imports (import * as Dss from "../../dss") bug out tsoa.
+//       Generated models, which use types that are referred to via namespace (e.g.
 //       Dss.EDigestAlgorithm), are wrong and will mess up validation.
+//       See #11.
 
 import { EDigestAlgorithm, ESignatureValidationIndication, ESignatureValidationSubIndication } from "../../dss"
 export type Base64 = string
