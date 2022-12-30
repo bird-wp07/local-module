@@ -1,10 +1,11 @@
 import * as xml2js from "xml2js"
 import { ok, err, Result } from "neverthrow"
-import { AxiosRequestConfig } from "axios"
+import { AxiosError, AxiosRequestConfig } from "axios"
 import * as Utility from "../utility"
 import { IGetDataToSignRequest, IGetDataToSignResponse, ISignDataResponse, IValidateSignatureRequest, IValidateSignatureResponse } from "./types"
 import { Base64 } from "./types"
 import { DSSParams } from "../utility"
+import * as Dss from "."
 
 // TODO: makeDssClient()
 
@@ -59,7 +60,7 @@ export class DssClient {
         }
         const response = await Utility.httpReq(config)
         if (response.isErr()) {
-            return err(response.error)
+            return err(DssClient.parseError(response.error))
         }
         return ok(response.value.data)
     }
@@ -73,7 +74,7 @@ export class DssClient {
         }
         const response = await Utility.httpReq(config)
         if (response.isErr()) {
-            return err(response.error)
+            return err(DssClient.parseError(response.error))
         }
         return ok(response.value.data)
     }
@@ -87,9 +88,37 @@ export class DssClient {
         }
         const response = await Utility.httpReq(config)
         if (response.isErr()) {
-            return err(response.error)
+            return err(DssClient.parseError(response.error))
         }
         return ok(response.value.data)
+    }
+
+    /**
+     * Transforms the response produced by invalid or unsuccessful DSS requests
+     * into meaningful, typed errors.
+     *
+     * Implemented on a need-to-have basis; WIP
+     *
+     * @param err The error returned by httpReq
+     */
+    static parseError(err: any): Error {
+        if (err instanceof AxiosError) {
+            if (err.code === AxiosError.ERR_BAD_RESPONSE && typeof err.response?.data === "string") {
+                const dssErrorMsg = err.response.data
+                if (
+                    dssErrorMsg.startsWith("Cannot deserialize value") ||
+                    dssErrorMsg.startsWith("Illegal unquoted character") ||
+                    dssErrorMsg.startsWith("Unexpected end-of-input")
+                ) {
+                    return new Dss.Errors.DeserializationError()
+                }
+
+                if (dssErrorMsg.startsWith("java.io.IOException: Error: End-of-File, expected line")) {
+                    return new Dss.Errors.UnexpectedInput()
+                }
+            }
+        }
+        return new Dss.Errors.UnhandledError()
     }
 }
 
