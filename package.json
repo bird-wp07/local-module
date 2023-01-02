@@ -29,7 +29,7 @@
         "@peculiar/asn1-schema": "^2.3.3",
         "@tsoa/runtime": "^4.1.3",
         "@types/node": "^18.11.9",
-        "axios": "~1.1.3",
+        "axios": "^1.2.2",
         "express": "^4.18.2",
         "fs": "^0.0.1-security",
         "neverthrow": "^5.1.0",
