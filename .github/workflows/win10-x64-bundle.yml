@@ -1,13 +1,14 @@
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   release-win-x64-bundle:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: main
 
       - name: Set up temporary directory and copy static files
         run: |
@@ -27,13 +28,10 @@ jobs:
           $localModuleVersion = npm view "@bird-wp07/local-module" version
           $zipFile = "wp07-local-module-win10-x64-v$localModuleVersion.zip"
           Rename-Item -Path ".\release.zip" -NewName $zipFile
-          Add-Content $env:GITHUB_ENV "RELEASE_TITLE=v$localModuleVersion"
           Add-Content $env:GITHUB_ENV "RELEASE_ZIP_FILENAME=$zipFile"
 
       - name: Release archive
         uses: ncipollo/release-action@v1
         with:
           artifacts: .\zip\${{ env.RELEASE_ZIP_FILENAME }}
-          name: ${{ env.RELEASE_TITLE }}
-          allowUpdates: true
-          tag: main
+          allowUpdates: true # must be set for the other pipelines to add their archives asynchronously

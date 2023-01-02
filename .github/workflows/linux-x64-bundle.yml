@@ -1,13 +1,14 @@
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   release-linux-x64-bundle:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: main
 
       - name: Set up temporary directory and copy static files
         run: |
@@ -25,14 +26,10 @@ jobs:
           local_module_version="$(npm view "@bird-wp07/local-module" version)"
           archive_filename="wp07-local-module-linux-x64-v$local_module_version.tar.xz"
           mv "release.tar.xz" "$archive_filename"
-          echo "RELEASE_TITLE=v$local_module_version" >>"$GITHUB_ENV"
           echo "RELEASE_ZIP_FILENAME=$archive_filename" >>"$GITHUB_ENV"
 
       - name: Release archive
         uses: ncipollo/release-action@v1
         with:
           artifacts: ./zip/${{ env.RELEASE_ZIP_FILENAME }}
-          name: ${{ env.RELEASE_TITLE }}
           allowUpdates: true
-          tag: main
-
