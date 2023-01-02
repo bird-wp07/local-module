@@ -64,7 +64,20 @@ fi
 log.info() { __log "info" "\033[32;1m" "$*"; }
 log.err() { __log "err " "\033[31;1m" "$*"; }
 
+# install_dependencies WHAT [LMVER]
+#
+# WHAT  - Dependencies to install. Any of {7zip,node,dss,java,local-module,all}.
+# LMVER - Local module to install (npm install @bird-wp07/local-module@LMVER).
+#         'latest' by default. Used to build release for specific version.
+#         Only relevant if WHAT is all or local-module.
+#
 install_dependencies() {
+    case "$1" in
+    7zip|node|dss|java|local-module|all) what="$1" ;;
+    *) echo "Missing argument WHAT." >&2; return 1 ;;
+    esac
+    lmver="${2:-latest}"
+
     # TODO: Remove dependency on xz for standalone bundle
     for prog in curl gzip xz; do
         if ! command -v $prog >/dev/null; then
@@ -73,7 +86,6 @@ install_dependencies() {
         fi
     done
     
-    what="${1:-all}"
     if [ "$what" = "7zip" ] || [ "$what" = "all" ]; then
         if [ -d "$p7zip_bin_path" ]; then
             log.info "7zip binary path found at '$p7zip_bin_path'."
@@ -121,7 +133,7 @@ install_dependencies() {
             log.info "Local module installation found at '$local_module_root_path'."
         else
             log.info "Local module installation not found at '$local_module_root_path'. Starting download ..."
-            PATH="$node_bin_path:$PATH" npm install --prefix "$local_module_root_path" "@bird-wp07/local-module"
+            PATH="$node_bin_path:$PATH" npm install --prefix "$local_module_root_path" "@bird-wp07/local-module@$lmver"
         fi
     fi
 }
@@ -129,7 +141,7 @@ install_dependencies() {
 # Builds self-contained tar.xz archive. Used by pipelines.
 build_standalone_bundle() {
     archive_filename="${1:-archive.tar.xz}"
-    install_dependencies
+    install_dependencies all "$(cat VERSION)"
     rm -rf "$dss_root_path/java" # remove embedded java for windows
     
     touch README ./postman.json # HACK: interop with github pipelines
@@ -172,7 +184,7 @@ stop_dss() {
 }
 
 main() {
-    install_dependencies
+    install_dependencies all
     export PATH="$PWD/$node_bin_path:$PATH"
     export WP07_LOCAL_MODULE_PORT=$LOCAL_MODULE_PORT
     export WP07_DSS_BASE_URL="http://127.0.0.1:$DSS_PORT"
