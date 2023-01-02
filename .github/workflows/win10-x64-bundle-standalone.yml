@@ -31,6 +31,8 @@ jobs:
       - name: Install local-module npm package
         working-directory: zip
         run: |
+          echo $env:GITHUB_REF
+          echo $env:GITHUB_REF_NAME
           & .\start.ps1 install-dependencies local-module $env:GITHUB_REF_NAME.substring(1)
 
       - name: Build archive
