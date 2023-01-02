@@ -10,7 +10,7 @@ fi
 
 # TODO: insert npm run test after tests are self-contained (#22)
 
-npm run publish
+npm run publish_npmjs
 package_version="$(cat package.json | jq -r .version)"
 git fetch --tags
 git tag -a "v$package_version" -m "release v$package_version"
