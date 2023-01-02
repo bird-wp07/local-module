@@ -24,7 +24,7 @@ jobs:
       - name: Build archive
         working-directory: zip
         run: |
-          7z a release.zip ".\start.ps1" ".\README" ".\postman.json"
+          7z a release.zip ".\start.ps1" ".\README" ".\postman.json" ".\VERSION"
 
       - name: Configure release title and name of zip file
         working-directory: zip
