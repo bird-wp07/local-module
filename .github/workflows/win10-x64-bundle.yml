@@ -17,6 +17,10 @@ jobs:
           Copy-Item ".\bundle\win10-x64\README" -Destination ".\zip\"
           Copy-Item ".\postman.json" -Destination ".\zip\"
 
+      - name: Create VERSION file
+        working-directory: zip
+        run: Set-Content -Path VERSION -Value $env:GIBHUB_REF_NAME.substring(1)
+
       - name: Build archive
         working-directory: zip
         run: |

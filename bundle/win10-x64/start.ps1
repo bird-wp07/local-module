@@ -112,7 +112,7 @@ function Stop-DSS {
 #
 # The contents of a directory, if it exists, are not further inspected. In
 # order to issue a full re-download of a component delete its directory.
-function Install-Dependencies ($what) {
+function Install-Dependencies ($what, $lmver = "latest") {
     if (($what -eq "node") -or ($what -eq "all")) {
         if (Test-Path -Path $nodeBinPath) {
             Write-Host "Standalone nodejs distribution found at '$nodeBinPath'."
@@ -144,13 +144,14 @@ function Install-Dependencies ($what) {
         else {
             Write-Host "Local module installation not found at '$localModulePath'. Starting download ..."
             # We're using the full path, as the node root hasn't been exported to PATH.
-            Start-Process -FilePath "$nodeBinPath\npm" -ArgumentList "install", "--prefix", $localModulePath, "@bird-wp07/local-module" -Wait
+            Start-Process -FilePath "$nodeBinPath\npm" -ArgumentList "install", "--prefix", $localModulePath, "@bird-wp07/local-module@${lmver}" -Wait
         }
     }
 }
 
 function main {
-    Install-Dependencies all
+    $version = $(Get-Content -Path VERSION)
+    Install-Dependencies all $version
 
     # Prepend the nodejs binary abspath to PATH to guarantee that our installed
     # nodejs is used.
@@ -186,6 +187,6 @@ Set-Location $PSScriptRoot
 Switch ($args[0]) {
     stop-dss { Stop-DSS }
     start-dss { Start-DSS }
-    install-dependencies { Install-Dependencies $args[1] }
+    install-dependencies { Install-Dependencies $args[1] $(Get-Content -Path VERSION) }
     default { main }
 }

@@ -15,9 +15,9 @@ jobs:
           mkdir ./zip
           cp ./bundle/linux-x64/start.sh ./bundle/linux-x64/README ./postman.json ./zip
 
-      - name: Create VERSION file for the non-standalone bundles to download the correct version of the local module from npm
+      - name: Create VERSION file
         working-directory: zip
-        run: echo $GIBHUB_REF_NAME >VERSION
+        run: echo $GIBHUB_REF_NAME | sed 's/^v//' >VERSION
 
       - name: Build archive
         working-directory: zip

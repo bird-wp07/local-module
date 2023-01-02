@@ -141,7 +141,8 @@ install_dependencies() {
 # Builds self-contained tar.xz archive. Used by pipelines.
 build_standalone_bundle() {
     archive_filename="${1:-archive.tar.xz}"
-    install_dependencies all "$(cat VERSION)"
+    lmver="$(cat VERSION)"
+    install_dependencies all $lmver
     rm -rf "$dss_root_path/java" # remove embedded java for windows
     
     touch README ./postman.json # HACK: interop with github pipelines
@@ -184,7 +185,8 @@ stop_dss() {
 }
 
 main() {
-    install_dependencies all
+    lmver="$(cat VERSION)" # shave off leading 'v' from version
+    install_dependencies all $lmver
     export PATH="$PWD/$node_bin_path:$PATH"
     export WP07_LOCAL_MODULE_PORT=$LOCAL_MODULE_PORT
     export WP07_DSS_BASE_URL="http://127.0.0.1:$DSS_PORT"

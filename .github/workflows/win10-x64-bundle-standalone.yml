@@ -8,6 +8,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: main
+      
+      # TODO: Create VERSION file
 
       - name: Set up temporary directory and copy static files
         run: |
@@ -29,7 +31,7 @@ jobs:
       - name: Install local-module npm package
         working-directory: zip
         run: |
-          & .\start.ps1 install-dependencies local-module
+          & .\start.ps1 install-dependencies local-module $env:GITHUB_REF_NAME.substring(1)
 
       - name: Build archive
         working-directory: zip
