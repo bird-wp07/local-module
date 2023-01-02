@@ -19,7 +19,7 @@ jobs:
 
       - name: Create VERSION file
         working-directory: zip
-        run: Set-Content -Path VERSION -Value $env:GIBHUB_REF_NAME.substring(1)
+        run: Set-Content -Path VERSION -Value $env:GITHUB_REF_NAME.substring(1)
 
       - name: Build archive
         working-directory: zip
