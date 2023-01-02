@@ -1,5 +1,8 @@
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   release-linux-x64-stanalone-bundle:
@@ -13,6 +16,10 @@ jobs:
         run: |
           mkdir ./zip
           cp ./bundle/linux-x64/start.sh ./bundle/linux-x64/README ./postman.json ./zip
+
+      - name: Create VERSION file
+        working-directory: zip
+        run: echo $GIBHUB_REF_NAME | sed 's/^v//' >VERSION
 
       - name: Download dependencies and build archive
         working-directory: zip

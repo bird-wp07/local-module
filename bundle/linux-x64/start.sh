@@ -146,7 +146,7 @@ build_standalone_bundle() {
     rm -rf "$dss_root_path/java" # remove embedded java for windows
     
     touch README ./postman.json # HACK: interop with github pipelines
-    tar -cvJf "$archive_filename" "$java_root_path" "$node_root_path" "$p7zip_root_path" "$dss_root_path" "$local_module_root_path" "README" "start.sh" "./postman.json"
+    tar -cvJf "$archive_filename" "$java_root_path" "$node_root_path" "$p7zip_root_path" "$dss_root_path" "$local_module_root_path" "README" "start.sh" "./postman.json" "VERSION"
     log.info "Built standalone archive '$archive_filename'."
 }
 

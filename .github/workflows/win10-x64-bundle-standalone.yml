@@ -1,15 +1,14 @@
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 jobs:
   release-win-x64-standalone-bundle:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: main
-      
-      # TODO: Create VERSION file
 
       - name: Set up temporary directory and copy static files
         run: |
@@ -17,6 +16,10 @@ jobs:
           Copy-Item ".\bundle\win10-x64\start.ps1" -Destination ".\zip\"
           Copy-Item ".\bundle\win10-x64\README" -Destination ".\zip\"
           Copy-Item ".\postman.json" -Destination ".\zip\"
+
+      - name: Create VERSION file
+        working-directory: zip
+        run: Set-Content -Path VERSION -Value $env:GITHUB_REF_NAME.substring(1)
 
       - name: Install standalone dss
         working-directory: zip
@@ -38,7 +41,7 @@ jobs:
       - name: Build archive
         working-directory: zip
         run: |
-          7z a release.zip ".\local-module" ".\dss-demo-bundle-5.11.1" ".\node-v18.12.1-win-x64" ".\start.ps1" ".\README" ".\postman.json"
+          7z a release.zip ".\local-module" ".\dss-demo-bundle-5.11.1" ".\node-v18.12.1-win-x64" ".\start.ps1" ".\README" ".\postman.json" ".\VERSION"
 
       - name: Configure release title and name of zip file
         working-directory: zip
@@ -46,13 +49,10 @@ jobs:
           $localModuleVersion = npm view "@bird-wp07/local-module" version
           $zipFile = "wp07-local-module-win10-x64-standalone-v$localModuleVersion.zip"
           Rename-Item -Path ".\release.zip" -NewName $zipFile
-          Add-Content $env:GITHUB_ENV "RELEASE_TITLE=v$localModuleVersion"
           Add-Content $env:GITHUB_ENV "RELEASE_ZIP_FILENAME=$zipFile"
 
       - name: Release archive
         uses: ncipollo/release-action@v1
         with:
           artifacts: .\zip\${{ env.RELEASE_ZIP_FILENAME }}
-          name: ${{ env.RELEASE_TITLE }}
           allowUpdates: true
-          tag: main
