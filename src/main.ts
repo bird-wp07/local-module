@@ -2,7 +2,6 @@ import * as Settings from "./settings"
 import { logger } from "./settings"
 import * as Dss from "./dss"
 import http from "http"
-import https from "https"
 import { app } from "./server"
 
 let dssClient: Dss.DssClient
@@ -28,19 +27,19 @@ async function main() {
     logger.info("DSS responded. Starting HTTP server ... ")
 
     /* Start our http server. */
-    let protocol = "http"
-    if (settings.localModuleUseHttps) {
-        protocol += "s"
-    }
-    const initCallback = () => {
-        logger.info(`Listening on ${protocol}://${settings.localModuleIp}:${settings.localModulePort}. See '/swagger'.`)
-    }
-    if (settings.localModuleUseHttps) {
-        // NOTE: This code path is currently inactive.
-        https.createServer(app).listen(settings.localModulePort, settings.localModuleIp, initCallback)
-    } else {
-        http.createServer(app).listen(settings.localModulePort, settings.localModuleIp, initCallback)
-    }
+    const split = settings.localModuleBaseUrl.split("://")[1].split(":")
+    const port = Number(split[1])
+    const hostname = split[0]
+    http.createServer(app).listen(port, hostname, () => {
+        logger.info(`Listening on ${settings.localModuleBaseUrl}. See '/swagger'.`)
+
+        /* Send USR1 signal to process waiting for local module to start up.
+         * Used for automated testing. */
+        if (process.env.WP07_LOCAL_MODULE_SIGNAL_PID != undefined) {
+            const pid = Number(process.env.WP07_LOCAL_MODULE_SIGNAL_PID)
+            process.kill(pid, "SIGUSR1")
+        }
+    })
 }
 
 void main()

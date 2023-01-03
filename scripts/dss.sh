@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 cd $(dirname ${0:A:h})
 
-DOCKERFILE_PATH="./docker/dss.Dockerfile" # relative to project root
+DOCKERFILE_PATH="./docker/Dockerfile" # relative to project root
 IMAGE_NAME="wp07-dss"
 
 _die() {
@@ -24,7 +24,7 @@ dss_run() {
         port=8080
     fi
 
-    docker build -t $IMAGE_NAME - < ./docker/dss.Dockerfile
+    docker build -t $IMAGE_NAME - < $DOCKERFILE_PATH
     docker container run $detach -p $port:8080 --rm -t --name "$IMAGE_NAME-$port" $IMAGE_NAME
 }
 
@@ -48,7 +48,7 @@ dss_ls() {
 }
 
 usage() {
-    echo "Control DSS docker containers. Usage:
+    echo "Bootstrap DSS via docker containers. Usage:
     
     \033[32;1m${ZSH_ARGZERO:A:t} run [-d] [HOST_PORT]\033[0m
         Spawns a DSS container exposed at port HOST_PORT (default: 8080).

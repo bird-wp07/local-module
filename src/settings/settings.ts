@@ -5,9 +5,10 @@ import * as Utility from "../utility"
 import { createLogger, transports, format } from "winston"
 import { Errors } from "."
 
-/* Export names of envvars for testing purposes. */
-export const localModulePortEnvvar = "WP07_LOCAL_MODULE_PORT"
-export const dssBaseUrlEnvvar = "WP07_DSS_BASE_URL"
+/* Export names of envvars for testing purposes.
+ */
+export const localModuleBaseUrlEnvvar = "WP07_LOCAL_MODULE_BASEURL"
+export const dssBaseUrlEnvvar = "WP07_DSS_BASEURL"
 
 /* Initialize project-wide logger. */
 export const logger = createLogger({
@@ -31,15 +32,18 @@ export const logger = createLogger({
 })
 
 export interface IApplicationSettings {
-    /* Local module configuration. Parsed from the 'WP07_LOCAL_MODULE_PORT'
-     * envvar. */
-    localModuleUseHttps: boolean // TODO: Remove
-    // TODO: expose ip so that containers can use 0.0.0.0
-    localModuleIp: string // hostname or ip
-    localModulePort: number
+    /* Local module origin. Parsed from the 'WP07_LOCAL_MODULE_BASEURL' envvar.
+     * Never has a trailing slash. */
+    /* NOTE: The local module base url technically specifies the so-called 'origin'
+     *       as opposed to a base url. But we'll refer to it as base url for the
+     *       sake of simplicity. See
+     *           https://developer.mozilla.org/en-US/docs/Web/API/Location
+     */
+    localModuleBaseUrl: string
 
-    /* Base url of the DSS API. Parsed from the 'WP07_DSS_BASE_URL' envvar. */
-    dssBaseUrl: string // always has a trailing slash
+    /* Base url of the DSS API. Parsed from the 'WP07_DSS_BASEURL' envvar.
+     * Never has a trailing slash. */
+    dssBaseUrl: string
 }
 
 export function parseApplicationSettings(env = process.env): Result<IApplicationSettings, Errors.MissingEnvvar | Errors.InvalidEnvvarValue | Error> {
@@ -53,51 +57,41 @@ export function parseApplicationSettings(env = process.env): Result<IApplication
         env = { ...parseRes.value, ...env }
     }
 
-    /* Validate local module settings. */
-    if (env[localModulePortEnvvar] == undefined) {
-        return err(new Errors.MissingEnvvar(localModulePortEnvvar))
-    }
-    const localModulePort = Number(env[localModulePortEnvvar])
-    if (!Utility.isValidPort(localModulePort)) {
-        return err(new Errors.InvalidEnvvarValue(localModulePortEnvvar, env[localModulePortEnvvar]))
-    }
-
-    /* Destructure DSS base url and validate its fields. We assert that
-     * the protocol is http/https and no additional fields outside of
-     * protocol, host and path are specified by the url.
+    /* Destructure base urls and validate their fields. We assert that
+     * the protocol is http and no additional fields outside of
+     * protocol, hostname and port are specified by the url.
      *
      * NOTE: The protocol parsed from a url by the urllib always
      *       contains a trailing colon. */
-    if (env[dssBaseUrlEnvvar] == undefined) {
-        return err(new Errors.MissingEnvvar(dssBaseUrlEnvvar))
-    }
-
-    try {
-        const urlStruct = new url.URL(env[dssBaseUrlEnvvar])
-        if (!["http:", "https:"].includes(urlStruct.protocol)) {
-            return err(new Errors.InvalidEnvvarValue(dssBaseUrlEnvvar, env[dssBaseUrlEnvvar], `Only 'http' and 'https' are supported.`))
-        } else if (urlStruct.port !== "" && !Utility.isValidPort(Number(urlStruct.port))) {
-            /* If the default port for http or https is used, the .port
-             * field is empty. We thus have to process this special case. */
-            return err(new Errors.InvalidEnvvarValue(dssBaseUrlEnvvar, env[dssBaseUrlEnvvar], `Invalid port: '${urlStruct.port}'.`))
-        } else if (urlStruct.username !== "" || urlStruct.password !== "" || urlStruct.search !== "" || urlStruct.hash !== "") {
-            throw new Error()
+    for (const envvar of [dssBaseUrlEnvvar, localModuleBaseUrlEnvvar]) {
+        if (env[envvar] == undefined) {
+            return err(new Errors.MissingEnvvar(envvar))
         }
-    } catch (error: unknown) {
-        return err(new Errors.InvalidEnvvarValue(dssBaseUrlEnvvar, env[dssBaseUrlEnvvar]))
-    }
 
-    /* Append a trailing slash to the base url for consistency. */
-    let dssBaseUrl = env[dssBaseUrlEnvvar]
-    if (!dssBaseUrl.endsWith("/")) {
-        dssBaseUrl += "/"
+        const envvarVal: string = env[envvar]!
+        try {
+            const urlStruct = new url.URL(envvarVal)
+            if ("http:" !== urlStruct.protocol) {
+                return err(new Errors.InvalidEnvvarValue(envvar, envvarVal, "Only 'http' is supported."))
+            } else if (urlStruct.port !== "" && !Utility.isValidPort(Number(urlStruct.port))) {
+                /* If the default port for http (or https) is used, the .port
+                 * field is empty. We thus have to process this special case. */
+                return err(new Errors.InvalidEnvvarValue(envvar, envvarVal, `Invalid port: '${urlStruct.port}'.`))
+            } else if (urlStruct.username !== "" || urlStruct.password !== "" || urlStruct.search !== "" || urlStruct.hash !== "" || urlStruct.pathname !== "/") {
+                return err(new Errors.InvalidEnvvarValue(envvar, envvarVal, "Invalid base url."))
+            }
+        } catch (error: unknown) {
+            return err(new Errors.InvalidEnvvarValue(envvar, envvarVal))
+        }
+
+        if (envvarVal.endsWith("/")) {
+            return err(new Errors.InvalidEnvvarValue(envvar, envvarVal, "Trailing slash not allowed in base url."))
+        }
     }
 
     const result: IApplicationSettings = {
-        localModuleUseHttps: false,
-        localModuleIp: "localhost",
-        localModulePort: localModulePort,
-        dssBaseUrl: env[dssBaseUrlEnvvar]
+        localModuleBaseUrl: env[localModuleBaseUrlEnvvar]!,
+        dssBaseUrl: env[dssBaseUrlEnvvar]!
     }
     return ok(result)
 }

@@ -1,6 +1,6 @@
 {
     "name": "@bird-wp07/local-module",
-    "version": "0.0.41",
+    "version": "0.0.42",
     "license": "",
     "bin": "./bin/start",
     "files": [
@@ -13,8 +13,9 @@
     "main": "dist/main.js",
     "types": "dist/main.d.ts",
     "scripts": {
-        "test": "npm run build && scripts/run_tests.sh",
-        "test:debug": "npm run build && scripts/run_tests.sh -d",
+        "test": "npm run build && npm run test:nobuild",
+        "test:nobuild": "scripts/run-tests.sh",
+        "test:debug": "npm run build && scripts/run-tests.sh -d",
         "build:clean": "rm -rf ./dist ./generated",
         "build:version.ts": "mkdir -p generated && node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > generated/version.ts",
         "build:tsoa": "npx tsoa spec-and-routes",

@@ -164,8 +164,8 @@ function main {
         Start-DSS
 
         # Start the local module's http server.
-        $env:WP07_LOCAL_MODULE_PORT = $LOCAL_MODULE_PORT
-        $env:WP07_DSS_BASE_URL = "http://127.0.0.1:$DSS_PORT"
+        $env:WP07_LOCAL_MODULE_BASEURL = "http://127.0.0.1:$LOCAL_MODULE_PORT"
+        $env:WP07_DSS_BASEURL = "http://127.0.0.1:$DSS_PORT"
         Push-Location $localModulePath
         npx "@bird-wp07/local-module"
         Pop-Location

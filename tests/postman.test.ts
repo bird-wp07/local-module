@@ -4,7 +4,7 @@ import newman from "newman"
 import { waitFor } from "wait-for-event"
 import collection from "../postman.json"
 
-const localModuleBaseUrl = process.env.LOCAL_MODULE_BASEURL ?? "http://localhost:2048"
+const localModuleBaseUrl = process.env.WP07_LOCAL_MODULE_BASEURL ?? "http://localhost:2048"
 
 describe("Postman", () => {
     test("Published collection successfully executes", async () => {
