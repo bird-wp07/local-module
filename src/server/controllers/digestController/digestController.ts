@@ -36,6 +36,10 @@ export class DigestController extends Controller {
 
     @Post("pdf")
     public async DigestPDF(@Body() request: IDigestPDFRequest): Promise<IDigestPDFResponse> {
-        return await new DigestFacade(dssClient).digestPDF(request)
+        const res = await new DigestFacade(dssClient).digestPDF(request)
+        if (res.isErr()) {
+            throw res.error
+        }
+        return res.value
     }
 }

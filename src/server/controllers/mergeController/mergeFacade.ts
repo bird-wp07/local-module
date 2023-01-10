@@ -1,5 +1,6 @@
+import { ok, err, Result } from "neverthrow"
 import { DssClient } from "../../../dss"
-import { convert, DSSParams } from "../../../utility"
+import { convert, ISignDocumentRequest } from "../../../utility"
 import { IMergePDFRequest, IMergePDFResponse } from "../types"
 
 export class MergeFacade {
@@ -8,20 +9,20 @@ export class MergeFacade {
         this.dssClient = dssClient
     }
 
-    public async mergePDF(body: IMergePDFRequest): Promise<IMergePDFResponse> {
+    public async mergePDF(body: IMergePDFRequest): Promise<Result<IMergePDFResponse, Error>> {
         const convertedCMS = convert(body.signatureAsCMS)
-        const requestData: DSSParams = convertedCMS.dssParams
+        const requestData: ISignDocumentRequest = convertedCMS.dssParams
         requestData.toSignDocument = {
             bytes: body.bytes
         }
         requestData.parameters.blevelParams = {
             signingDate: body.signingTimestamp
         }
-        const signDataRes = await this.dssClient.signData(requestData)
-        if (signDataRes.isErr()) {
-            throw signDataRes.error
+        const signDocumentRes = await this.dssClient.signDocument(requestData)
+        if (signDocumentRes.isErr()) {
+            return err(signDocumentRes.error)
         }
-        const response: IMergePDFResponse = { bytes: signDataRes.value.bytes }
-        return response
+        const result: IMergePDFResponse = { bytes: signDocumentRes.value.bytes }
+        return ok(result)
     }
 }

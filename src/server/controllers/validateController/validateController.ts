@@ -22,6 +22,10 @@ export class ValidateController extends Controller {
      */
     @Post("pdf")
     public async validateSignedPdf(@Body() body: IValidateSignedPdfRequest): Promise<IValidateSignedPdfResponse> {
-        return await new ValidateFacade(dssClient).validateSignature(body)
+        const res = await new ValidateFacade(dssClient).validateSignature(body)
+        if (res.isErr()) {
+            throw res.error
+        }
+        return res.value
     }
 }

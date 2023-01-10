@@ -3,6 +3,8 @@ export enum EDssErrorCode {
     UNEXPECTED_RESPONSE = "UNEXPECTED_RESPONSE",
     DESERIALIZATION_ERROR = "DESERIALIZATION_ERROR",
     UNEXPECTED_INPUT = "UNEXPECTED_INPUT",
+    CERTIFICATE_NOT_YET_VALID = "CERTIFICATE_NOT_YET_VALID",
+    CERTIFICATE_EXPIRED = "CERTIFICATE_EXPIRED",
     UNHANDLED_ERROR = "UNHANDLED_ERROR"
 }
 
@@ -46,11 +48,37 @@ export class UnexpectedInput extends DssError {
 }
 
 /**
+ * Error indicating a not-yet-valid certificate. May be caused by attempting to
+ * merge a signature with a document using a timestamp that's outside the
+ * temporal scope of the certificate.
+ */
+export class CertificateNotYetValid extends DssError {
+    public constructor(msg?: string) {
+        super(msg ?? "Certificate is not yet valid.", EDssErrorCode.CERTIFICATE_NOT_YET_VALID)
+    }
+}
+
+/**
+ *  Error indicating an expired certificate. May be caused by attempting to
+ * merge a signature with a document using a timestamp that's outside the
+ * temporal scope of the certificate.
+ */
+export class CertificateExpired extends DssError {
+    public constructor(msg?: string) {
+        super(msg ?? "Certificate expired.", EDssErrorCode.CERTIFICATE_NOT_YET_VALID)
+    }
+}
+
+/**
  * Placeholder / fallback error; Occurrence of this error indicates incomplete
  * code paths.
  */
 export class UnhandledError extends DssError {
-    public constructor() {
-        super("Unhandled error", EDssErrorCode.UNHANDLED_ERROR)
+    public constructor(err?: any) {
+        if (err !== undefined) {
+            super(`Unhandled error: ${JSON.stringify(err)}`, EDssErrorCode.UNHANDLED_ERROR)
+        } else {
+            super("Unhandled error", EDssErrorCode.UNHANDLED_ERROR)
+        }
     }
 }

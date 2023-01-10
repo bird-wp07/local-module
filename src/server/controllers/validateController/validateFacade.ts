@@ -1,3 +1,4 @@
+import { ok, err, Result } from "neverthrow"
 import { DssClient, ESignatureValidationIndication, IValidateSignatureRequest } from "../../../dss"
 import { IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "../types"
 
@@ -7,7 +8,7 @@ export class ValidateFacade {
         this.dssClient = dssClient
     }
 
-    public async validateSignature(request: IValidateSignedPdfRequest): Promise<IValidateSignedPdfResponse> {
+    public async validateSignature(request: IValidateSignedPdfRequest): Promise<Result<IValidateSignedPdfResponse, Error>> {
         const dssRequest: IValidateSignatureRequest = {
             signedDocument: {
                 bytes: request.bytes,
@@ -19,7 +20,7 @@ export class ValidateFacade {
         }
         const response = await this.dssClient.validateSignature(dssRequest)
         if (response.isErr()) {
-            throw response.error
+            return err(response.error)
         }
 
         let result: IValidateSignedPdfResponse
@@ -41,6 +42,6 @@ export class ValidateFacade {
             throw new Error("Multiple signatures not yet supported.")
         }
 
-        return result
+        return ok(result)
     }
 }

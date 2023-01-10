@@ -13,15 +13,16 @@ describe("Digest Facade", () => {
     })
 
     describe("/digest/pdf", () => {
-        test(`get the SHA256 hash of a valid pdf`, async () => {
-            const bytes = fs.readFileSync(`./assets/unsigned.pdf`)
+        // TODOC: What's a 'valid pdf'?
+        test("get the SHA256 hash of a valid pdf", async () => {
+            const bytes = fs.readFileSync("./assets/unsigned.pdf")
             const request: IDigestPDFRequest = {
                 bytes: bytes.toString("base64"),
                 digestAlgorithm: Dss.EDigestAlgorithm.SHA256,
                 signingTimestamp: 1670594222000
             }
             const response = await new service.DigestFacade(dssClient).digestPDF(request) // TODO: DI
-            const have = response.digest
+            const have = response._unsafeUnwrap().digest
             const want = "LKzqH/84VwE6BA10+ynTrB7jjNAliRRo7I2BUCukMXU="
             expect(have).to.equal(want)
         })

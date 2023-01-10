@@ -4,7 +4,7 @@ import { AxiosError, AxiosRequestConfig } from "axios"
 import * as Utility from "../utility"
 import { IGetDataToSignRequest, IGetDataToSignResponse, ISignDataResponse, IValidateSignatureRequest, IValidateSignatureResponse } from "./types"
 import { Base64 } from "./types"
-import { DSSParams } from "../utility"
+import { ISignDocumentRequest } from "../utility"
 import * as Dss from "."
 
 // TODO: makeDssClient()
@@ -65,7 +65,7 @@ export class DssClient {
         return ok(response.value.data)
     }
 
-    public async signData(request: DSSParams): Promise<Result<ISignDataResponse, Error>> {
+    public async signDocument(request: ISignDocumentRequest): Promise<Result<ISignDataResponse, Error>> {
         const config: AxiosRequestConfig = {
             method: "POST",
             url: "/services/rest/signature/one-document/signDocument",
@@ -116,9 +116,19 @@ export class DssClient {
                 if (dssErrorMsg.startsWith("java.io.IOException: Error: End-of-File, expected line")) {
                     return new Dss.Errors.UnexpectedInput()
                 }
+
+                let match = dssErrorMsg.match(/^The signing certificate \(notBefore : ([^,]+), notAfter : ([^)]+)\) is not yet valid at signing time ([^!]+)!/)
+                if (match != null && match.length === 4) {
+                    return new Dss.Errors.CertificateNotYetValid(`Certificate (valid from '${match[1]}' to '${match[2]}') is not yet valid at signing time '${match[3]}'.`)
+                }
+
+                match = dssErrorMsg.match(/^The signing certificate \(notBefore : ([^,]+), notAfter : ([^)]+)\) is expired at signing time ([^!]+)!/)
+                if (match != null && match.length === 4) {
+                    return new Dss.Errors.CertificateExpired(`Certificate (valid from '${match[1]}' to '${match[2]}') is expired at signing time '${match[3]}'.`)
+                }
             }
         }
-        return new Dss.Errors.UnhandledError()
+        return new Dss.Errors.UnhandledError(err)
     }
 }
 

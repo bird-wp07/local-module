@@ -18,7 +18,7 @@ RegisterRoutes(app)
  * Error handling. All errors yield a json response with a string code and an
  * error message providing more detail.
  */
-app.use(function errorHandler(err: unknown, req: ExRequest, res: ExResponse, next: NextFunction): ExResponse | void {
+app.use(function errorHandler(err: unknown, req: ExRequest, res: ExResponse, next: NextFunction): ExResponse | any {
     /* Syntax errors arise if we're given invalid json bodies. */
     if (err instanceof SyntaxError && (err as any).type === "entity.parse.failed") {
         logger.debug(`Caught syntax error for ${req.path}`)

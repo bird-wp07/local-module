@@ -10,18 +10,18 @@ import { Base64 } from "../types/common"
 
 export interface ICms2DssResponse {
     cmsContent: ICmsContent
-    dssParams: DSSParams
+    dssParams: ISignDocumentRequest
 }
 
-export interface DSSCert {
+export interface IDssCert {
     encodedCertificate: string
 }
 
-export interface DSSBLevelParams {
+export interface IDssBLevelParams {
     signingDate: number
 }
 
-export interface DSSSigningParams {
+export interface IDssSigningParams {
     signWithExpiredCertificate: false
     generateTBSWithoutCertificate: false
     signatureLevel: Dss.ESignatureLevel
@@ -29,21 +29,21 @@ export interface DSSSigningParams {
     signatureAlgorithm?: Dss.ESignatureAlgorithm
     encryptionAlgorithm?: Dss.EEncryptionAlgorithm
     digestAlgorithm: Dss.EDigestAlgorithm
-    signingCertificate: DSSCert
-    certificateChain: DSSCert[]
-    blevelParams?: DSSBLevelParams
+    signingCertificate: IDssCert
+    certificateChain: IDssCert[]
+    blevelParams?: IDssBLevelParams
 }
-export interface DSSSignatureValue {
+export interface IDssSignatureValue {
     algorithm: Dss.ESignatureAlgorithm
     value: string
 }
 
-export interface DSSParams {
+export interface ISignDocumentRequest {
     toSignDocument?: {
         bytes: Base64
     }
-    parameters: DSSSigningParams
-    signatureValue: DSSSignatureValue
+    parameters: IDssSigningParams
+    signatureValue: IDssSignatureValue
 }
 
 export interface ICmsContent {
@@ -116,7 +116,7 @@ export function convert(base64OfCMS: string): ICms2DssResponse {
     cms.certificates?.forEach((value: any) => {
         certificates.push(Buffer.from(AsnSerializer.serialize(value)).toString("base64"))
     })
-    const dssCertificateChain: DSSCert[] = []
+    const dssCertificateChain: IDssCert[] = []
     certificates.forEach((value: string) => {
         dssCertificateChain.push({
             encodedCertificate: value

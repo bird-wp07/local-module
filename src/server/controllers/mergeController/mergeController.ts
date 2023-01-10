@@ -7,7 +7,10 @@ import { MergeFacade } from "./mergeFacade"
 export class MergeController extends Controller {
     @Post("pdf")
     public async MergePDF(@Body() request: IMergePDFRequest): Promise<IMergePDFResponse> {
-        // FIXME: Bogus implementation
-        return await new MergeFacade(dssClient).mergePDF(request)
+        const res = await new MergeFacade(dssClient).mergePDF(request)
+        if (res.isErr()) {
+            throw res.error
+        }
+        return res.value
     }
 }

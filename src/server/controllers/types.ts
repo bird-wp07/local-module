@@ -18,7 +18,7 @@ export interface IDigestBlobResponse {
 export interface IDigestPDFRequest {
     digestAlgorithm: EDigestAlgorithm
     bytes: Base64
-    signingTimestamp?: number // TODOC: What time format is this?
+    signingTimestamp?: number // unix ms
 }
 
 export interface IDigestPDFResponse {
