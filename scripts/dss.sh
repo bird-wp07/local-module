@@ -11,7 +11,7 @@ _die() {
 
 dss_run() {
     if [[ "$1" == "-d" ]]; then
-        detach="-d"
+        detach="d"
         shift
     fi
     
@@ -25,7 +25,7 @@ dss_run() {
     fi
 
     docker build -t $IMAGE_NAME - < $DOCKERFILE_PATH
-    docker run -it $detach -p $port:8080 --rm -t --name "$IMAGE_NAME-$port" $IMAGE_NAME
+    docker run -it${detach} -p $port:8080 --rm --name "$IMAGE_NAME-$port" $IMAGE_NAME
 }
 
 dss_stop() {
