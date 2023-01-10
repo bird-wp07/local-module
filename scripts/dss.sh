@@ -25,7 +25,7 @@ dss_run() {
     fi
 
     docker build -t $IMAGE_NAME - < $DOCKERFILE_PATH
-    docker container run -it $detach -p $port:8080 --rm -t --name "$IMAGE_NAME-$port" $IMAGE_NAME
+    docker run -it $detach -p $port:8080 --rm -t --name "$IMAGE_NAME-$port" $IMAGE_NAME
 }
 
 dss_stop() {
