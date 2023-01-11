@@ -9,7 +9,7 @@ Package version is determined from package.json. Implicitly publishes to npm.'
     exit 0
 fi
 
-./scripts/run-tests-selfcontained.sh # run tests prior to publishing
+npm run test0 # run tests prior to publishing
 npm run publish_npmjs
 package_version="$(cat package.json | jq -r .version)"
 git fetch --tags
