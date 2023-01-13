@@ -19,7 +19,7 @@ jobs:
         working-directory: zip
         run: |
           echo $GIBHUB_REF_NAME | sed 's/^v//' >VERSION 
-          echo 'GITHUB_REF_NAME=$GITHUB_REF_NAME'
+          echo GITHUB_REF_NAME=$GITHUB_REF_NAME
 
       - name: Build archive
         working-directory: zip
