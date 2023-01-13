@@ -1,0 +1,6 @@
+!include commons.iuml
+'skinparam monochrome true
+skinparam ParticipantPadding 20
+skinparam BoxPadding 20
+'autoactivate on
+hide footbox

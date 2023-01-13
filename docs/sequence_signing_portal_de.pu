@@ -1,0 +1,75 @@
+@startuml sequence_signing_portal_de
+!include .plantuml/skins/sequence_diagram.iuml
+
+title Sequenzdiagramm Signieren von Digitalen Nachweise über Landesportal
+
+autonumber
+
+box "Bildungseinrichtung"
+    participant "Einrichtungssoftware" as software
+    participant "Lokales Modul" as local_module
+end box
+
+box "Landesautorität"
+    participant "Landesportal" as authority
+end box
+
+box "Zentraler Service"
+    participant "Signaturdienst" as signer
+end box
+
+
+box "Dritte"
+    participant "Lokales Modul" as local_module_verifier
+    participant "Software Dritter" as verifier
+end box
+
+== Vorbedingungen ==
+
+software <--> authority: Vertrauenswürdige Beziehung, Authentifizierung und Autorisierung des Personals
+authority <--> signer: Vertrauenswürdige Beziehung, Authentifizierung und Autorisierung der Einrichtung
+signer <-- verifier: Vertraut Signaturdienst, Anonymer Zugriff
+
+== Signieren ==
+
+-> software ++: PDF signieren
+software -> software: Lokalen Zeitstempel bestimmen
+software -> local_module ++: Unsigniertes PDF hashen\n/digest/PDF (PDF, Zeitstempel)
+local_module --> software --: Hash des Dokumentes (Base64)
+software -> authority ++: Hash für Einrichtung signieren\n(Hash, Personal Authentifizierung)
+authority --> authority: Überprüfen des Lehrpersonals
+authority --> authority: Überprüfen der Einrichtung
+authority -> signer ++: Hash für Einrichtung signieren\n(Hash, Einrichtung, Zertifikat, ggf. Audit-Informationen)
+signer -> signer: Audit-Log
+signer -> signer: Signieren des Hashes mittels\nprivaten Schlüssel der Einrichtung
+signer --> authority --: Digitale Signatur für Hash
+authority --> software --: Digitale Signatur für Hash
+software -> local_module ++: Unsigniertes PDF mit\nder digitalen Signatur zusammenführen\n/merge/PDF (PDF, Zeitstempel, Signatur)
+local_module --> software --: Signiertes PDF (Base64)
+<-- software --: PDF zurückgeben
+
+== Validieren (Lokales Modul der Bildungseinrichtung) ==
+
+-> software ++: PDF validieren
+software -> local_module ++: PDF validieren\n/validate/PDF (PDF)
+local_module -> local_module: PDF Signatur und Vertrauenskette überprüfen
+local_module -> local_module: Signatur herauslesen,\nSignaturhash bilden
+local_module -> signer ++: Einzelne Signatur abfragen (Hash der Signatur)
+signer --> local_module --: Status der Signatur (Valide oder nicht)
+local_module --> software --: PDF Validierungsstatus
+<-- software --: PDF Validierungsstatus\nzurückgeben
+
+== Validieren (Lokales Modul von Dritten) ==
+
+verifier <- ++: PDF validieren
+verifier -> local_module_verifier ++: PDF validieren\n/validate/PDF (PDF)
+local_module_verifier -> local_module_verifier: PDF Signatur und Vertrauenskette überprüfen
+local_module_verifier -> local_module_verifier: Signatur herauslesen,\nSignaturhash bilden
+local_module_verifier -> signer ++: Einzelne Signatur abfragen (Hash der Signatur)
+signer --> local_module_verifier --: Status der Signatur (Valide oder nicht)
+local_module_verifier --> verifier --: PDF Validierungsstatus
+verifier --> --: PDF Validierungsstatus\nzurückgeben
+
+
+
+@enduml
