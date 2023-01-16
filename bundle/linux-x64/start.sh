@@ -30,10 +30,10 @@ p7zip_archive_filename="7z2201-linux-x64.tar.xz"
 
 # Path of the dss root directory extracted from the archive. Contains, among
 # other files, the 'Webapp-Startup.bat' and 'Webapp-Shutdown.bat' batch files.
-dss_root_path="dss-demo-bundle-5.11.1"
+dss_root_path="dss-demo-bundle-5.11"
 
-dss_url="https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip"
-dss_archive_filename="dss-standalone-v5.11.1.zip"
+dss_url="https://github.com/bird-wp07/dss-demonstrations/releases/download/5.11/dss-demo-bundle-5.11.zip"
+dss_archive_filename="dss-standalone-v5.11.zip"
 
 # Path of the local module installed via
 #
@@ -185,7 +185,7 @@ stop_dss() {
 }
 
 main() {
-    lmver="$(cat VERSION)" # shave off leading 'v' from version
+    lmver="$(cat VERSION)"
     install_dependencies all $lmver
     export PATH="$PWD/$node_bin_path:$PATH"
     export WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:$LOCAL_MODULE_PORT"

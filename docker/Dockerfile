@@ -6,9 +6,9 @@ RUN apt install -y curl zsh bash p7zip-full xz-utils default-jre
 # it contains shell scripts to start and stop the http server, which work well
 # enough for our purpose. DSS uses port 8080 by default.
 WORKDIR /root
-RUN curl -Lo "./dss-demo-bundle-5.11.1.zip" "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip"
-RUN 7z x -y "./dss-demo-bundle-5.11.1.zip" \
-    && rm -r "./dss-demo-bundle-5.11.1/java"
+RUN curl -Lo "./dss-demo-bundle-5.11.zip" "https://github.com/bird-wp07/dss-demonstrations/releases/download/5.11/dss-demo-bundle-5.11.zip"
+RUN 7z x -y "./dss-demo-bundle-5.11.zip" \
+    && rm -r "./dss-demo-bundle-5.11/java"
 EXPOSE 8080
 
 # Download and extract portable node. This is used to run the local module and
@@ -19,4 +19,4 @@ RUN tar -xvf "node.tar.xz"
 ENV PATH="/root/node-v18.12.1-linux-x64/bin:$PATH"
 
 # Start DSS by default.
-CMD bash ./dss-demo-bundle-5.11.1/apache-tomcat-8.5.82/bin/catalina.sh run
+CMD bash ./dss-demo-bundle-5.11/apache-tomcat-8.5.82/bin/catalina.sh run

@@ -45,7 +45,7 @@ run_tests() {
     export WP07_LOCAL_MODULE_BASEURL=http://127.0.0.1:2048
     export WP07_LOCAL_MODULE_SIGNAL_PID=$$
 
-    bash ./dss-demo-bundle-5.11.1/apache-tomcat-8.5.82/bin/catalina.sh run >/dev/null 2>&1 &
+    bash ./dss-demo-bundle-5.11/apache-tomcat-8.5.82/bin/catalina.sh run >/dev/null 2>&1 &
     npm install
     npm run start &
 

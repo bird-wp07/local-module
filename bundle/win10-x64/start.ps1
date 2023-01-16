@@ -14,7 +14,7 @@ $nodeBinPath = ".\node-v18.12.1-win-x64"
 
 # Path of the dss root directory extracted from the archive. Contains, among
 # other files, the 'Webapp-Startup.bat' and 'Webapp-Shutdown.bat' batch files.
-$dssRootPath = ".\dss-demo-bundle-5.11.1"
+$dssRootPath = ".\dss-demo-bundle-5.11"
 
 # Path of the local module installed via
 #
@@ -29,8 +29,8 @@ $serverConfigPath = "$dssRootPath\apache-tomcat-8.5.82\conf\server.xml"
 # Downloads
 $nodeUrl = "https://nodejs.org/dist/v18.12.1/node-v18.12.1-win-x64.zip"
 $nodeZipFileName = ".\node-standalone-v18.12.1-win-x64.zip"
-$dssUrl = "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip"
-$dssZipFileName = ".\dss-standalone-v5.11.1.zip"
+$dssUrl = "https://github.com/bird-wp07/dss-demonstrations/releases/download/5.11/dss-demo-bundle-5.11.zip"
+$dssZipFileName = ".\dss-standalone-v5.11.zip"
 
 # Control the [x] button of the Powershell window, in order to guarantee cleanup. See
 #
@@ -97,7 +97,7 @@ function Start-DSS {
 # boot sequence.
 function Stop-DSS {
     $query = ( "Select * from win32_Process where " +
-        "(ExecutablePath like '%dss-demo-bundle-5.11.1\\java\\bin\\java.exe') and " +
+        "(ExecutablePath like '%dss-demo-bundle-5.11\\java\\bin\\java.exe') and " +
         "(CommandLine like '%org.apache.catalina.startup.Bootstrap%')" )
     $results = Get-WmiObject -Query $query
     foreach ($result in $results) {

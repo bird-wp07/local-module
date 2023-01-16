@@ -56,10 +56,11 @@ describe("Digest, Sign, Merge, Verify", () => {
         const validationResult = await new service.ValidateFacade(dssClient).validateSignature(validateSignatureRequest)
         expect(validationResult.isErr()).to.be.false
         const have = validationResult._unsafeUnwrap()
-        // COMBAK: Adjust the result and reason once the DSS keystore knows about the cs certificate.
+        // COMBAK: Adjust result and reason once the cs root certificate's metadata is complete.
+        //         See #27
         const want: IValidateSignedPdfResponse = {
             result: Dss.ESignatureValidationIndication.INDETERMINATE,
-            reason: Dss.ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
+            reason: Dss.ESignatureValidationSubIndication.TRY_LATER
         }
         expect(have).to.deep.equal(want)
     })
