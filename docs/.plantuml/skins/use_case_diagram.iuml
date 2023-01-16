@@ -1,0 +1,14 @@
+!include commons.iuml
+left to right direction
+skinparam usecase {
+	BackgroundColor White
+	BorderColor Black
+    ArrowColor Black
+	BackgroundColor<< HighPriority >> Salmon
+	BorderColor<< HighPriority >> Salmon
+}
+skinparam actor {
+	BackgroundColor White
+	BorderColor Black
+}
+hide << HighPriority >> stereotypes

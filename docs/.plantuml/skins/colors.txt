@@ -1,0 +1,29 @@
+White       #ffffff     255,255,255
+Light Blue  #e2f3fe     226,243,254
+Blue        #38a8e0     56,168,224
+Dark Blue   #29235c     41,35,92
+Orange      #f9b233     249,178,51
+Grey        #b2b2b2     178,178,178
+
+Headlines   Quicksand Bold
+Body        Quicksand Regular
+
+
+Red         #c42021     196,32,33
+Green       #417B5a     65,123,90
+Dark Green  #45462A     69,70,42
+Tarn        #788475     120,132,117
+Brown       #8A716A     138,113,106
+Brown2      #7e5920     126,89,32
+Beige       #EEE1B3     238,225,179
+
+
+
+Grey        #b2b2b2
+Blue        #38a8e0
+Light Blue  #e2f3fe
+Red         #f6f3b8
+Green       #d4fcdf
+Yellow      #ffecb5
+Violet      #ad8cde
+Light Brown #c5b5aa
