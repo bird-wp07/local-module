@@ -96,7 +96,7 @@ Die Applikation kann durch wiederholte Eingabe der Tastenkombination Ctrl-C im P
    ./start.sh
    ```
 
-5. Beenden des Lokalen Moduls durch saubere Terminierung des das Startupskript ausführenden Prozesses, z.B. durch die Tastenkombination Ctrl-C im entsprechenden Terminal, durch Schließen des Terminalfensters oder durch manuelles Senden des Signals `kill -SIGINT <PID>`. Hierbei werden alle Hintergrunddienste ebenfalls beenden.
+5. Beenden des Lokalen Moduls durch saubere Terminierung des das Startupskript ausführenden Prozesses, z.B. durch die Tastenkombination Ctrl-C im entsprechenden Terminal, durch Schließen des Terminalfensters oder durch manuelles Senden des Signals `kill -SIGINT <PID>`. Hierbei werden alle gestarteten Hintergrunddienste beendet.
 
 ## 2.4 Sicherheit
 
