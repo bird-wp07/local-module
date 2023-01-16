@@ -22,7 +22,7 @@
         "build:tsoa": "npx tsoa spec-and-routes",
         "build": "npm run build:clean && npm run build:version.ts && npm run build:tsoa && npx tsc -p ./tsconfig.json",
         "start": "npm run build && node ./dist/src/main.js",
-        "start:debug": "npm run build && NOTE_OPTIONS=--inspect-brk node ./dist/src/main.js",
+        "start:debug": "npm run build && NODE_OPTIONS=--inspect-brk node ./dist/src/main.js",
         "lint": "npm run build && npx eslint 'src/**/*.ts' 'tests/**/*.ts'",
         "publish_npmjs": "npm run build && npm publish",
         "release": "./scripts/release.sh"
