@@ -67,7 +67,7 @@ app.use(function errorHandler(err: unknown, req: ExRequest, res: ExResponse, nex
         logger.error(`Caught unhandled error for ${req.path}.`)
         return res.status(500).json({
             code: "SYS_UNHANDLED_ERROR",
-            message: "Unhandled error"
+            message: `Unhandled error: ${JSON.stringify(err)}`
         })
     }
 
