@@ -17,7 +17,7 @@ jobs:
 
       - name: Create VERSION file
         working-directory: zip
-        run: echo $GIBHUB_REF_NAME | sed 's/^v//' >VERSION
+        run: echo $GITHUB_REF_NAME | sed 's/^v//' >VERSION
 
       - name: Download dependencies and build archive
         working-directory: zip
