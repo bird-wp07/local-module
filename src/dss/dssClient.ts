@@ -117,6 +117,10 @@ export class DssClient {
                     return new Dss.Errors.UnexpectedInput()
                 }
 
+                if (dssErrorMsg.startsWith("The document cannot be modified!")) {
+                    return new Dss.Errors.DocumentCannotBeModified()
+                }
+
                 let match = dssErrorMsg.match(/^The signing certificate \(notBefore : ([^,]+), notAfter : ([^)]+)\) is not yet valid at signing time ([^!]+)!/)
                 if (match != null && match.length === 4) {
                     return new Dss.Errors.CertificateNotYetValid(`Certificate (valid from '${match[1]}' to '${match[2]}') is not yet valid at signing time '${match[3]}'.`)
