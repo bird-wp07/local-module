@@ -1,3 +1,4 @@
 enable-source-maps: true
 bail: true
 timeout: "3600000"
+slow: "8000"
