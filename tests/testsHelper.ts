@@ -1,5 +1,6 @@
 import * as Cs from "../src/cs"
 import * as Dss from "../src/dss"
+import { httpReq } from "../src/utility"
 
 /**
  * Creates a Cs.CsClient and calls #isOnline(), throwing in case of failure.
@@ -25,4 +26,17 @@ export async function makeDssClient(): Promise<Dss.DssClient> {
         throw new Error(`DSS cannot be reached at '${dssClient.baseUrl}'.`)
     }
     return dssClient
+}
+
+export async function findLm(): Promise<string> {
+    const lmBaseUrl = process.env.WP07_LM_BASEURL ?? "http://127.0.0.1:2048"
+    const res = await httpReq({
+        method: "GET",
+        baseURL: lmBaseUrl,
+        url: "/system/health"
+    })
+    if (res.isErr()) {
+        throw new Error(`Local Module cannot be reached at '${lmBaseUrl}'.`)
+    }
+    return lmBaseUrl
 }
