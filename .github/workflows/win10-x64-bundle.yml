@@ -18,7 +18,7 @@ jobs:
           Copy-Item ".\postman.json" -Destination ".\zip\"
 
       - name: Compile README.md to README.html
-      - uses: docker://pandoc/core:2.19
+        uses: docker://pandoc/core:2.19
         with:
           args: "--standalone --embed-resources --output .\\zip\\README.html" # gets appended to pandoc command
 
