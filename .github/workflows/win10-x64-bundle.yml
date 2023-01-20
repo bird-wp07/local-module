@@ -14,8 +14,8 @@ jobs:
         run: |
           New-Item -Path . -Name ".\zip\" -ItemType "directory"
           Copy-Item ".\bundle\win10-x64\start.ps1" -Destination ".\zip\"
+          Copy-Item ".\bundle\win10-x64\CONFIG" -Destination ".\zip\"
           Copy-Item ".\postman.json" -Destination ".\zip\"
-          Copy-Item ".\CONFIG" -Destination ".\zip\"
 
       - name: Compile README.md to README.html
       - uses: docker://pandoc/core:2.9

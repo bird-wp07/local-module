@@ -16,7 +16,7 @@ jobs:
           cp ./bundle/linux-x64/start.sh ./postman.json ./zip
 
       - name: Compile README.md to README.html
-      - uses: docker://pandoc/core:2.9
+        uses: docker://pandoc/core:2.9
         with:
           args: "--standalone --embed-resources --output ./zip/README.html" # gets appended to pandoc command
 
