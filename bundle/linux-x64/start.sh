@@ -20,7 +20,7 @@ node_url="https://nodejs.org/dist/v18.12.1/node-v18.12.1-linux-x64.tar.xz"
 node_archive_filename="node-standalone-v18.12.1-linux-x64.tar.xz"
 
 java_root_path="jdk-19.0.1"
-java_url="https://download.oracle.com/java/19/latest/jdk-19_linux-x64_bin.tar.gz"
+java_url="https://download.oracle.com/java/19/archive/jdk-19.0.1_linux-x64_bin.tar.gz"
 java_archive_filename="jdk-19_linux-x64_bin.tar.gz"
 
 p7zip_root_path="7z"
