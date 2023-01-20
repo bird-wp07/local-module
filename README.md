@@ -64,8 +64,7 @@ abgesetzt werden, wobei <BASIS_PFAD> den Pfad zur 'start.ps1' Datei vom Arbeitsv
 
 #### 2.2.1.3 Konfiguration
 
-Die Ports des lokalen Moduls, sowie des im Hintergrund laufenden DSS Servers können über die Kopfzeilen der Datei 'start.ps1' selbst konfiguriert werden, falls Kollisionen mit belegten Ports auftreten sollten.
-
+Die Ports des lokalen Moduls, sowie des im Hintergrund laufenden DSS Servers können über die beiligende Datei *CONFIG* konfiguriert werden, falls Kollisionen mit belegten Ports auftreten sollten.
 
 #### 2.2.1.4 Start
 
@@ -77,7 +76,7 @@ Die Applikation kann durch wiederholte Eingabe der Tastenkombination Ctrl-C im P
 
 ### 2.2.2 Ausführung durch Doppelklick der start.exe
 
-Das Windowsbundle des Lokalen Moduls liefert die gewöhnliche ausführbare Datei *start.exe* aus, welche alternativ zum Powershellskript verwendet werden kann. Das Vorgehen zur Konfiguration und Beendigung des Programms entspricht dem des Powershellskriptes.
+Das Windowsbundle des Lokalen Moduls liefert die gewöhnliche ausführbare Datei *start.exe* aus, welche alternativ zum Powershellskript verwendet werden kann. Das Vorgehen zur Konfiguration und Beendigung des Programms entspricht dem des Powershellskriptes. Meldungen des Windows Defender können auch hier ignoriert werden.
 
 Leider markiert der Windows Antivirus (und möglicherweise auch andere Antivirussoftware) die Datei fälschlicherweise als Malware und verweigert ihre Ausführung. Daher kann es erforderlich sein, die *start.exe* nach dem Entpacken des Archivs in die entsprechende Whitelist aufzunehmen. Der Ablauf hierfür ist nachfolgend beispielhaft für Windows 11 dargestellt:
 

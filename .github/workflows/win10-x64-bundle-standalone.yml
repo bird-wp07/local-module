@@ -16,6 +16,7 @@ jobs:
           Copy-Item ".\bundle\win10-x64\start.ps1" -Destination ".\zip\"
           Copy-Item ".\bundle\win10-x64\README" -Destination ".\zip\"
           Copy-Item ".\postman.json" -Destination ".\zip\"
+          Copy-Item ".\CONFIG" -Destination ".\zip\"
 
       - name: Compile .exe from pwsh script
         shell: powershell
@@ -49,7 +50,7 @@ jobs:
       - name: Build archive
         working-directory: zip
         run: |
-          7z a release.zip ".\local-module" ".\dss-demo-bundle-5.11" ".\node-v18.12.1-win-x64" ".\start.ps1" ".\start.exe" ".\README" ".\postman.json" ".\VERSION"
+          7z a release.zip ".\local-module" ".\dss-demo-bundle-5.11" ".\node-v18.12.1-win-x64" ".\start.ps1" ".\start.exe" ".\README" ".\postman.json" ".\VERSION" ".\CONFIG"
 
       - name: Configure release title and name of zip file
         working-directory: zip
