@@ -2,9 +2,8 @@
 //       Generated models, which use types that are referred to via namespace (e.g.
 //       Dss.EDigestAlgorithm), are wrong and will mess up validation.
 //       See #11.
-
 import { EDigestAlgorithm, ESignatureValidationIndication, ESignatureValidationSubIndication } from "../../dss"
-export type Base64 = string
+import { Base64 } from "../../types/common"
 
 export interface IDigestBlobRequest {
     bytes: Base64
