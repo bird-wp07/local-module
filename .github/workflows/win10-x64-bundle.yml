@@ -18,7 +18,7 @@ jobs:
           Copy-Item ".\postman.json" -Destination ".\zip\"
 
       - name: Compile README.md to README.html
-      - run: |
+        run: |
          choco install --yes pandoc
          pandoc --standalone --embed-resources --output=./zip/README.html README.md
 
