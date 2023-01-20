@@ -18,6 +18,7 @@ jobs:
           Copy-Item ".\postman.json" -Destination ".\zip\"
 
       - name: Compile .exe from pwsh script
+        shell: powershell
         working-directory: zip
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
