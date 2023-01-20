@@ -17,6 +17,13 @@ jobs:
           Copy-Item ".\bundle\win10-x64\README" -Destination ".\zip\"
           Copy-Item ".\postman.json" -Destination ".\zip\"
 
+      - name: Compile .exe from pwsh script
+        working-directory: zip
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module ps2exe
+          Invoke-ps2exe .\start.ps1 .\start.exe
+
       - name: Create VERSION file
         working-directory: zip
         run: Set-Content -Path VERSION -Value $env:GITHUB_REF_NAME.substring(1)
@@ -41,7 +48,7 @@ jobs:
       - name: Build archive
         working-directory: zip
         run: |
-          7z a release.zip ".\local-module" ".\dss-demo-bundle-5.11" ".\node-v18.12.1-win-x64" ".\start.ps1" ".\README" ".\postman.json" ".\VERSION"
+          7z a release.zip ".\local-module" ".\dss-demo-bundle-5.11" ".\node-v18.12.1-win-x64" ".\start.ps1" ".\start.exe" ".\README" ".\postman.json" ".\VERSION"
 
       - name: Configure release title and name of zip file
         working-directory: zip
