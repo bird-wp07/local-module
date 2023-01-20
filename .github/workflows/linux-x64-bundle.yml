@@ -18,7 +18,7 @@ jobs:
       - name: Compile README.md to README.html
         uses: docker://pandoc/core:2.19
         with:
-          args: "--standalone --embed-resources --output ./zip/README.html" # gets appended to pandoc command
+          args: "--standalone --embed-resources --output ./zip/README.html README.md" # gets appended to pandoc command
 
       - name: Create VERSION file
         working-directory: zip
