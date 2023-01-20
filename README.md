@@ -81,15 +81,19 @@ Das Windowsbundle des Lokalen Moduls liefert die gewöhnliche ausführbare Datei
 Leider markiert der Windows Antivirus (und möglicherweise auch andere Antivirussoftware) die Datei fälschlicherweise als Malware und verweigert ihre Ausführung. Daher kann es erforderlich sein, die *start.exe* nach dem Entpacken des Archivs in die entsprechende Whitelist aufzunehmen. Der Ablauf hierfür ist nachfolgend beispielhaft für Windows 11 dargestellt:
 
 1. Entpacken des Archivs in ein beliebiges Verzeichnis
-2. Im Reiter *Viren- und Bedrohungsschutz* des Menüs *Windows-Sicherheit* auf den Link *Ausschüsse hinzufügen oder entfernen* klicken.
+2. Im Reiter *Viren- und Bedrohungsschutz* des Menüs *Windows-Sicherheit* auf *Einstellungen verwalten* klicken.
+
+    ![](./docs/windows-av-whitelist0.png)
+
+3. *Ausschüsse hinzufügen oder entfernen* auswählen.
 
     ![](./docs/windows-av-whitelist1.png)
 
-3. Anschließend auf *Ausschluss hinzufügen* klicken und über den Reiter *Datei* durch den Explorer die zuvor entpackte *start.exe* auswählen. Die freigegebene Datei wird anschließend unter den Ausschlüssen gelistet.
+4. Anschließend auf *Ausschluss hinzufügen* klicken und über den Reiter *Datei* durch den Explorer die zuvor entpackte *start.exe* auswählen. Die freigegebene Datei wird anschließend unter den Ausschlüssen gelistet.
 
     ![](./docs/windows-av-whitelist2.png)
 
-4. Doppelklick auf die *start.exe*. Trotz der Ausnahme erfordert Windows eine erneute Bestätigung. Hierfür im Warnfenster auf *Weitere Informationen* und anschließend auf *Trotzdem ausführen* klicken. Dies startet das Programm.
+5. Doppelklick auf die *start.exe*. Trotz der Ausnahme erfordert Windows eine erneute Bestätigung. Hierfür im Warnfenster auf *Weitere Informationen* und anschließend auf *Trotzdem ausführen* klicken. Dies startet das Programm.
 
     ![](./docs/windows-av-whitelist3.png)
 
