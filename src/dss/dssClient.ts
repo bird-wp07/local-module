@@ -3,7 +3,7 @@ import { ok, err, Result } from "neverthrow"
 import { AxiosError, AxiosRequestConfig } from "axios"
 import * as Utility from "../utility"
 import { IGetDataToSignRequest, IGetDataToSignResponse, ISignDataResponse, IValidateSignatureRequest, IValidateSignatureResponse } from "./types"
-import { Base64 } from "./types"
+import { Base64 } from "../types/common"
 import { ISignDocumentRequest } from "../utility"
 import * as Dss from "."
 
