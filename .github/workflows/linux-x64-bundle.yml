@@ -15,6 +15,11 @@ jobs:
           mkdir ./zip
           cp ./bundle/linux-x64/start.sh ./bundle/linux-x64/README ./postman.json ./zip
 
+      - name: Compile README.md to README.html
+      - uses: docker://pandoc/core:2.9
+        with:
+          args: "--standalone --embed-resources --output ./zip/README.html" # gets appended to pandoc command
+
       - name: Create VERSION file
         working-directory: zip
         run: echo "$GITHUB_REF_NAME" | sed 's/^v//' >VERSION

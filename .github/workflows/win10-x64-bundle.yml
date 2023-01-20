@@ -18,6 +18,11 @@ jobs:
           Copy-Item ".\postman.json" -Destination ".\zip\"
           Copy-Item ".\CONFIG" -Destination ".\zip\"
 
+      - name: Compile README.md to README.html
+      - uses: docker://pandoc/core:2.9
+        with:
+          args: "--standalone --embed-resources --output .\zip\README.html" # gets appended to pandoc command
+
       - name: Compile .exe from pwsh script
         shell: powershell # see https://github.com/MScholtes/PS2EXE/issues/82
         working-directory: zip
@@ -33,7 +38,7 @@ jobs:
       - name: Build archive
         working-directory: zip
         run: |
-          7z a release.zip ".\start.ps1" ".\start.exe" ".\README" ".\postman.json" ".\VERSION" ".\CONFIG"
+          7z a release.zip ".\start.ps1" ".\start.exe" ".\README" ".\postman.json" ".\VERSION" ".\CONFIG" ".\README.html"
 
       - name: Configure release title and name of zip file
         working-directory: zip
