@@ -1,6 +1,6 @@
 {
     "name": "@bird-wp07/local-module",
-    "version": "0.0.57",
+    "version": "0.0.58",
     "license": "",
     "bin": "./bin/start",
     "files": [
@@ -24,8 +24,6 @@
         "start": "npm run build && node ./dist/src/main.js",
         "start:debug": "npm run build && NODE_OPTIONS=--inspect-brk node ./dist/src/main.js",
         "lint": "npm run build && npx eslint 'src/**/*.ts' 'tests/**/*.ts'",
-        "publish_npmjs": "npm run build && npm publish",
-        "release": "./scripts/release.sh",
         "dsm": "npm run build && node ./dist/tests/dsmCli.js"
     },
     "dependencies": {
