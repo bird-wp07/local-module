@@ -1,49 +1,43 @@
-// HACK: Local namespace imports (import * as Dss from "../../dss") bug out tsoa.
-//       Generated models, which use types that are referred to via namespace (e.g.
-//       Dss.EDigestAlgorithm), are wrong and will mess up validation.
-//       See #11.
+import { Base64, EDigestAlgorithm } from "../../types/common"
 
-import { EDigestAlgorithm, ESignatureValidationIndication, ESignatureValidationSubIndication } from "../../dss"
-export type Base64 = string
-
-export interface IDigestBlobRequest {
+export interface DigestBlobRequest {
     bytes: Base64
     digestAlgorithm: EDigestAlgorithm
 }
 
-export interface IDigestBlobResponse {
+export interface DigestBlobResponse {
     digest: Base64
 }
 
-export interface IDigestPDFRequest {
+export interface DigestPDFRequest {
     digestAlgorithm: EDigestAlgorithm
     bytes: Base64
     signingTimestamp?: number // unix ms
 }
 
-export interface IDigestPDFResponse {
+export interface DigestPDFResponse {
     digest: Base64
 }
 
-export interface IMergePDFRequest {
+export interface MergePDFRequest {
     bytes: Base64
     signatureAsCMS: Base64
     signingTimestamp: number
 }
 
-export interface IMergePDFResponse {
+export interface MergePDFResponse {
     bytes: Base64
 }
 
-export interface IValidateSignedPdfResponse {
-    result: ESignatureValidationIndication
-    reason: ESignatureValidationSubIndication | "NO_SIGNATURE" | null
-}
-
-export interface IValidateSignedPdfRequest {
+export interface ValidateSignedPdfRequest {
     bytes: Base64
 }
 
-export interface IGetHealthResponse {
+export interface ValidateSignedPdfResponse {
+    result: string
+    reason: string | null
+}
+
+export interface GetHealthResponse {
     status: "ok"
 }

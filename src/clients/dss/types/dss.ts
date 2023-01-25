@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 export type Base64 = string
 
 export enum ESignatureAlgorithm {
@@ -40,51 +42,60 @@ export enum EDigestAlgorithm {
     SHA512 = "SHA512"
 }
 
-/**
- * Base64 encoded blob or digest with an optional filename.
- *
- * @field bytes - base64 encoded blob or digest
- * @field digestAlgorithm - the respective digest algorithm used or null/undefined for a raw blob
- * @field name - an optional filename
- */
-export interface IBlobOrDigest {
+export interface IDssBLevelParams {
+    signingDate: number
+}
+
+export interface IDssCert {
+    encodedCertificate: string
+}
+
+export interface IDssSigningParams {
+    signWithExpiredCertificate?: boolean
+    generateTBSWithoutCertificate?: boolean
+    signatureLevel: ESignatureLevel
+    signaturePackaging?: ESignaturePackaging
+    signatureAlgorithm?: ESignatureAlgorithm
+    encryptionAlgorithm?: EEncryptionAlgorithm
+    digestAlgorithm?: EDigestAlgorithm
+    signingCertificate?: IDssCert
+    certificateChain?: IDssCert[]
+    blevelParams?: IDssBLevelParams
+}
+
+export interface IDssSignatureValue {
+    algorithm: ESignatureAlgorithm
+    value: string
+}
+
+export interface IToSignDocumentParams {
     bytes: Base64
     digestAlgorithm?: EDigestAlgorithm | null
     name?: string
 }
 
+export interface ISignDocumentRequest {
+    toSignDocument?: IToSignDocumentParams
+    parameters: IDssSigningParams
+    signatureValue: IDssSignatureValue
+}
+
+export interface ISignDocumentResponse {
+    bytes: Base64
+}
+
 export interface IGetDataToSignRequest {
-    // TODO: Replace with IBlobOrDigest
     toSignDocument: {
         bytes: Base64
         name?: string
     }
-    parameters?: {
-        signingCertificate?: {
-            encodedCertificate: Base64
-        }
-        signatureLevel?: ESignatureLevel
-        signaturePackaging?: ESignaturePackaging
-        signatureAlgorithm?: ESignatureAlgorithm
-        digestAlgorithm?: EDigestAlgorithm
-        encryptionAlgorithm?: EEncryptionAlgorithm
-        generateTBSWithoutCertificate?: boolean
-        blevelParams?: {
-            signingDate: number
-        }
-    }
+    parameters: IDssSigningParams
 }
 
 export interface IGetDataToSignResponse {
     bytes: Base64
 }
 
-export interface ISignDataResponse {
-    bytes: Base64
-}
-export interface IDigestResponse {
-    digest: string
-}
 /**
  * Possible results ("indications") of a signature validation. See
  *
@@ -154,8 +165,8 @@ export interface IValidateSignatureResponse {
 }
 
 export interface IValidateSignatureRequest {
-    signedDocument: IBlobOrDigest
-    originalDocuments: IBlobOrDigest[]
+    signedDocument: IToSignDocumentParams
+    originalDocuments: IToSignDocumentParams[]
     policy: null
     signatureId: null
 }

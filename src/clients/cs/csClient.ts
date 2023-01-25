@@ -1,7 +1,7 @@
 import { AxiosRequestConfig } from "axios"
 import { ok, err, Result } from "neverthrow"
 import { ISignatureResponse, ISignatureRequest } from "./types"
-import * as Utility from "../utility"
+import * as Utility from "../../utility"
 
 export class CsClient {
     public baseUrl: string

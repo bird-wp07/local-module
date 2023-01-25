@@ -5,22 +5,15 @@ import { describe, test } from "mocha"
 import { expect } from "chai"
 import chai from "chai"
 import chaiSubset from "chai-subset"
-import * as Dss from "../src/dss/"
-import {
-    EDigestAlgorithm,
-    ESignatureLevel,
-    ESignaturePackaging,
-    ESignatureValidationIndication,
-    ESignatureValidationSubIndication,
-    IGetDataToSignRequest,
-    IValidateSignatureRequest,
-    IValidateSignatureResponse
-} from "../src/dss/types"
+import { GetDataToSignRequest, ValidateSignedDocumentRequest, ValidateSignedDocumentResponse } from "../src/server/services"
+import { EDigestAlgorithm, ESignatureLevel, ESignaturePackaging } from "../src/types/common"
+import { DssClient, ESignatureValidationIndication, ESignatureValidationSubIndication } from "../src/clients/dss"
+import { getDigestValueFromXmldsig } from "../src/clients/dss"
 
 chai.use(chaiSubset)
 
-describe(Dss.DssClient.name, () => {
-    let dssClient: Dss.DssClient
+describe(DssClient.name, () => {
+    let dssClient: DssClient
     before("Init", async () => {
         dssClient = await makeDssClient()
     })
@@ -29,22 +22,17 @@ describe(Dss.DssClient.name, () => {
         for (const filename of ["books.xml", "sheep.jpg"]) {
             test(`produces a correct SHA256 hash of '${filename}'`, async () => {
                 const bytes = fs.readFileSync(`./assets/${filename}`)
-                const request: IGetDataToSignRequest = {
-                    parameters: {
-                        signatureLevel: ESignatureLevel.XAdES_B,
-                        digestAlgorithm: EDigestAlgorithm.SHA256,
-                        signaturePackaging: ESignaturePackaging.ENVELOPING,
-                        generateTBSWithoutCertificate: true
-                    },
-                    toSignDocument: {
-                        bytes: bytes.toString("base64")
-                    }
+                const request: GetDataToSignRequest = {
+                    signatureLevel: ESignatureLevel.XAdES_B,
+                    digestAlgorithm: EDigestAlgorithm.SHA256,
+                    signaturePackaging: ESignaturePackaging.ENVELOPING,
+                    bytes: bytes.toString("base64")
                 }
                 const response = await dssClient.getDataToSign(request)
                 expect(response.isOk()).to.be.true
                 const data = response._unsafeUnwrap()
-                const xmldsig = Buffer.from(data.bytes, "base64").toString("utf8")
-                const have = await Dss.getDigestValueFromXmldsig(xmldsig)
+                const xmldsig = Buffer.from(data.digest, "base64").toString("utf8")
+                const have = await getDigestValueFromXmldsig(xmldsig)
                 const want = createHash("sha256").update(bytes).digest("base64")
                 expect(have).to.equal(want)
             })
@@ -54,54 +42,30 @@ describe(Dss.DssClient.name, () => {
     describe("#validateSignature()", () => {
         test.skip("handles a valid QES-signed PDF correctly", async () => {
             const originalFileB64 = fs.readFileSync(`./assets/TODO.pdf`).toString("base64")
-            const request: IValidateSignatureRequest = {
+            const request: ValidateSignedDocumentRequest = {
                 signedDocument: {
-                    bytes: originalFileB64,
-                    digestAlgorithm: null
-                },
-                originalDocuments: [],
-                policy: null,
-                signatureId: null
+                    bytes: originalFileB64
+                }
             }
             const have = (await dssClient.validateSignature(request))._unsafeUnwrap()
-            const want: IValidateSignatureResponse = {
-                SimpleReport: {
-                    signatureOrTimestamp: [
-                        {
-                            Signature: {
-                                Indication: ESignatureValidationIndication.TOTAL_PASSED,
-                                SubIndication: null
-                            }
-                        }
-                    ]
-                }
+            const want: ValidateSignedDocumentResponse = {
+                result: ESignatureValidationIndication.TOTAL_PASSED,
+                reason: null
             }
             expect(have).to.containSubset(want)
         })
 
         test("handles a self-signed PDF correctly", async () => {
             const originalFileB64 = fs.readFileSync("./assets/selfsigned-js.pdf").toString("base64")
-            const request: IValidateSignatureRequest = {
+            const request: ValidateSignedDocumentRequest = {
                 signedDocument: {
-                    bytes: originalFileB64,
-                    digestAlgorithm: null
-                },
-                originalDocuments: [],
-                policy: null,
-                signatureId: null
+                    bytes: originalFileB64
+                }
             }
             const have = (await dssClient.validateSignature(request))._unsafeUnwrap()
-            const want: IValidateSignatureResponse = {
-                SimpleReport: {
-                    signatureOrTimestamp: [
-                        {
-                            Signature: {
-                                Indication: ESignatureValidationIndication.INDETERMINATE,
-                                SubIndication: ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
-                            }
-                        }
-                    ]
-                }
+            const want: ValidateSignedDocumentResponse = {
+                result: ESignatureValidationIndication.INDETERMINATE,
+                reason: ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
             }
             expect(have).to.containSubset(want)
         })
@@ -109,34 +73,22 @@ describe(Dss.DssClient.name, () => {
         test("handles a self-signed, detached signature correctly", async () => {
             const originalFileB64 = fs.readFileSync(`./assets/sample.xml`).toString("base64")
             const sidecarSignatureFileB64 = fs.readFileSync(`./assets/sample-xades-detached.xml`).toString("base64")
-            const request: IValidateSignatureRequest = {
+            const request: ValidateSignedDocumentRequest = {
                 signedDocument: {
                     bytes: sidecarSignatureFileB64,
-                    digestAlgorithm: null,
                     name: "sample-detached.xml"
                 },
                 originalDocuments: [
                     {
                         bytes: originalFileB64,
-                        digestAlgorithm: null,
                         name: "sample.xml"
                     }
-                ],
-                policy: null,
-                signatureId: null
+                ]
             }
             const have = (await dssClient.validateSignature(request))._unsafeUnwrap()
-            const want: IValidateSignatureResponse = {
-                SimpleReport: {
-                    signatureOrTimestamp: [
-                        {
-                            Signature: {
-                                Indication: ESignatureValidationIndication.INDETERMINATE,
-                                SubIndication: ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
-                            }
-                        }
-                    ]
-                }
+            const want: ValidateSignedDocumentResponse = {
+                result: ESignatureValidationIndication.INDETERMINATE,
+                reason: ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
             }
             expect(have).to.containSubset(want)
         })
@@ -145,34 +97,22 @@ describe(Dss.DssClient.name, () => {
             const originalFileB64 = fs.readFileSync(`./assets/sample.xml`).toString("base64")
             const corruptedFileB64 = "/" + originalFileB64.slice(1)
             const sidecarSignatureFileB64 = fs.readFileSync(`./assets/sample-xades-detached.xml`).toString("base64")
-            const request: IValidateSignatureRequest = {
+            const request: ValidateSignedDocumentRequest = {
                 signedDocument: {
                     bytes: sidecarSignatureFileB64,
-                    digestAlgorithm: null,
                     name: "sample-detached.xml"
                 },
                 originalDocuments: [
                     {
                         bytes: corruptedFileB64,
-                        digestAlgorithm: null,
                         name: "sample.xml"
                     }
-                ],
-                policy: null,
-                signatureId: null
+                ]
             }
             const have = (await dssClient.validateSignature(request))._unsafeUnwrap()
-            const want: IValidateSignatureResponse = {
-                SimpleReport: {
-                    signatureOrTimestamp: [
-                        {
-                            Signature: {
-                                Indication: ESignatureValidationIndication.TOTAL_FAILED,
-                                SubIndication: ESignatureValidationSubIndication.HASH_FAILURE
-                            }
-                        }
-                    ]
-                }
+            const want: ValidateSignedDocumentResponse = {
+                result: ESignatureValidationIndication.TOTAL_FAILED,
+                reason: ESignatureValidationSubIndication.HASH_FAILURE
             }
             expect(have).to.containSubset(want)
         })
@@ -192,19 +132,16 @@ describe(Dss.DssClient.name, () => {
                 }
             ]
 
-            const responses: IValidateSignatureResponse[] = []
+            const responses: ValidateSignedDocumentResponse[] = []
             for (const signedDocument of signedDocuments) {
-                const request: IValidateSignatureRequest = {
+                const request: ValidateSignedDocumentRequest = {
                     signedDocument: signedDocument,
                     originalDocuments: [
                         {
                             bytes: originalFileB64,
-                            digestAlgorithm: null,
                             name: "sample.xml"
                         }
-                    ],
-                    policy: null,
-                    signatureId: null
+                    ]
                 }
                 const response = (await dssClient.validateSignature(request))._unsafeUnwrap()
                 responses.push(response)

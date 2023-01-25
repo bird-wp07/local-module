@@ -1,10 +1,13 @@
 import * as Settings from "./settings"
 import { logger } from "./settings"
-import * as Dss from "./dss"
 import http from "http"
 import { app } from "./server"
+import { DssClient } from "./clients/dss"
+import { IDocumentClient } from "./clients"
+import { DssClientOptions } from "./clients/ClientOptions"
+import { sleepms } from "./utility"
 
-let dssClient: Dss.DssClient
+let dssClient: IDocumentClient
 
 async function main() {
     /* Parse application settings. */
@@ -16,10 +19,22 @@ async function main() {
     const settings = settingsRes.value
 
     /* Wait for DSS startup to fininsh. */
-    dssClient = new Dss.DssClient(settings.dssBaseUrl)
+    const dssClientOptions = new DssClientOptions()
+    dssClientOptions.baseUrl = settings.dssBaseUrl
+    dssClient = new DssClient(dssClientOptions)
     const wait = 3600
     logger.info(`Waiting for DSS to respond at '${settings.dssBaseUrl}' ... `)
-    const isOnline = await dssClient.isOnline({ waitSeconds: wait })
+    const start = new Date().getTime()
+    let isOnline = false
+    do {
+        const httpReqRes = await dssClient.isOnline()
+        if (httpReqRes.isOk() && httpReqRes.value.valueOf()) {
+            isOnline = true
+            break
+        }
+        await sleepms(1000)
+    } while ((new Date().getTime() - start) / 1000 < wait)
+
     if (!isOnline) {
         logger.error("DSS didn't respond. Abort.")
         process.exit(1)
