@@ -42,4 +42,4 @@ jobs:
         with:
           artifacts: ./zip/${{ env.RELEASE_ZIP_FILENAME }}
           allowUpdates: true
-          prerelease: startsWith(github.ref_name, 'test-')
+          prerelease: ${{ startsWith(github.ref_name, 'test-') }}
