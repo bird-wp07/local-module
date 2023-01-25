@@ -5,10 +5,10 @@ import * as Utility from "../utility"
 import { createLogger, transports, format } from "winston"
 import { Errors } from "."
 
-/* Export names of envvars for testing purposes.
- */
+/* Export names of envvars for testing purposes. */
 export const localModuleBaseUrlEnvvar = "WP07_LOCAL_MODULE_BASEURL"
 export const dssBaseUrlEnvvar = "WP07_DSS_BASEURL"
+export const csBaseUrlEnvvar = "WP07_CS_BASEURL" // central cervice
 
 /* Initialize project-wide logger. */
 export const logger = createLogger({

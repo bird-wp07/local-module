@@ -1,37 +1,31 @@
 #!/usr/bin/env zsh
-cd $(dirname ${0:A:h})
-
-DOCKERFILE_PATH="./docker/Dockerfile" # relative to project root
-IMAGE_NAME="wp07-dss"
-
-_die() {
-    echo "$1" >&2
-    exit 1
-}
+set -e
+cd $(dirname ${0:A:h}) # cd into project root
+source ./scripts/common.sh
 
 dss_run() {
     if [[ "$1" == "-d" ]]; then
         detach="d"
         shift
     fi
-    
+
     if [[ "$1" != "" ]]; then
         if [[ ! "$1" =~ ^[1-9][0-9]*$ ]]; then
-            _die "Invalid port: '$1'"
+            die "Invalid port: '$1'"
         fi
         port=$1
     else
         port=8080
     fi
 
-    docker build -t $IMAGE_NAME - < $DOCKERFILE_PATH
-    docker run -it${detach} -p $port:8080 --rm --name "$IMAGE_NAME-$port" $IMAGE_NAME
+    build_docker_image
+    docker run -it${detach} -p $port:8080 --rm --name "$PROJECT_DOCKER_IMAGE_NAME-dss-$port" "$PROJECT_DOCKER_IMAGE_NAME"
 }
 
 dss_stop() {
     if [[ "$1" =~ ^[1-9][0-9]*$ ]]; then
         if [[ ! "$1" =~ ^[1-9][0-9]*$ ]]; then
-            _die "Invalid port: '$1'"
+            die "Invalid port: '$1'"
         fi
         name="$IMAGE_NAME-$1"
     else
@@ -49,7 +43,7 @@ dss_ls() {
 
 usage() {
     echo "Bootstrap DSS via docker containers. Usage:
-    
+
     \033[32;1m${ZSH_ARGZERO:A:t} run [-d] [HOST_PORT]\033[0m
         Spawns a DSS container exposed at port HOST_PORT (default: 8080).
         Optionally, use -d to run the container as a background process.
@@ -68,6 +62,10 @@ ls|run|stop)
     cmd=$1
     shift
     dss_$cmd $@
+    ;;
+@)
+    shift
+    $@
     ;;
 *)
     usage

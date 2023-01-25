@@ -115,7 +115,7 @@ Dieser Vorgang muss nicht wiederholt werden. Zukünftig kann die Datei durch Dop
    tar -xvf "local-module.tar.xz"
    ```
 
-3. Optional können zur Vermeidung von Portkollisionen in der Datei *start.sh* die Ports für das lokale Modul und den DSS Hintergrunddienst konfiguriert werden. Der relevante Abschnitt der Datei ist mit *ADMINISTRATOR SETTINGS* gekennzeichnet.
+3. Optional können zur Vermeidung von Portkollisionen in der Datei *start.sh* die Ports für das lokale Modul und den DSS Hintergrunddienst konfiguriert werden. Der relevante Abschnitt der Datei ist mit *ADMINISTRATOR SETTINGS* gekennzeichnet. Alternativ können die Ports über die Umgebungsvariablen *DSS_PORT* und *LOCAL_MODULE_PORT* gesetzt werden.
 
 4. Starten des Lokalen Moduls durch Ausführen des Startupskripts. Hierbei werden alle benötigen Hintergrunddienste gestartet.
 

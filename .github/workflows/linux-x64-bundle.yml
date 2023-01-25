@@ -2,7 +2,7 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - "v*"
+      - "*"
 
 jobs:
   release-linux-x64-bundle:
@@ -13,27 +13,27 @@ jobs:
       - name: Set up temporary directory and copy static files
         run: |
           mkdir ./zip
-          cp ./bundle/linux-x64/start.sh ./postman.json ./zip
+          cp ./scripts/bootstrap-linux.sh ./zip/start.sh
+          cp ./postman.json ./zip
 
-      - name: Compile README.md to README.html
+      - name: Compile README.html
         uses: docker://pandoc/core:2.19
         with:
           args: "--standalone --embed-resources --output ./zip/README.html README.md"
 
       - name: Create VERSION file
         working-directory: zip
-        run: echo "$GITHUB_REF_NAME" | sed 's/^v//' >VERSION
+        run: echo "$GITHUB_REF_NAME" >VERSION
 
       - name: Build archive
         working-directory: zip
         run: |
-          tar -cJf release.tar.xz start.sh postman.json VERSION README.html
+          tar -cJf release.tar.xz *
 
       - name: Configure release title and name of zip file
         working-directory: zip
         run: |
-          local_module_version="$(npm view "@bird-wp07/local-module" version)"
-          archive_filename="wp07-local-module-linux-x64-v$local_module_version.tar.xz"
+          archive_filename="wp07-local-module-linux-x64-v$GITHUB_REF_NAME.tar.xz"
           mv "release.tar.xz" "$archive_filename"
           echo "RELEASE_ZIP_FILENAME=$archive_filename" >>"$GITHUB_ENV"
 
@@ -42,3 +42,4 @@ jobs:
         with:
           artifacts: ./zip/${{ env.RELEASE_ZIP_FILENAME }}
           allowUpdates: true
+          prerelease: startsWith(github.ref_name, 'test-')
