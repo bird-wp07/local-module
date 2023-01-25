@@ -37,6 +37,9 @@ jobs:
           mv "release.tar.xz" "$archive_filename"
           echo "RELEASE_ZIP_FILENAME=$archive_filename" >>"$GITHUB_ENV"
 
+      # If the tag is prefixed with 'test-' we create a pre-release, which,
+      # incidentally, will also not override the newest release, allowing us to
+      # test pipelines ad libitum from any branch.
       - name: Release archive
         uses: ncipollo/release-action@v1
         with:
