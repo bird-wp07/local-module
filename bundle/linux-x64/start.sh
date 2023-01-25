@@ -20,7 +20,7 @@ node_url="https://nodejs.org/dist/v18.12.1/node-v18.12.1-linux-x64.tar.xz"
 node_archive_filename="node-standalone-v18.12.1-linux-x64.tar.xz"
 
 java_root_path="jdk-19.0.1"
-java_url="https://download.oracle.com/java/19/latest/jdk-19_linux-x64_bin.tar.gz"
+java_url="https://download.oracle.com/java/19/archive/jdk-19.0.1_linux-x64_bin.tar.gz"
 java_archive_filename="jdk-19_linux-x64_bin.tar.gz"
 
 p7zip_root_path="7z"
@@ -145,8 +145,8 @@ build_standalone_bundle() {
     install_dependencies all $lmver
     rm -rf "$dss_root_path/java" # remove embedded java for windows
     
-    touch README ./postman.json # HACK: interop with github pipelines
-    tar -cvJf "$archive_filename" "$java_root_path" "$node_root_path" "$p7zip_root_path" "$dss_root_path" "$local_module_root_path" "README" "start.sh" "./postman.json" "VERSION"
+    touch ./postman.json README.html # HACK: interop with github pipelines
+    tar -cJf "$archive_filename" "$java_root_path" "$node_root_path" "$p7zip_root_path" "$dss_root_path" "$local_module_root_path" "start.sh" "./postman.json" "VERSION" "./README.html"
     log.info "Built standalone archive '$archive_filename'."
 }
 

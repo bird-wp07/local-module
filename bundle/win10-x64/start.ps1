@@ -1,8 +1,9 @@
-# ######################
-# ADMINISTRATOR SETTINGS
-# ######################
-$LOCAL_MODULE_PORT = 2048
-$DSS_PORT = 8089
+# Change into the directory containing this script for constistent execution
+# irrspective of the working directory from where this script is run.
+Set-Location $PSScriptRoot
+
+$LOCAL_MODULE_PORT = Get-Content .\CONFIG | Select-String "^LOCAL_MODULE_PORT=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+$DSS_PORT = Get-Content .\CONFIG | Select-String "^DSS_PORT=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 $DEBUG = 0
 
 # Constants
@@ -179,10 +180,6 @@ function main {
         Set-Location $rootDir
     }
 }
-
-# Change into the directory containing this script for constistent execution
-# irrspective of the working directory from where this script is run.
-Set-Location $PSScriptRoot
 
 Switch ($args[0]) {
     stop-dss { Stop-DSS }

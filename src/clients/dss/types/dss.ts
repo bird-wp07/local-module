@@ -1,6 +1,4 @@
-/* eslint-disable */
-
-export type Base64 = string
+import { Base64 } from "../../../types/common"
 
 export enum ESignatureAlgorithm {
     RSA_SHA256 = "RSA_SHA256",

@@ -13,7 +13,12 @@ jobs:
       - name: Set up temporary directory and copy static files
         run: |
           mkdir ./zip
-          cp ./bundle/linux-x64/start.sh ./bundle/linux-x64/README ./postman.json ./zip
+          cp ./bundle/linux-x64/start.sh ./postman.json ./zip
+
+      - name: Compile README.md to README.html
+        uses: docker://pandoc/core:2.19
+        with:
+          args: "--standalone --embed-resources --output ./zip/README.html README.md"
 
       - name: Create VERSION file
         working-directory: zip
@@ -22,7 +27,7 @@ jobs:
       - name: Build archive
         working-directory: zip
         run: |
-          tar -cJf release.tar.xz start.sh README postman.json VERSION
+          tar -cJf release.tar.xz start.sh postman.json VERSION README.html
 
       - name: Configure release title and name of zip file
         working-directory: zip

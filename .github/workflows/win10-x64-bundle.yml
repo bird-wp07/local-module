@@ -14,8 +14,21 @@ jobs:
         run: |
           New-Item -Path . -Name ".\zip\" -ItemType "directory"
           Copy-Item ".\bundle\win10-x64\start.ps1" -Destination ".\zip\"
-          Copy-Item ".\bundle\win10-x64\README" -Destination ".\zip\"
+          Copy-Item ".\bundle\win10-x64\CONFIG" -Destination ".\zip\"
           Copy-Item ".\postman.json" -Destination ".\zip\"
+
+      - name: Compile README.md to README.html
+        run: |
+         choco install --yes pandoc
+         pandoc --standalone --embed-resources --output=./zip/README.html README.md
+
+      - name: Compile .exe from pwsh script
+        shell: powershell # see https://github.com/MScholtes/PS2EXE/issues/82
+        working-directory: zip
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module ps2exe
+          Invoke-ps2exe -inputFile .\start.ps1 -iconFile ..\assets\bird.ico -version $env:GITHUB_REF_NAME.substring(1) -outputFile .\start.exe
 
       - name: Create VERSION file
         working-directory: zip
@@ -24,7 +37,7 @@ jobs:
       - name: Build archive
         working-directory: zip
         run: |
-          7z a release.zip ".\start.ps1" ".\README" ".\postman.json" ".\VERSION"
+          7z a release.zip ".\start.ps1" ".\start.exe" ".\postman.json" ".\VERSION" ".\CONFIG" ".\README.html"
 
       - name: Configure release title and name of zip file
         working-directory: zip

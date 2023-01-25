@@ -3,6 +3,7 @@ export enum EDssErrorCode {
     UNEXPECTED_RESPONSE = "UNEXPECTED_RESPONSE",
     DESERIALIZATION_ERROR = "DESERIALIZATION_ERROR",
     UNEXPECTED_INPUT = "UNEXPECTED_INPUT",
+    DOC_CANNOT_BE_MODIFIED = "DOC_CANNOT_BE_MODIFIED",
     CERTIFICATE_NOT_YET_VALID = "CERTIFICATE_NOT_YET_VALID",
     CERTIFICATE_EXPIRED = "CERTIFICATE_EXPIRED",
     UNHANDLED_ERROR = "UNHANDLED_ERROR",
@@ -45,6 +46,16 @@ export class DeserializationError extends DssError {
 export class UnexpectedInput extends DssError {
     public constructor() {
         super("Error parsing input file or data, possibly due to unexpected file format", EDssErrorCode.UNEXPECTED_INPUT)
+    }
+}
+
+/**
+ * Error produced when attemting to digest a signed document.
+ * ???: Why does this produce an error?
+ */
+export class DocumentCannotBeModified extends DssError {
+    public constructor() {
+        super("Document cannot be modified.", EDssErrorCode.DOC_CANNOT_BE_MODIFIED)
     }
 }
 

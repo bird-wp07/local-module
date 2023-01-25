@@ -43,11 +43,12 @@ Es gibt hierbei zwei Versionen für Windows und Linux:
 
 ## 2.2 Betrieb unter Windows
 
-### 2.2.1 Installation
+## 2.2.1 Ausführung mittels Powershell
+### 2.2.1.1 Installation
 
 Nachdem das Archiv vom GitHub Repository heruntergeladen wurde, das Archiv mit einem Archivprogramm (WinZip oder https://www.7-zip.org/) in ein beliebiges Verzeichnis entpacken. Das Lokale Modul besitzt keinen Installer und ist portabel.
 
-### 2.2.2 Einmalige Einrichtung des Betriebssystems
+#### 2.2.1.2 Einmalige Einrichtung des Betriebssystems
 
 Um die Ausführung beliebiger Powershell Skripte zu erlauben, muss in einer Administrator Powershell (Windows-Taste drücken, "Powershell" eingeben, Rechtsklick auf den Powershell Eintrag und "Als Administrator ausführen" auswählen.
 
@@ -61,18 +62,44 @@ Möglicherweise muss auch die Ausführung des Skripts manuell erlaubt werden. Hi
 
 abgesetzt werden, wobei <BASIS_PFAD> den Pfad zur 'start.ps1' Datei vom Arbeitsverzeichnis der Powershell darstellt. Abhängig von den Nutzerberechtigungen kann hierfür eine Administrator Powershell notwendig sein.
 
-### 2.2.3 Konfiguration
+#### 2.2.1.3 Konfiguration
 
-Die Ports des lokalen Moduls, sowie des im Hintergrund laufenden DSS Servers können über die Kopfzeilen der Datei 'start.ps1' selbst konfiguriert werden, falls Kollisionen mit belegten Ports auftreten sollten.
+Die Ports des lokalen Moduls, sowie des im Hintergrund laufenden DSS Servers können über die beiligende Datei *CONFIG* konfiguriert werden, falls Kollisionen mit belegten Ports auftreten sollten.
 
-
-### 2.2.4 Start
+#### 2.2.1.4 Start
 
 Zum Starten des lokalen Moduls Rechtsklick auf 'start.ps1' und im Kontextmenü 'Mit PowerShell ausführen' wählen. Etwaige Meldungen des Windows Defender können ignoriert werden ("Abbrechen" klicken oder Fenster schließen). Eine Portfreigabe ist bei einem Zugriff vom selben Rechner aus nicht vonnöten.
 
-### 2.2.5 Beenden
+#### 2.2.1.5 Beenden
 
 Die Applikation kann durch wiederholte Eingabe der Tastenkombination Ctrl-C im Powershell Fenster unterbrochen werden. Hierbei werden auch alle Hintergrunddienste beendet.
+
+### 2.2.2 Ausführung durch Doppelklick der start.exe
+
+Das Windowsbundle des Lokalen Moduls liefert die gewöhnliche ausführbare Datei *start.exe* aus, welche alternativ zum Powershellskript verwendet werden kann. Das Vorgehen zur Konfiguration und Beendigung des Programms entspricht dem des Powershellskriptes. Meldungen des Windows Defender können auch hier ignoriert werden.
+
+Leider markiert der Windows Antivirus (und möglicherweise auch andere Antivirussoftware) die Datei fälschlicherweise als Malware und verweigert ihre Ausführung. Daher kann es erforderlich sein, die *start.exe* nach dem Entpacken des Archivs in die entsprechende Whitelist aufzunehmen. Der Ablauf hierfür ist nachfolgend beispielhaft für Windows 11 dargestellt:
+
+1. Entpacken des Archivs in ein beliebiges Verzeichnis
+2. Im Reiter *Viren- und Bedrohungsschutz* des Menüs *Windows-Sicherheit* auf *Einstellungen verwalten* klicken.
+
+    ![](./docs/windows-av-whitelist0.png)
+
+3. *Ausschüsse hinzufügen oder entfernen* auswählen.
+
+    ![](./docs/windows-av-whitelist1.png)
+
+4. Anschließend auf *Ausschluss hinzufügen* klicken und über den Reiter *Datei* durch den Explorer die zuvor entpackte *start.exe* auswählen. Die freigegebene Datei wird anschließend unter den Ausschlüssen gelistet.
+
+    ![](./docs/windows-av-whitelist2.png)
+
+5. Doppelklick auf die *start.exe*. Trotz der Ausnahme erfordert Windows eine erneute Bestätigung. Hierfür im Warnfenster auf *Weitere Informationen* und anschließend auf *Trotzdem ausführen* klicken. Dies startet das Programm.
+
+    ![](./docs/windows-av-whitelist3.png)
+
+    ![](./docs/windows-av-whitelist4.png)
+    
+Dieser Vorgang muss nicht wiederholt werden. Zukünftig kann die Datei durch Doppelklick wie gewohnt gestartet werden.
 
 ## 2.3 Betrieb unter Linux
 
