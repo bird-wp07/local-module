@@ -87,18 +87,13 @@ function Start-DSS {
     Pop-Location
 }
 
-# Kill running DSS servers by eliminating processes whose commandlines match
-# our use case. This is a hack to solve the problem of the included shutdown
-# batch file not working properly unless the dss server has fully finished its
-# boot sequence.
+# Kill running DSS servers via PID. This is a hack to solve the problem of the
+# included shutdown batch file not working properly unless the dss server has
+# fully finished its boot sequence.
 function Stop-DSS {
-    $query = ( "Select * from win32_Process where " +
-        "(ExecutablePath like '%dss-demo-bundle-5.11\\java\\bin\\java.exe') and " +
-        "(CommandLine like '%org.apache.catalina.startup.Bootstrap%')" )
-    $results = Get-WmiObject -Query $query
-    foreach ($result in $results) {
-        Stop-Process $result.handle
-    }
+    Push-Location $dssRootPath
+    $dssPid = Get-Content -File dss.pid
+    Pop-Location
 }
 
 # If needed, downloads missing dependencies (dss, standalone node, local
@@ -166,6 +161,7 @@ function Install-Dependencies ($what, $lmver = "latest") {
             Push-Location $localModulePath
             npm install
             npm run build-windows
+            Pop-Location
         }
     }
 }
