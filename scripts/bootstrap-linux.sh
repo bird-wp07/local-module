@@ -118,7 +118,7 @@ bootstrap() {
     install_jdk "$JDK_ROOT"
     install_dss "$DSS_ROOT"
     install_node "$NODE_ROOT"
-    PATH="NODE_ROOT/bin:$PATH" install_lm "$LM_ROOT" "$1"
+    PATH="$(realpath "$NODE_ROOT")/bin:$PATH" install_lm "$LM_ROOT" "$1"
 }
 
 # Starts local module, using default directories and settings. The process runs
@@ -130,7 +130,7 @@ start_lm() {
         cd "$LM_ROOT"
         WP07_DSS_BASEURL="http://127.0.0.1:$DSS_PORT" \
             WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:$LOCAL_MODULE_PORT" \
-            PATH="$NODE_ROOT/bin:$PATH" npm run start
+            PATH="$(realpath "$NODE_ROOT")/bin:$PATH" npm run start
     )
 }
 
@@ -175,7 +175,7 @@ serve_all() {
 
     # Ensure cleanup of DSS process
     trap "stop_dss" EXIT
-    
+
     # Start DSS in the background and fire up the local module.
     JAVA_HOME="$JRE_ROOT" start_dss "$DSS_PID_FILE" >/dev/null 2>&1
     start_lm
@@ -187,3 +187,5 @@ if [ -z "$1" ]; then
 else
     "$@"
 fi
+
+# Abhängigkeiten checken: curl, xz-utils, jq
