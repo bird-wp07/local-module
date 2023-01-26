@@ -36,7 +36,7 @@ describe("Digest, Sign, Merge, Verify", () => {
             expect(digestPdfRes.isErr()).to.be.false
             const digest = digestPdfRes._unsafeUnwrap().digest
 
-            const exampleSignatureRequest: Cs.ISignatureRequest = {
+            const exampleSignatureRequest: Cs.SignatureRequest = {
                 auditLog: "Signing of Test Document",
                 issuerId: "ID-OF-YOUR-KEY",
                 hash: digest,
@@ -85,7 +85,7 @@ describe("Digest, Sign, Merge, Verify", () => {
         expect(digestPdfRes.isErr()).to.be.false
         const digest = digestPdfRes._unsafeUnwrap().digest
 
-        const exampleSignatureRequest: Cs.ISignatureRequest = {
+        const exampleSignatureRequest: Cs.SignatureRequest = {
             auditLog: "Signing of Test Document",
             issuerId: "ID-OF-YOUR-KEY",
             hash: digest,
@@ -118,7 +118,7 @@ describe("Digest, Sign, Merge, Verify", () => {
         expect(digestPdfRes.isErr()).to.be.false
         const digest = digestPdfRes._unsafeUnwrap().digest
 
-        const exampleSignatureRequest: Cs.ISignatureRequest = {
+        const exampleSignatureRequest: Cs.SignatureRequest = {
             auditLog: "Signing of TestDocument",
             issuerId: "ID-OF-YOUR-KEY",
             hash: digest,

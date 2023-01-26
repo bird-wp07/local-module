@@ -1,5 +1,5 @@
 import { ok, err, Result } from "neverthrow"
-import { ISignatureResponse, ISignatureRequest } from "./types"
+import { SignatureResponse, SignatureRequest } from "./types"
 import { Inject } from "typescript-ioc"
 import { IHttpClient } from "../httpClient"
 import { ISignatureServiceClient } from "../ISignatureServiceClient"
@@ -29,8 +29,8 @@ export class CsClient implements ISignatureServiceClient {
         return true
     }
 
-    async getSignedCms(request: ISignatureRequest): Promise<Result<ISignatureResponse, Error>> {
-        const response = await this.httpClient.post<ISignatureResponse>("/api/v1/signer/issuances", request)
+    async getSignedCms(request: SignatureRequest): Promise<Result<SignatureResponse, Error>> {
+        const response = await this.httpClient.post<SignatureResponse>("/api/v1/signer/issuances", request)
         if (response.isErr()) {
             return err(response.error)
         }
