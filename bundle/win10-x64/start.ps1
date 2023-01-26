@@ -158,8 +158,14 @@ function Install-Dependencies ($what, $lmver = "latest") {
                 Select-Object -Expand Name
             Copy-Item -Recurse "$localModulePath\$subdirName\*" -Destination "$localModulePath"
             Remove-Item -Recurse "$localModulePath\$subdirName"
-            
-            
+
+            # Prepend the nodejs binary abspath to PATH to guarantee that our installed
+            # nodejs is used.
+            $nodeBin = Resolve-Path $nodeBinPath
+            $env:Path = "$($nodeBin);$($env:Path)"
+            Push-Location $localModulePath
+            npm install
+            npm run build-windows
         }
     }
 }
@@ -182,7 +188,7 @@ function main {
         $env:WP07_LOCAL_MODULE_BASEURL = "http://127.0.0.1:$LOCAL_MODULE_PORT"
         $env:WP07_DSS_BASEURL = "http://127.0.0.1:$DSS_PORT"
         Push-Location $localModulePath
-        npx "@bird-wp07/local-module"
+        npm run start-windows
         Pop-Location
     }
     finally {
