@@ -13,11 +13,11 @@ jobs:
       - uses: actions/checkout@v3
 
       - run: |
-        New-Item -Path . -Name ".\zip\" -ItemType "directory"
-        Copy-Item @(".\bundle\win10-x64\*", ".\postman.json") -Destination ".\zip\"
-        Set-Content -Path .\zip\VERSION -Value $env:GITHUB_REF_NAME.substring(1)
-        choco install --yes pandoc
-        pandoc --standalone --embed-resources --output=./zip/README.html README.md
+          New-Item -Path . -Name ".\zip\" -ItemType "directory"
+          Copy-Item @(".\bundle\win10-x64\*", ".\postman.json") -Destination ".\zip\"
+          Set-Content -Path .\zip\VERSION -Value $env:GITHUB_REF_NAME.substring(1)
+          choco install --yes pandoc
+          pandoc --standalone --embed-resources --output=./zip/README.html README.md
 
       - shell: powershell # see https://github.com/MScholtes/PS2EXE/issues/82
         working-directory: zip
