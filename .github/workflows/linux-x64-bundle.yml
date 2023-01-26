@@ -7,42 +7,25 @@ on:
 jobs:
   release-linux-x64-bundle:
     runs-on: ubuntu-latest
+    env:
+     archiveName: wp07-local-module-linux-x64-v${{ GITHUB_REF_NAME }}.tar.xz
     steps:
       - uses: actions/checkout@v3
-
-      - name: Set up temporary directory and copy static files
-        run: |
+      - uses: docker://pandoc/core:2.19
+        with:
+          args: "--standalone --embed-resources --output ./README.html ./README.md"
+      - run: |
           mkdir ./zip
           cp ./scripts/bootstrap-linux.sh ./zip/start.sh
-          cp ./postman.json ./zip
-
-      - name: Compile README.html
-        uses: docker://pandoc/core:2.19
-        with:
-          args: "--standalone --embed-resources --output ./zip/README.html README.md"
-
-      - name: Create VERSION file
-        working-directory: zip
-        run: echo "$GITHUB_REF_NAME" >VERSION
-
-      - name: Build archive
-        working-directory: zip
-        run: |
-          tar -cJf release.tar.xz *
-
-      - name: Configure release title and name of zip file
-        working-directory: zip
-        run: |
-          archive_filename="wp07-local-module-linux-x64-v$GITHUB_REF_NAME.tar.xz"
-          mv "release.tar.xz" "$archive_filename"
-          echo "RELEASE_ZIP_FILENAME=$archive_filename" >>"$GITHUB_ENV"
+          cp ./postman.json ./README.html ./zip
+          echo "$GITHUB_REF_NAME" >./zip/VERSION
+          cd ./zip && tar -cJf "$archiveName" *
 
       # If the tag is prefixed with 'test-' we create a pre-release, which,
-      # incidentally, will also not override the newest release, allowing us to
-      # test pipelines ad libitum from any branch.
-      - name: Release archive
-        uses: ncipollo/release-action@v1
+      # incidentally, won't override the newest release, allowing us to test
+      # pipelines ad libitum from any branch.
+      - uses: ncipollo/release-action@v1
         with:
-          artifacts: ./zip/${{ env.RELEASE_ZIP_FILENAME }}
+          artifacts: ./zip/${{ env.archiveName }}
           allowUpdates: true
           prerelease: ${{ startsWith(github.ref_name, 'test-') }}
