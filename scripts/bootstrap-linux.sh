@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Bootstrap DSS and local module, downloading all dependencies for linux
-# machines. We use bash instead of zsh as this script is deployed to
-# institutional IT systems. This self-contained script is exported as the
-# 'start.sh' in the linux bundles.
+# Bootstrap DSS and local module, downloading all dependencies for x64 linux.
+# We use bash instead of zsh as this script is deployed to institutional IT
+# systems. This self-contained script is exported as the 'start.sh' in the
+# linux bundles.
 
 set -e
 
@@ -24,26 +24,24 @@ DSS_PID_FILE=".dss.pid"
 # colors or don't.
 if [ -t 1 ]; then
     __log() {
-        prefix="$1"
-        code="$2"
-        shift 2
-        printf -- "$*\n" | sed 's/^/[start.sh] '"$(printf "$code")""$prefix""$(printf "\x1b[0m")"': /'
+        a="$1"; b="$2"; c="$3"; shift 3;
+        printf -- "$@\n" | sed "s/^/[$a] $c$b\x1b[0m: /"
     }
 else
     __log() {
-        prefix="$1"
-        shift 2
-        printf -- "$*\n" | sed 's/^/[start.sh] '"$prefix"': /'
+        a="$1"; b="$2"; c="$3"; shift 3;
+        printf -- "@\n" | sed "s/^/[$a] $c: /"
     }
 fi
-log.info() { __log "info" "\x1b[32;1m" "$*"; }
-log.err() { __log "err " "\x1b[31;1m" "$*"; }
+prefix="start.sh" # beware: must escape sed-relevant characters
+log_info() { __log "$prefix" "info" "\x1b[32;1m" "$*"; }
+log_err() { __log "$prefix" "err " "\x1b[31;1m" "$*"; }
 
 # Installs java into $1.
 install_jdk() {
-    [ -z "$1" ] && { log.err "missing JDK output directory path"; return 1; }
-    [ -d "$1" ] && { log.info "JDK found at '$1'. Skipping install."; return; }
-    log.info "Installing JDK at '$1'."
+    [ -z "$1" ] && { log_err "missing JDK output directory path"; return 1; }
+    [ -d "$1" ] && { log_info "JDK found at '$1'. Skipping install."; return; }
+    log_info "Installing JDK at '$1'."
 
     # The archive contents' paths are prefixed with 'jdk-<VERSION>'. We remove
     # this prefix while unpacking for consistent naming of the JDK root
@@ -55,9 +53,9 @@ install_jdk() {
 
 # Installs DSS into $1.
 install_dss() {
-    [ -z "$1" ] && { log.err "missing DSS output directory path"; return 1; }
-    [ -d "$1" ] && { log.info "DSS found at '$1'. Skipping install."; return; }
-    log.info "Installing DSS at '$1'."
+    [ -z "$1" ] && { log_err "missing DSS output directory path"; return 1; }
+    [ -d "$1" ] && { log_info "DSS found at '$1'. Skipping install."; return; }
+    log_info "Installing DSS at '$1'."
 
     mkdir -p "$1"
     curl -Ls "https://api.github.com/repos/bird-wp07/dss-demonstrations/releases/latest" |
@@ -69,9 +67,9 @@ install_dss() {
 
 # Installs standalone node into $1. $PATH is not modified.
 install_node() {
-    [ -z "$1" ] && { log.err "missing Node output directory path"; return 1; }
-    [ -d "$1" ] && { log.info "Node found at '$1'. Skipping install."; return; }
-    log.info "Installing Node at '$1'."
+    [ -z "$1" ] && { log_err "missing Node output directory path"; return 1; }
+    [ -d "$1" ] && { log_info "Node found at '$1'. Skipping install."; return; }
+    log_info "Installing Node at '$1'."
 
     mkdir -p "$1"
     curl -Lso - "https://nodejs.org/dist/v18.12.1/node-v18.12.1-linux-x64.tar.xz" |
@@ -81,11 +79,11 @@ install_node() {
 # Installs local module into $1. $2 chooses a tag to install, defaulting to the latest release.
 install_lm() {
     for dep in node npm npx; do
-        command -v "$dep" >/dev/null || { log.err "$dep not found"; return 1; }
+        command -v "$dep" >/dev/null || { log_err "$dep not found"; return 1; }
     done
-    [ -z "$1" ] && { log.err "missing local module output directory path"; return 1; }
-    [ -d "$1" ] && { log.info "Local module found at '$1'. Skipping install."; return; }
-    log.info "Installing local module at '$1'."
+    [ -z "$1" ] && { log_err "missing local module output directory path"; return 1; }
+    [ -d "$1" ] && { log_info "Local module found at '$1'. Skipping install."; return; }
+    log_info "Installing local module at '$1'."
 
     mkdir -p "$1"
     [ ! -z $2 ] && urlsuffix="tags/$2" || urlsuffix="latest"
@@ -98,18 +96,6 @@ install_lm() {
     npm install
     npm run build
     cd -
-}
-
-# Builds self-contained tar.xz archive. Used by pipelines.
-build_standalone_bundle() {
-    archive_filename="${1:-archive.tar.xz}"
-    lmver="$(cat VERSION)"
-    install_dependencies all $lmver
-    rm -rf "$dss_root_path/java" # remove embedded java for windows
-
-    touch ./postman.json README.html # HACK: interop with github pipelines
-    tar -cJf "$archive_filename" "$JDK_ROOT" "$NODE_ROOT" "$p7zip_root_path" "$dss_root_path" "$local_module_root_path" "start.sh" "./postman.json" "VERSION" "./README.html"
-    log.info "Built standalone archive '$archive_filename'."
 }
 
 # Installs all dependencies, using default output directories. $1 can be used
@@ -139,7 +125,7 @@ start_lm() {
 # which case the process is run in the background and the pid is written to the
 # file.
 start_dss() {
-    [ -z "$JAVA_HOME" ] && ! command -v java >/dev/null && { log.err "java not found and \$JAVA_HOME undefined"; return 1; }
+    [ -z "$JAVA_HOME" ] && ! command -v java >/dev/null && { log_err "java not found and \$JAVA_HOME undefined"; return 1; }
 
     # HACK: Replace the server's default port by in-file substitution.
     #       Unfortunately, there is no easier method as we're not in control of
@@ -148,9 +134,9 @@ start_dss() {
     sed -i -E 's|(<Connector port=")([^"]+)(" protocol="HTTP/1.1")|\1'"$DSS_PORT"'\3|g' "$cfg_xml"
 
     if [ -z "$1" ]; then
-        bash "$DSS_ROOT/apache-tomcat-8.5.82/bin/catalina.sh" run
+        bash "$DSS_ROOT/apache-tomcat-8.5.82/bin/catalina.sh" run 2>&1
     else
-        bash "$DSS_ROOT/apache-tomcat-8.5.82/bin/catalina.sh" run &
+        bash "$DSS_ROOT/apache-tomcat-8.5.82/bin/catalina.sh" run 2>&1 &
         echo $! >"$1"
     fi
 }
@@ -159,7 +145,7 @@ start_dss() {
 # default pid file path is used.
 stop_dss() {
     [ -z "$1" ] && pidfile="$DSS_PID_FILE" || pidfile="$1";
-    [ ! -f "$pidfile" ] && { log.err "no pid file at '$pidfile'"; return 1; }
+    [ ! -f "$pidfile" ] && { log_err "no pid file at '$pidfile'"; return 1; }
     kill "$(cat "$pidfile")"
     rm -rf "$pidfile"
 }
@@ -173,19 +159,17 @@ serve_all() {
     tag="$(cat VERSION 2>/dev/null)" || tag=""
     bootstrap "$tag"
 
-    # Ensure cleanup of DSS process
+    # Ensure cleanup of DSS process.
     trap "stop_dss" EXIT
 
     # Start DSS in the background and fire up the local module.
-    JAVA_HOME="$JRE_ROOT" start_dss "$DSS_PID_FILE" >/dev/null 2>&1
-    start_lm
+    JAVA_HOME="$(realpath "$JDK_ROOT")" start_dss "$DSS_PID_FILE" >/dev/null
+    PATH="$(realpath "$NODE_ROOT")/bin:$PATH" start_lm
 }
 
 if [ -z "$1" ]; then
-    cd "$(dirname "$(realpath "$0")")"
+    cd "$(dirname "$0")"
     serve_all
 else
     "$@"
 fi
-
-# Abhängigkeiten checken: curl, xz-utils, jq
