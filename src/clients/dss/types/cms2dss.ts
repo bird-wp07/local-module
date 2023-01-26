@@ -1,13 +1,13 @@
 /* eslint-disable */
 import ASN1 from "@lapo/asn1js"
-import { EDigestAlgorithm, ESignatureAlgorithm, ESignatureLevel, ESignaturePackaging, IDssCert, ISignDocumentRequest } from "./dss"
-import { OIDS } from "./oids"
+import { EDigestAlgorithm, ESignatureAlgorithm, ESignatureLevel, ESignaturePackaging, DssCert, DssSignDocumentRequest } from "./dss"
+import { OIDS } from "./../../../utility/oids"
 import * as ASNSchema from "@peculiar/asn1-schema"
 import { SignedData } from "@peculiar/asn1-cms"
 
 export interface ICms2DssResponse {
     cmsContent: ICmsContent
-    dssParams: ISignDocumentRequest
+    dssParams: DssSignDocumentRequest
 }
 
 export interface ICmsContent {
@@ -92,7 +92,7 @@ export function convert(base64OfCMS: string): ICms2DssResponse {
     cms.certificates?.forEach((value: any) => {
         certificates.push(Buffer.from(ASNSchema.AsnSerializer.serialize(value)).toString("base64"))
     })
-    const dssCertificateChain: IDssCert[] = []
+    const dssCertificateChain: DssCert[] = []
     certificates.forEach((value: string) => {
         dssCertificateChain.push({
             encodedCertificate: value

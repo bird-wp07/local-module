@@ -1,15 +1,15 @@
-import { Body, Controller, Post, Route } from "tsoa";
-import { dssClient } from "../../main";
-import { ApplicationService } from "../services/ApplicationService";
-import { DigestPDFRequest, DigestPDFResponse, MergePDFRequest, MergePDFResponse, ValidateSignedPdfRequest, ValidateSignedPdfResponse } from "./types";
+import { Body, Controller, Post, Route } from "tsoa"
+import { Container } from "typescript-ioc"
+import { ApplicationService } from "../services/ApplicationService"
+import { DigestPDFRequest, DigestPDFResponse, MergePDFRequest, MergePDFResponse, ValidateSignedPdfRequest, ValidateSignedPdfResponse } from "./types"
 
 @Route("digest")
 export class DigestController extends Controller {
+    // Hack to work around problems with tsoa and typescript-ioc
     private applicationService: ApplicationService
-
-    constructor() {
+    constructor(applicationService?: ApplicationService) {
         super()
-        this.applicationService = new ApplicationService(dssClient)
+        this.applicationService = applicationService ?? Container.get(ApplicationService)
     }
 
     @Post("pdf")
@@ -25,10 +25,9 @@ export class DigestController extends Controller {
 @Route("merge")
 export class MergeController extends Controller {
     private applicationService: ApplicationService
-
-    constructor() {
+    constructor(applicationService?: ApplicationService) {
         super()
-        this.applicationService = new ApplicationService(dssClient)
+        this.applicationService = applicationService ?? Container.get(ApplicationService)
     }
 
     @Post("pdf")
@@ -60,10 +59,9 @@ export class ValidateController extends Controller {
      */
 
     private applicationService: ApplicationService
-
-    constructor() {
+    constructor(applicationService?: ApplicationService) {
         super()
-        this.applicationService = new ApplicationService(dssClient)
+        this.applicationService = applicationService ?? Container.get(ApplicationService)
     }
 
     @Post("pdf")

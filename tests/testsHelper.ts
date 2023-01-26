@@ -2,6 +2,7 @@ import * as Cs from "../src/clients/cs"
 import { DssClientOptions } from "../src/clients/ClientOptions"
 import { DssClient } from "../src/clients/dss/DssClient"
 import { httpReq } from "../src/utility"
+import { HttpClient } from "../src/clients"
 
 /**
  * Creates a Cs.CsClient and calls #isOnline(), throwing in case of failure.
@@ -22,7 +23,7 @@ export async function makeCsClient(): Promise<Cs.CsClient> {
 export async function makeDssClient(): Promise<DssClient> {
     const dssBaseUrl = process.env.WP07_DSS_BASEURL ?? "http://127.0.0.1:8080"
     const clientOptions: DssClientOptions = { baseUrl: dssBaseUrl }
-    const dssClient = new DssClient(clientOptions)
+    const dssClient = new DssClient(new HttpClient(), clientOptions)
 
     const isOnline = await dssClient.isOnline()
     if (isOnline.isErr() || !isOnline.value.valueOf()) {

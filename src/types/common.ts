@@ -13,7 +13,22 @@ export enum ESignatureLevel {
 /**
  * See https://ec.europa.eu/digital-building-blocks/wikis/display/ESIGKB/What+is+the+packaging+enveloped+-+detached+-+enveloping+and+internally+detached+of+a+signature
  */
- export enum ESignaturePackaging {
+export enum ESignaturePackaging {
     ENVELOPED = "ENVELOPED",
     ENVELOPING = "ENVELOPING"
+}
+
+export enum ESignatureAlgorithm {
+    RSA_SHA256 = "RSA_SHA256",
+    ECDSA_SHA256 = "ECDSA_SHA256"
+}
+
+export enum EEncryptionAlgorithm {
+    RSA = "RSA",
+    ECDSA = "ECDSA"
+}
+
+export enum EASiCContainerType {
+    ASiC_S,
+    ASiC_E
 }

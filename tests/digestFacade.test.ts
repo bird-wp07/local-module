@@ -3,12 +3,12 @@ import { expect } from "chai"
 import { makeDssClient } from "./testsHelper"
 import fs from "fs"
 import { ApplicationService } from "../src/server/services"
-import { IDocumentClient } from "../src/server/clients/IDocumentClient"
 import { DigestPDFRequest } from "../src/server/controllers/types"
 import { EDigestAlgorithm } from "../src/types/common"
+import { DssClient } from "../src/clients"
 
 describe("Digest Facade", () => {
-    let dssClient: IDocumentClient
+    let dssClient: DssClient
     before("Init", async () => {
         dssClient = await makeDssClient()
     })

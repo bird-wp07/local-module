@@ -3,9 +3,9 @@ export interface IClientOptions {
 }
 
 export class DssClientOptions implements IClientOptions {
-    baseUrl: string;
+    baseUrl: string
 }
 
 export class CsClientOptions implements IClientOptions {
-    baseUrl: string;
+    baseUrl: string
 }

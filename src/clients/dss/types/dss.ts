@@ -40,15 +40,15 @@ export enum EDigestAlgorithm {
     SHA512 = "SHA512"
 }
 
-export interface IDssBLevelParams {
+export interface DssBLevelParams {
     signingDate: number
 }
 
-export interface IDssCert {
+export interface DssCert {
     encodedCertificate: string
 }
 
-export interface IDssSigningParams {
+export interface DssSigningParams {
     signWithExpiredCertificate?: boolean
     generateTBSWithoutCertificate?: boolean
     signatureLevel: ESignatureLevel
@@ -56,41 +56,41 @@ export interface IDssSigningParams {
     signatureAlgorithm?: ESignatureAlgorithm
     encryptionAlgorithm?: EEncryptionAlgorithm
     digestAlgorithm?: EDigestAlgorithm
-    signingCertificate?: IDssCert
-    certificateChain?: IDssCert[]
-    blevelParams?: IDssBLevelParams
+    signingCertificate?: DssCert
+    certificateChain?: DssCert[]
+    blevelParams?: DssBLevelParams
 }
 
-export interface IDssSignatureValue {
+export interface DssSignatureValue {
     algorithm: ESignatureAlgorithm
     value: string
 }
 
-export interface IToSignDocumentParams {
+export interface DssToSignDocumentParams {
     bytes: Base64
     digestAlgorithm?: EDigestAlgorithm | null
     name?: string
 }
 
-export interface ISignDocumentRequest {
-    toSignDocument?: IToSignDocumentParams
-    parameters: IDssSigningParams
-    signatureValue: IDssSignatureValue
+export interface DssSignDocumentRequest {
+    toSignDocument?: DssToSignDocumentParams
+    parameters: DssSigningParams
+    signatureValue: DssSignatureValue
 }
 
-export interface ISignDocumentResponse {
+export interface DssSignDocumentResponse {
     bytes: Base64
 }
 
-export interface IGetDataToSignRequest {
+export interface DssGetDataToSignRequest {
     toSignDocument: {
         bytes: Base64
         name?: string
     }
-    parameters: IDssSigningParams
+    parameters: DssSigningParams
 }
 
-export interface IGetDataToSignResponse {
+export interface DssGetDataToSignResponse {
     bytes: Base64
 }
 
@@ -146,7 +146,7 @@ export enum ESignatureValidationSubIndication {
     /* NOTE: A TOTAL_PASSED result provides no reasons. */
 }
 
-export interface ISignatureOrTimestamp {
+export interface DssSignatureOrTimestamp {
     Signature: {
         Indication: ESignatureValidationIndication
 
@@ -155,16 +155,16 @@ export interface ISignatureOrTimestamp {
     }
 }
 
-export interface IValidateSignatureResponse {
+export interface DssValidateSignatureResponse {
     SimpleReport: {
         // NOTE: the lowercase 's' is not a typo
-        signatureOrTimestamp: ISignatureOrTimestamp[] | null
+        signatureOrTimestamp: DssSignatureOrTimestamp[] | null
     }
 }
 
-export interface IValidateSignatureRequest {
-    signedDocument: IToSignDocumentParams
-    originalDocuments: IToSignDocumentParams[]
+export interface DssValidateSignatureRequest {
+    signedDocument: DssToSignDocumentParams
+    originalDocuments: DssToSignDocumentParams[]
     policy: null
     signatureId: null
 }

@@ -1,10 +1,10 @@
 import { Base64, EDigestAlgorithm, ESignatureLevel, ESignaturePackaging } from "../../types/common"
 
 export interface GetDataToSignRequest {
-    signatureLevel: ESignatureLevel,
-    signaturePackaging: ESignaturePackaging,
-    digestAlgorithm: EDigestAlgorithm,
-    signingTimestamp?: number,
+    signatureLevel: ESignatureLevel
+    signaturePackaging: ESignaturePackaging
+    digestAlgorithm: EDigestAlgorithm
+    signingTimestamp?: number
     bytes: Base64
 }
 
@@ -14,7 +14,7 @@ export interface GetDataToSignResponse {
 
 export interface MergeDocumentRequest {
     bytes: Base64
-    cms?: Base64,
+    cms?: Base64
     signingTimestamp?: number
 }
 

@@ -1,23 +1,41 @@
-import { AxiosError } from "axios";
-import { err, ok, Result } from "neverthrow";
-import { DssClientOptions } from "../ClientOptions";
-import { HttpClient, IHttpClient } from "../HttpClient";
-import { IDocumentClient } from "../IDocumentClient";
+import { AxiosError } from "axios"
+import { err, ok, Result } from "neverthrow"
+import { DssClientOptions } from "../ClientOptions"
+import { IHttpClient } from "../HttpClient"
+import { IDocumentClient } from "../IDocumentClient"
 import * as DssErrors from "./DssErrors"
-import ASN1 from "@lapo/asn1js";
+import ASN1 from "@lapo/asn1js"
 import * as ASNSchema from "@peculiar/asn1-schema"
-import { ESignatureValidationIndication, EEncryptionAlgorithm, ESignatureAlgorithm, IGetDataToSignRequest, IValidateSignatureRequest, IValidateSignatureResponse, IGetDataToSignResponse, convert, ISignDocumentRequest, ISignDocumentResponse, IToSignDocumentParams } from "./types/";
-import { Base64, ESignatureLevel } from "../../types/common";
+import {
+    ESignatureValidationIndication,
+    EEncryptionAlgorithm,
+    ESignatureAlgorithm,
+    DssGetDataToSignRequest,
+    DssValidateSignatureRequest,
+    DssValidateSignatureResponse,
+    DssGetDataToSignResponse,
+    convert,
+    DssSignDocumentRequest,
+    DssSignDocumentResponse,
+    DssToSignDocumentParams
+} from "./types/"
+import { Base64, ESignatureLevel } from "../../types/common"
 import * as xml2js from "xml2js"
-import { GetDataToSignRequest, GetDataToSignResponse, MergeDocumentRequest, MergeDocumentResponse, ValidateSignedDocumentRequest, ValidateSignedDocumentResponse } from "../../server/services";
+import {
+    GetDataToSignRequest,
+    GetDataToSignResponse,
+    MergeDocumentRequest,
+    MergeDocumentResponse,
+    ValidateSignedDocumentRequest,
+    ValidateSignedDocumentResponse
+} from "../../server/services"
+import { Inject } from "typescript-ioc"
 
 export class DssClient implements IDocumentClient {
-    private httpClient: IHttpClient
-    constructor(options: DssClientOptions) {
-        this.httpClient = new HttpClient()
+    constructor(@Inject private httpClient: IHttpClient, @Inject options: DssClientOptions) {
         this.httpClient.setBaseUrl(options.baseUrl)
     }
-    
+
     public async isOnline(): Promise<Result<boolean, Error>> {
         let responseData = ""
         let gotResponse = false
@@ -33,8 +51,8 @@ export class DssClient implements IDocumentClient {
     }
 
     public async getDataToSign(request: GetDataToSignRequest): Promise<Result<GetDataToSignResponse, Error>> {
-        const dssRequest: IGetDataToSignRequest = this.convertDataToSignRequest(request)
-        const digestResponse = await this.httpClient.post<IGetDataToSignResponse>("/services/rest/signature/one-document/getDataToSign", dssRequest)
+        const dssRequest: DssGetDataToSignRequest = this.convertDataToSignRequest(request)
+        const digestResponse = await this.httpClient.post<DssGetDataToSignResponse>("/services/rest/signature/one-document/getDataToSign", dssRequest)
         if (digestResponse.isErr()) {
             return err(this.parseError(digestResponse.error))
         }
@@ -57,7 +75,7 @@ export class DssClient implements IDocumentClient {
         return documentHash
     }
 
-    private convertDataToSignRequest(request: GetDataToSignRequest): IGetDataToSignRequest {
+    private convertDataToSignRequest(request: GetDataToSignRequest): DssGetDataToSignRequest {
         return {
             toSignDocument: {
                 bytes: request.bytes
@@ -84,16 +102,16 @@ export class DssClient implements IDocumentClient {
             return err(new DssErrors.PropertyMissing("Signing Timestamp"))
         }
         const dssRequest = this.convertMergeRequest(request)
-        const signDocumentRes = await this.httpClient.post<ISignDocumentResponse>("/services/rest/signature/one-document/signDocument", dssRequest)
+        const signDocumentRes = await this.httpClient.post<DssSignDocumentResponse>("/services/rest/signature/one-document/signDocument", dssRequest)
         if (signDocumentRes.isErr()) {
             return err(this.parseError(signDocumentRes.error))
         }
         return ok({ bytes: signDocumentRes.value.bytes })
     }
 
-    private convertMergeRequest(request: MergeDocumentRequest): ISignDocumentRequest {
+    private convertMergeRequest(request: MergeDocumentRequest): DssSignDocumentRequest {
         const convertedCMS = convert(request.cms!)
-        const requestData: ISignDocumentRequest = convertedCMS.dssParams
+        const requestData: DssSignDocumentRequest = convertedCMS.dssParams
         requestData.toSignDocument = {
             bytes: request.bytes
         }
@@ -104,17 +122,17 @@ export class DssClient implements IDocumentClient {
     }
 
     public async validateSignature(request: ValidateSignedDocumentRequest): Promise<Result<ValidateSignedDocumentResponse, Error>> {
-        const dssRequest: IValidateSignatureRequest = {
+        const dssRequest: DssValidateSignatureRequest = {
             signedDocument: {
                 bytes: request.signedDocument.bytes,
                 name: request.signedDocument.name,
                 digestAlgorithm: null
             },
-            originalDocuments: request.originalDocuments as IToSignDocumentParams[],
+            originalDocuments: request.originalDocuments as DssToSignDocumentParams[],
             policy: null,
             signatureId: null
         }
-        const response = await this.httpClient.post<IValidateSignatureResponse>("/services/rest/validation/validateSignature", dssRequest)
+        const response = await this.httpClient.post<DssValidateSignatureResponse>("/services/rest/validation/validateSignature", dssRequest)
         if (response.isErr()) {
             return err(this.parseError(response.error))
         }
@@ -188,7 +206,7 @@ export class DssClient implements IDocumentClient {
  *
  * See 'https://www.w3.org/TR/xmldsig-core1/#sec-SignedInfo'.
  */
- export async function getDigestValueFromXmldsig(xml: string): Promise<Base64> {
+export async function getDigestValueFromXmldsig(xml: string): Promise<Base64> {
     /* eslint-disable */ // xml2js declarations suck
     const xmlStruct = await xml2js.parseStringPromise(xml)
     const digest64: string = xmlStruct["ds:SignedInfo"]["ds:Reference"].filter((e: any) => e.$.Type === "http://www.w3.org/2000/09/xmldsig#Object")[0]["ds:DigestValue"][0]

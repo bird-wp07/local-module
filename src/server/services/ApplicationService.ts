@@ -1,14 +1,13 @@
-import { Result } from "neverthrow";
-import { ESignatureLevel, ESignaturePackaging } from "../../types/common";
-import { IDocumentClient } from "../../clients";
-import { DigestPDFRequest, DigestPDFResponse, MergePDFRequest, MergePDFResponse, ValidateSignedPdfRequest, ValidateSignedPdfResponse } from "../controllers/types";
-import { GetDataToSignRequest, MergeDocumentRequest, ValidateSignedDocumentRequest } from "./types";
+import { Result } from "neverthrow"
+import { ESignatureLevel, ESignaturePackaging } from "../../types/common"
+import { IDocumentClient } from "../../clients"
+import { DigestPDFRequest, DigestPDFResponse, MergePDFRequest, MergePDFResponse, ValidateSignedPdfRequest, ValidateSignedPdfResponse } from "../controllers/types"
+import { GetDataToSignRequest, MergeDocumentRequest, ValidateSignedDocumentRequest } from "./types"
+import { Inject, Singleton } from "typescript-ioc"
 
+@Singleton
 export class ApplicationService {
-    public documentClient: IDocumentClient
-    constructor(dssClient: IDocumentClient) {
-        this.documentClient = dssClient
-    }
+    constructor(@Inject public documentClient: IDocumentClient) {}
 
     // TODO: add validation
     public async createDigestForPDF(request: DigestPDFRequest): Promise<Result<DigestPDFResponse, Error>> {

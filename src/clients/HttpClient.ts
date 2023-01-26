@@ -1,14 +1,16 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-import { err, ok, Result } from "neverthrow";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios"
+import { err, ok, Result } from "neverthrow"
 
-export interface IHttpClient {
-    setBaseUrl(baseUrl: string): void;
-    get<T>(path: string): Promise<Result<T, AxiosError | Error>>;
-    post<T>(path: string, body: unknown): Promise<Result<T, AxiosError | Error>>;
+export abstract class IHttpClient {
+    public abstract setBaseUrl(baseUrl: string): void
+
+    public abstract get<T>(path: string): Promise<Result<T, AxiosError | Error>>
+
+    public abstract post<T>(path: string, body: unknown): Promise<Result<T, AxiosError<unknown, any> | Error>>
 }
 
 export class HttpClient implements IHttpClient {
-    private baseUrl: string
+    protected baseUrl: string
 
     public setBaseUrl(baseUrl: string): void {
         this.baseUrl = baseUrl

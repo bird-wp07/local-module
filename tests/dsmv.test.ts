@@ -4,15 +4,17 @@ import * as fs from "fs"
 import * as Cs from "../src/clients/cs"
 import { findLm, makeCsClient, makeDssClient } from "./testsHelper"
 import { httpReq } from "../src/utility"
+import { CsClient } from "../src/clients/cs"
 import * as Dss from "../src/clients/dss"
 import { DigestPDFRequest, MergePDFRequest, ValidateSignedPdfRequest, ValidateSignedPdfResponse } from "../src/server/controllers/types"
 import { EDigestAlgorithm } from "../src/types/common"
 import { ApplicationService } from "../src/server/services"
+import { IDocumentClient } from "../src/clients"
 
 describe("Digest, Sign, Merge, Verify", () => {
     // NOTE: The signing certificate used by the cs is valid
     //       from 2022-11-25T12:29:00Z to 2023-11-25T12:29:00Z
-    let dssClient: Dss.DssClient
+    let dssClient: IDocumentClient
     let csClient: Cs.CsClient
     let service: ApplicationService
     before("Init", async () => {
@@ -40,7 +42,7 @@ describe("Digest, Sign, Merge, Verify", () => {
                 hash: digest,
                 digestMethod: "SHA256"
             }
-            const getSignedCmsRes = await Cs.csClient.getSignedCms(exampleSignatureRequest)
+            const getSignedCmsRes = await csClient.getSignedCms(exampleSignatureRequest)
             expect(getSignedCmsRes.isErr()).to.be.false
             const signedCms = getSignedCmsRes._unsafeUnwrap()
             const cms = signedCms.cms
