@@ -2,9 +2,7 @@
     "name": "@bird-wp07/local-module",
     "version": "0.0.59",
     "license": "",
-    "bin": "./bin/start",
     "files": [
-        "bin/",
         "dist/src/",
         "dist/generated/",
         "package.json",
@@ -18,14 +16,16 @@
         "test:nobuild": "scripts/run-tests.sh",
         "test:debug": "npm run build && scripts/run-tests.sh -d",
         "build:clean": "rm -rf ./dist ./generated",
-        "build:version.ts": "mkdir -p generated && node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > generated/version.ts",
+        "build:version.ts": "mkdir generated && node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > generated/version.ts",
         "build:tsoa": "npx tsoa spec-and-routes",
         "build": "npm run build:clean && npm run build:version.ts && npm run build:tsoa && npx tsc -p ./tsconfig.json",
         "start": "npm run build && node ./dist/src/main.js",
         "start:nobuild": "node ./dist/src/main.js",
         "start:debug": "npm run build && NODE_OPTIONS=--inspect-brk node ./dist/src/main.js",
         "lint": "npm run build && npx eslint 'src/**/*.ts' 'tests/**/*.ts'",
-        "dsm": "npm run build && node ./dist/tests/dsmCli.js"
+        "dsm": "npm run build && node ./dist/tests/dsmCli.js",
+        "build-windows": "npm run build:version.ts && npm run build:tsoa && npx tsc -p .\\tsconfig.json",
+        "start-windows": "node .\\dist\\src\\main.js"
     },
     "dependencies": {
         "@lapo/asn1js": "^1.2.4",

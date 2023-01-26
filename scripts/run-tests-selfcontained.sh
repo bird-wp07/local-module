@@ -43,11 +43,11 @@ run_tests() {
     export LOCAL_MODULE_PORT=2048
     export WP07_DSS_BASEURL="http://127.0.0.1:$DSS_PORT"
     export WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:$LOCAL_MODULE_PORT"
-    ./bootstrap-linux.sh start_dss >/dev/null 2>&1 &
+    ./start.sh start_dss >/dev/null 2>&1 &
 
     # NOTE: We want to install for, build and run the local module from the
     #       current working tree, not the github repository. Thus we do not
-    #       use ./bootstrap-linux.sh start_lm.
+    #       use ./start.sh start_lm.
     npm install
     npm run build
     WP07_LOCAL_MODULE_SIGNAL_PID=$$ npm run start:nobuild &

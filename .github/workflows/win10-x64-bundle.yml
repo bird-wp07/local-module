@@ -2,53 +2,37 @@ on:
   workflow_dispatch:
   push:
     tags:
-      - "v*"
+      - "*"
 
 jobs:
   release-win-x64-bundle:
     runs-on: windows-latest
+    env:
+      archiveName: ${{ format('wp07-local-module-windows-x64-v{0}.zip', github.ref_name) }}
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up temporary directory and copy static files
-        run: |
-          New-Item -Path . -Name ".\zip\" -ItemType "directory"
-          Copy-Item ".\bundle\win10-x64\start.ps1" -Destination ".\zip\"
-          Copy-Item ".\bundle\win10-x64\CONFIG" -Destination ".\zip\"
-          Copy-Item ".\postman.json" -Destination ".\zip\"
+      - run: |
+        New-Item -Path . -Name ".\zip\" -ItemType "directory"
+        Copy-Item @(".\bundle\win10-x64\*", ".\postman.json") -Destination ".\zip\"
+        Set-Content -Path .\zip\VERSION -Value $env:GITHUB_REF_NAME.substring(1)
+        choco install --yes pandoc
+        pandoc --standalone --embed-resources --output=./zip/README.html README.md
 
-      - name: Compile README.md to README.html
-        run: |
-         choco install --yes pandoc
-         pandoc --standalone --embed-resources --output=./zip/README.html README.md
-
-      - name: Compile .exe from pwsh script
-        shell: powershell # see https://github.com/MScholtes/PS2EXE/issues/82
+      - shell: powershell # see https://github.com/MScholtes/PS2EXE/issues/82
         working-directory: zip
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module ps2exe
           Invoke-ps2exe -inputFile .\start.ps1 -iconFile ..\assets\bird.ico -version $env:GITHUB_REF_NAME.substring(1) -outputFile .\start.exe
 
-      - name: Create VERSION file
-        working-directory: zip
-        run: Set-Content -Path VERSION -Value $env:GITHUB_REF_NAME.substring(1)
-
       - name: Build archive
         working-directory: zip
         run: |
-          7z a release.zip ".\start.ps1" ".\start.exe" ".\postman.json" ".\VERSION" ".\CONFIG" ".\README.html"
+          7z a $env:archiveName *
 
-      - name: Configure release title and name of zip file
-        working-directory: zip
-        run: |
-          $localModuleVersion = npm view "@bird-wp07/local-module" version
-          $zipFile = "wp07-local-module-win10-x64-v$localModuleVersion.zip"
-          Rename-Item -Path ".\release.zip" -NewName $zipFile
-          Add-Content $env:GITHUB_ENV "RELEASE_ZIP_FILENAME=$zipFile"
-
-      - name: Release archive
-        uses: ncipollo/release-action@v1
+      - uses: ncipollo/release-action@v1
         with:
-          artifacts: .\zip\${{ env.RELEASE_ZIP_FILENAME }}
-          allowUpdates: true # must be set for the other pipelines to add their archives asynchronously
+          artifacts: .\zip\${{ env.archiveName }}
+          allowUpdates: true
+          prerelease: ${{ startsWith(github.ref_name, 'test-') }}

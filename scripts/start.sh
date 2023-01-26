@@ -100,7 +100,7 @@ install_lm() {
 
 # Installs all dependencies, using default output directories. $1 can be used
 # to specify the local module's version tag.
-bootstrap() {
+install_all() {
     install_jdk "$JDK_ROOT"
     install_dss "$DSS_ROOT"
     install_node "$NODE_ROOT"
@@ -158,7 +158,7 @@ serve_all() {
     # allow running it without a VERSION file, which will default to the latest
     # local module version tag.
     tag="$(cat VERSION 2>/dev/null)" || tag=""
-    bootstrap "$tag"
+    install_all "$tag"
 
     # Ensure cleanup of DSS process.
     trap "stop_dss" EXIT

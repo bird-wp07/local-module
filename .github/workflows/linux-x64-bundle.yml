@@ -8,7 +8,7 @@ jobs:
   release-linux-x64-bundle:
     runs-on: ubuntu-latest
     env:
-     archiveName: ${{ format('wp07-local-module-linux-x64-v{0}.tar.xz', github.ref_name) }}
+      archiveName: ${{ format('wp07-local-module-linux-x64-v{0}.tar.xz', github.ref_name) }}
     steps:
       - uses: actions/checkout@v3
       - uses: docker://pandoc/core:2.19
@@ -16,8 +16,7 @@ jobs:
           args: "--standalone --embed-resources --output ./README.html ./README.md"
       - run: |
           mkdir ./zip
-          cp ./scripts/bootstrap-linux.sh ./zip/start.sh
-          cp ./postman.json ./README.html ./zip
+          cp ./postman.json ./README.html ./scripts/start.sh ./zip
           echo "$GITHUB_REF_NAME" >./zip/VERSION
           cd ./zip && tar -cJf "$archiveName" *
 
@@ -27,5 +26,5 @@ jobs:
       - uses: ncipollo/release-action@v1
         with:
           artifacts: ./zip/${{ env.archiveName }}
-          allowUpdates: true
+          allowUpdates: true # must be set for the other pipelines to add their archives asynchronously
           prerelease: ${{ startsWith(github.ref_name, 'test-') }}

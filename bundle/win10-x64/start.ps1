@@ -4,7 +4,6 @@ Set-Location $PSScriptRoot
 
 $LOCAL_MODULE_PORT = Get-Content .\CONFIG | Select-String "^LOCAL_MODULE_PORT=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 $DSS_PORT = Get-Content .\CONFIG | Select-String "^DSS_PORT=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
-$DEBUG = 0
 
 # Constants
 # ---------
@@ -16,6 +15,7 @@ $nodeBinPath = ".\node-v18.12.1-win-x64"
 # Path of the dss root directory extracted from the archive. Contains, among
 # other files, the 'Webapp-Startup.bat' and 'Webapp-Shutdown.bat' batch files.
 $dssRootPath = ".\dss-demo-bundle-5.11"
+$dssPidFileName = "dss.pid"
 
 # Path of the local module installed via
 #
@@ -75,20 +75,15 @@ function Start-DSS {
     $cfg.Server.Service.Connector.port = "$DSS_PORT"
     $cfg.Save((Resolve-Path $serverConfigPath)) # Writeback requires abspath
 
-    # Run the included startup batch file from its own directory. Depdending on
-    # the debug setting, show or hide the dss cmd.exe window.
+    # Run the included startup batch file from its own directory.
     Push-Location $dssRootPath
     $env:JRE_HOME = ".\java"
     $env:CATALINA_HOME = ".\apache-tomcat-8.5.82"
-    if ($DEBUG -eq 1) {
-        Start-Process -FilePath cmd.exe -ArgumentList "/c", ".\apache-tomcat-8.5.82\bin\catalina.bat run"
-    }
-    else {
-        Start-Process -FilePath cmd.exe -ArgumentList "/c", ".\apache-tomcat-8.5.82\bin\catalina.bat run" `
-            -RedirectStandardError "NUL" -RedirectStandardOut "..\NUL" -NoNewWindow
-        #                           ^^^~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^~~~~~~~~~~~~~~ lol, windows
-        # See https://stackoverflow.com/questions/49375418
-    }
+    $process = Start-Process -FilePath cmd.exe -ArgumentList "/c", ".\apache-tomcat-8.5.82\bin\catalina.bat run" `
+        -RedirectStandardError "NUL" -RedirectStandardOut "..\NUL" -NoNewWindow
+    #                           ^^^~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^~~~~~~~~~~~~~~ lol, windows
+    # See https://stackoverflow.com/questions/49375418
+    Write-Output $process.ID >dss.pid
     Pop-Location
 }
 
@@ -116,36 +111,55 @@ function Stop-DSS {
 function Install-Dependencies ($what, $lmver = "latest") {
     if (($what -eq "node") -or ($what -eq "all")) {
         if (Test-Path -Path $nodeBinPath) {
-            Write-Host "Standalone nodejs distribution found at '$nodeBinPath'."
+            Write-Output "Standalone nodejs distribution found at '$nodeBinPath'."
         }
         else {
-            Write-Host "Standalone nodejs distribution not found at '$nodeBinPath'. Starting download ..."
+            Write-Output "Standalone nodejs distribution not found at '$nodeBinPath'. Starting download ..."
             Invoke-WebRequest -Uri $nodeUrl -OutFile $nodeZipFileName
-            Write-Host "Extracting archive ..."
+            Write-Output "Extracting archive ..."
             Expand-Archive -Path $nodeZipFileName -DestinationPath .
         }
     }
 
     if (($what -eq "dss") -or ($what -eq "all")) {
         if (Test-Path -Path $dssRootPath) {
-            Write-Host "DSS installation found at '$dssRootPath'."
+            Write-Output "DSS installation found at '$dssRootPath'."
         }
         else {
-            Write-Host "Dss installation not found at '$dssRootPath'. Starting download ..."
+            Write-Output "Dss installation not found at '$dssRootPath'. Starting download ..."
             Invoke-WebRequest -Uri $dssUrl -OutFile $dssZipFileName
-            Write-Host "Extracting archive ..."
+            Write-Output "Extracting archive ..."
             Expand-Archive -Path $dssZipFileName -DestinationPath .
         }
     }
 
     if (($what -eq "local-module") -or ($what -eq "all")) {
         if (Test-Path -Path $localModulePath) {
-            Write-Host "Local module installation found at '$localModulePath'."
+            Write-Output "Local module installation found at '$localModulePath'."
         }
         else {
-            Write-Host "Local module installation not found at '$localModulePath'. Starting download ..."
-            # We're using the full path, as the node root hasn't been exported to PATH.
-            Start-Process -FilePath "$nodeBinPath\npm" -ArgumentList "install", "--prefix", $localModulePath, "@bird-wp07/local-module@${lmver}" -Wait
+            Write-Output "Local module installation not found at '$localModulePath'. Starting download ..."
+            if ($lmver -eq "latest") {
+                $suffix = "latest"
+            } else {
+                $suffix = "tags/$lmver"
+            }
+            $lmurl = "https://api.github.com/repos/bird-wp07/local-module/releases/$suffix"
+            $zipBallUrl = Invoke-WebRequest -Uri $lmurl -ContentType "application/json" -Method Get -UseBasicParsing |
+                Select-Object -Expand Content |
+                ConvertFrom-Json |
+                Select-Object -Expand zipball_url
+            Invoke-WebRequest -Uri $zipballUrl -OutFile lm.zip
+            Expand-Archive -Path lm.zip -DestinationPath $localModulePath
+
+            # Remove subdirectory in archive (equivalent of tar --strip-components 1).
+            $subdirName = Get-ChildItem -Path $localModulePath |
+                Select-Object -first 1 |
+                Select-Object -Expand Name
+            Copy-Item -Recurse "$localModulePath\$subdirName\*" -Destination "$localModulePath"
+            Remove-Item -Recurse "$localModulePath\$subdirName"
+            
+            
         }
     }
 }
