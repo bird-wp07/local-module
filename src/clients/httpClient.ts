@@ -6,7 +6,7 @@ export abstract class IHttpClient {
 
     public abstract get<T>(path: string): Promise<Result<T, AxiosError | Error>>
 
-    public abstract post<T>(path: string, body: unknown): Promise<Result<T, AxiosError<unknown, any> | Error>>
+    public abstract post<T>(path: string, body: unknown): Promise<Result<T, AxiosError | Error>>
 }
 
 export class HttpClient implements IHttpClient {

@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Route } from "tsoa"
 import { Container } from "typescript-ioc"
-import { ApplicationService } from "../services/ApplicationService"
+import { ApplicationService } from "../services/applicationService"
 import { DigestPDFRequest, DigestPDFResponse, MergePDFRequest, MergePDFResponse, ValidateSignedPdfRequest, ValidateSignedPdfResponse } from "./types"
 
 @Route("digest")

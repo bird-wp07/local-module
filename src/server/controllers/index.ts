@@ -1,2 +1,2 @@
-export * from "./SignatureController"
-export * from "./SystemController"
+export * from "./signatureController"
+export * from "./systemController"

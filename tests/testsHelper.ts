@@ -1,6 +1,6 @@
 import * as Cs from "../src/clients/cs"
-import { DssClientOptions } from "../src/clients/ClientOptions"
-import { DssClient } from "../src/clients/dss/DssClient"
+import { DssClientOptions } from "../src/clients/clientOptions"
+import { DssClient } from "../src/clients/dss/dssClient"
 import { httpReq } from "../src/utility"
 import { HttpClient } from "../src/clients"
 

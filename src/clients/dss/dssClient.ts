@@ -1,9 +1,9 @@
 import { AxiosError } from "axios"
 import { err, ok, Result } from "neverthrow"
-import { DssClientOptions } from "../ClientOptions"
-import { IHttpClient } from "../HttpClient"
+import { DssClientOptions } from "../clientOptions"
+import { IHttpClient } from "../httpClient"
 import { IDocumentClient } from "../IDocumentClient"
-import * as DssErrors from "./DssErrors"
+import * as DssErrors from "./dssErrors"
 import ASN1 from "@lapo/asn1js"
 import * as ASNSchema from "@peculiar/asn1-schema"
 import {
@@ -18,7 +18,7 @@ import {
     DssSignDocumentRequest,
     DssSignDocumentResponse,
     DssToSignDocumentParams
-} from "./types/"
+} from "./types"
 import { Base64, ESignatureLevel } from "../../types/common"
 import * as xml2js from "xml2js"
 import {

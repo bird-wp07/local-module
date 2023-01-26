@@ -1,3 +1,3 @@
 export * from "./IDocumentClient"
-export * from "./HttpClient"
+export * from "./httpClient"
 export * from "./dss"

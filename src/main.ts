@@ -4,11 +4,10 @@ import http from "http"
 import { app } from "./server"
 import { DssClient } from "./clients/dss"
 import { HttpClient, IDocumentClient, IHttpClient } from "./clients"
-import { DssClientOptions } from "./clients/ClientOptions"
+import { DssClientOptions } from "./clients/clientOptions"
 import { Container, Scope } from "typescript-ioc"
-import "./server/controllers/SignatureController"
+import "./server/controllers/signatureController"
 import "./server/services"
-import { ApplicationService } from "./server/services"
 
 const settingsRes = Settings.parseApplicationSettings()
 if (settingsRes.isErr()) {
@@ -47,4 +46,4 @@ function main() {
     })
 }
 
-void main()
+main()

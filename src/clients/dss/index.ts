@@ -1,3 +1,3 @@
-export * from "./DssClient"
+export * from "./dssClient"
 export * from "./types"
-export * from "./DssErrors"
+export * from "./dssErrors"

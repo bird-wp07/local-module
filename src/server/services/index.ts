@@ -1,2 +1,2 @@
-export * from "./ApplicationService"
+export * from "./applicationService"
 export * from "./types"
