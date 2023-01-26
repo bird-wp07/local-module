@@ -4,10 +4,11 @@ import { IDocumentClient } from "../../clients"
 import { DigestPDFRequest, DigestPDFResponse, MergePDFRequest, MergePDFResponse, ValidateSignedPdfRequest, ValidateSignedPdfResponse } from "../controllers/types"
 import { GetDataToSignRequest, MergeDocumentRequest, ValidateSignedDocumentRequest } from "./types"
 import { Inject, Singleton } from "typescript-ioc"
+import { ISignatureServiceClient } from "../../clients"
 
 @Singleton
 export class ApplicationService {
-    constructor(@Inject public documentClient: IDocumentClient) {}
+    constructor(@Inject public documentClient: IDocumentClient, @Inject public signatureClient: ISignatureServiceClient) {}
 
     // TODO: add validation
     public async createDigestForPDF(request: DigestPDFRequest): Promise<Result<DigestPDFResponse, Error>> {

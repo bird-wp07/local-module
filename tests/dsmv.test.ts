@@ -20,7 +20,7 @@ describe("Digest, Sign, Merge, Verify", () => {
     before("Init", async () => {
         dssClient = await makeDssClient()
         csClient = await makeCsClient()
-        service = new ApplicationService(dssClient)
+        service = new ApplicationService(dssClient, csClient)
     })
 
     for (const pdfpath of ["./assets/unsigned.pdf", "./assets/Test5.pdf", "./assets/Test6.pdf", "./assets/Test7.pdf"]) {

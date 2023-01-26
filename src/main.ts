@@ -3,11 +3,12 @@ import { logger } from "./settings"
 import http from "http"
 import { app } from "./server"
 import { DssClient } from "./clients/dss"
-import { HttpClient, IDocumentClient, IHttpClient } from "./clients"
-import { DssClientOptions } from "./clients/clientOptions"
+import { HttpClient, IDocumentClient, IHttpClient, ISignatureServiceClient } from "./clients"
+import { CsClientOptions, DssClientOptions } from "./clients/clientOptions"
 import { Container, Scope } from "typescript-ioc"
 import "./server/controllers/signatureController"
 import "./server/services"
+import { CsClient } from "./clients/cs"
 
 const settingsRes = Settings.parseApplicationSettings()
 if (settingsRes.isErr()) {
@@ -20,6 +21,10 @@ Container.bind(IHttpClient).to(HttpClient).scope(Scope.Local)
 Container.bind(IDocumentClient).to(DssClient).scope(Scope.Singleton)
 const dssOptions: DssClientOptions = { baseUrl: settings.dssBaseUrl }
 Container.bind(DssClientOptions).factory(() => dssOptions)
+
+Container.bind(ISignatureServiceClient).to(CsClient).scope(Scope.Singleton)
+const csOptions: CsClientOptions = { baseUrl: settings.csBaseUrl }
+Container.bind(CsClientOptions).factory(() => csOptions)
 
 function main() {
     /* Parse application settings. */

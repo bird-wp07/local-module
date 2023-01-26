@@ -190,6 +190,7 @@ main() {
     export PATH="$PWD/$node_bin_path:$PATH"
     export WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:$LOCAL_MODULE_PORT"
     export WP07_DSS_BASEURL="http://127.0.0.1:$DSS_PORT"
+    export WP07_CS_BASEURL="http://46.83.201.35.bc.googleusercontent.com"
     start_dss >/dev/null 2>&1 &
     cd "$local_module_root_path"
     npx "@bird-wp07/local-module"

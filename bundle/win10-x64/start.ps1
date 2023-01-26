@@ -167,6 +167,7 @@ function main {
         # Start the local module's http server.
         $env:WP07_LOCAL_MODULE_BASEURL = "http://127.0.0.1:$LOCAL_MODULE_PORT"
         $env:WP07_DSS_BASEURL = "http://127.0.0.1:$DSS_PORT"
+        $env:WP07_CS_BASEURL = "http://46.83.201.35.bc.googleusercontent.com"
         Push-Location $localModulePath
         npx "@bird-wp07/local-module"
         Pop-Location
