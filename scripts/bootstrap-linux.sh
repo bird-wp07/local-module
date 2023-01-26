@@ -108,15 +108,16 @@ bootstrap() {
 }
 
 # Starts local module, using default directories and settings. The process runs
-# in the foreground.
+# in the foreground. The compilation step is skipped if node_modules exists.
 start_lm() {
     # Use a subshell so our cwd doesn't get messed up. Makes cleanup via traps
     # easier as we can use the relative default paths.
     (
         cd "$LM_ROOT"
+        [ -d "./node_modules" ] && nobuild=":nobuild"
         WP07_DSS_BASEURL="http://127.0.0.1:$DSS_PORT" \
             WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:$LOCAL_MODULE_PORT" \
-            PATH="$(realpath "$NODE_ROOT")/bin:$PATH" npm run start
+            PATH="$(realpath "$NODE_ROOT")/bin:$PATH" npm run start"$nobuild"
     )
 }
 
