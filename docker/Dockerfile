@@ -7,8 +7,7 @@ RUN apt install -y curl zsh bash p7zip-full xz-utils default-jre
 # enough for our purpose. DSS uses port 8080 by default.
 WORKDIR /root
 RUN curl -Lo "./dss-demo-bundle-5.11.zip" "https://github.com/bird-wp07/dss-demonstrations/releases/download/5.11/dss-demo-bundle-5.11.zip"
-RUN 7z x -y "./dss-demo-bundle-5.11.zip" \
-    && rm -r "./dss-demo-bundle-5.11/java"
+RUN 7z x -y "./dss-demo-bundle-5.11.zip"
 EXPOSE 8080
 
 # Download and extract portable node. This is used to run the local module and
