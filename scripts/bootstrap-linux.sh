@@ -30,12 +30,12 @@ if [ -t 1 ]; then
 else
     __log() {
         a="$1"; b="$2"; c="$3"; shift 3;
-        printf -- "@\n" | sed "s/^/[$a] $c: /"
+        printf -- "$@\n" | sed "s/^/[$a] $c: /"
     }
 fi
 prefix="start.sh" # beware: must escape sed-relevant characters
-log_info() { __log "$prefix" "info" "\x1b[32;1m" "$*"; }
-log_err() { __log "$prefix" "err " "\x1b[31;1m" "$*"; }
+log_info() { __log "$prefix" "info" "\x1b[32;1m" "$@"; }
+log_err() { __log "$prefix" "err " "\x1b[31;1m" "$@"; }
 
 # Installs java into $1.
 install_jdk() {
