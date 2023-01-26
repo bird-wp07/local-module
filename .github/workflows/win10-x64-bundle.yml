@@ -24,7 +24,7 @@ jobs:
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module ps2exe
-          Invoke-ps2exe -inputFile .\start.ps1 -iconFile ..\assets\bird.ico -version $env:GITHUB_REF_NAME.substring(1) -outputFile .\start.exe
+          Invoke-ps2exe -inputFile .\start.ps1 -iconFile ..\assets\bird.ico -outputFile .\start.exe
 
       - name: Build archive
         working-directory: zip
