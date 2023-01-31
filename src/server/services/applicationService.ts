@@ -8,14 +8,11 @@ import {
     MergePDFRequest,
     MergePDFResponse,
     ValidateSignedPdfRequest,
-    ValidateSignedPdfResponse,
-    ValidateSignedPdfResult
+    ValidateSignedPdfResponse
 } from "../controllers/types"
 import { GetDataToSignRequest, MergeDocumentRequest, ValidateSignedDocumentRequest } from "./types"
 import { Inject, Singleton } from "typescript-ioc"
 import { ISignatureServiceClient } from "../../clients"
-import { CsValidationRequest, EHashType } from "../../clients/cs"
-import * as crypto from "crypto"
 
 @Singleton
 export class ApplicationService {
