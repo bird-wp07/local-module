@@ -17,22 +17,27 @@ import {
     convert,
     DssSignDocumentRequest,
     DssSignDocumentResponse,
-    DssToSignDocumentParams
+    DssToSignDocumentParams,
+    DssValidateSignatureValue
 } from "./types"
-import { Base64, ESignatureLevel } from "../../types/common"
+import { Base64, ESignatureLevel, EValidationSteps } from "../../types/common"
 import * as xml2js from "xml2js"
 import {
     GetDataToSignRequest,
     GetDataToSignResponse,
+    GetSignatureValueRequest,
+    GetSignatureValueResponse,
     MergeDocumentRequest,
     MergeDocumentResponse,
     ValidateSignedDocumentRequest,
-    ValidateSignedDocumentResponse
+    ValidateSignedDocumentResponse,
+    ValidateSignedDocumentResult
 } from "../../server/services"
 import { Inject } from "typescript-ioc"
 
-export class DssClient implements IDocumentClient {
+export class DssClient extends IDocumentClient {
     constructor(@Inject private httpClient: IHttpClient, @Inject options: DssClientOptions) {
+        super()
         this.httpClient.setBaseUrl(options.baseUrl)
     }
 
@@ -121,42 +126,71 @@ export class DssClient implements IDocumentClient {
         return requestData
     }
 
-    public async validateSignature(request: ValidateSignedDocumentRequest): Promise<Result<ValidateSignedDocumentResponse, Error>> {
-        const dssRequest: DssValidateSignatureRequest = {
-            signedDocument: {
-                bytes: request.signedDocument.bytes,
-                name: request.signedDocument.name,
-                digestAlgorithm: null
-            },
-            originalDocuments: request.originalDocuments as DssToSignDocumentParams[],
-            policy: null,
-            signatureId: null
-        }
+    public async validate(request: ValidateSignedDocumentRequest): Promise<Result<ValidateSignedDocumentResponse, Error>> {
+        const dssRequest = this.convertValidationRequest(request)
         const response = await this.httpClient.post<DssValidateSignatureResponse>("/services/rest/validation/validateSignature", dssRequest)
         if (response.isErr()) {
             return err(this.parseError(response.error))
         }
 
-        let result: ValidateSignedDocumentResponse
+        let result: ValidateSignedDocumentResult
         const signatures = response.value.SimpleReport.signatureOrTimestamp
 
         /* Check for checked signature. If none are returned, we respond with
          * an error, in contrast to DSS. */
         if (signatures == undefined || signatures.length === 0) {
             result = {
-                result: ESignatureValidationIndication.TOTAL_FAILED,
+                validationStep: EValidationSteps.SIGNATURE,
+                passed: false,
                 reason: "NO_SIGNATURE"
             }
         } else if (signatures.length === 1) {
             result = {
-                result: signatures[0].Signature.Indication,
+                validationStep: EValidationSteps.SIGNATURE,
+                passed: signatures[0].Signature.Indication === ESignatureValidationIndication.TOTAL_PASSED ? true : false,
                 reason: signatures[0].Signature.SubIndication
             }
         } else {
             throw new Error("Multiple signatures not yet supported.")
         }
 
-        return ok(result)
+        return ok({ results: [result] })
+    }
+
+    public async getSignatureValue(request: GetSignatureValueRequest): Promise<Result<GetSignatureValueResponse, Error>> {
+        const dssRequest = this.convertValidationRequest(request)
+        const response = await this.httpClient.post<DssValidateSignatureValue>("/services/rest/validation/validateSignature", dssRequest)
+        if (response.isErr()) {
+            return err(this.parseError(response.error))
+        }
+
+        const signatures = response.value.DiagnosticData.Signature
+
+        if (signatures && signatures.length === 1) {
+            const signatureValue: GetSignatureValueResponse = {
+                signatureValue: signatures[0].SignatureValue
+            }
+            return ok(signatureValue)
+        } else {
+            throw new Error("No or multiple signatures found.")
+        }
+    }
+
+    private convertValidationRequest(request: ValidateSignedDocumentRequest | GetSignatureValueRequest): DssValidateSignatureRequest {
+        const dssRequest: DssValidateSignatureRequest = {
+            signedDocument: {
+                bytes: request.signedDocument.bytes,
+                name: request.signedDocument.name,
+                digestAlgorithm: null
+            },
+            originalDocuments: [] as DssToSignDocumentParams[],
+            policy: null,
+            signatureId: null
+        }
+        if ("originalDocuments" in request) {
+            dssRequest.originalDocuments = request.originalDocuments as DssToSignDocumentParams[]
+        }
+        return dssRequest
     }
 
     /**

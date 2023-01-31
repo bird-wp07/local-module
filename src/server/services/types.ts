@@ -1,4 +1,4 @@
-import { Base64, EDigestAlgorithm, ESignatureLevel, ESignaturePackaging } from "../../types/common"
+import { Base64, EDigestAlgorithm, ESignatureLevel, ESignaturePackaging, EValidationSteps } from "../../types/common"
 
 export interface GetDataToSignRequest {
     signatureLevel: ESignatureLevel
@@ -32,7 +32,18 @@ export interface ValidateSignedDocumentRequest {
     originalDocuments?: Document[]
 }
 
-export interface ValidateSignedDocumentResponse {
-    result: string
+export interface ValidateSignedDocumentResult {
+    validationStep: EValidationSteps
+    passed: boolean
     reason: string | null
+}
+
+export interface ValidateSignedDocumentResponse {
+    results: ValidateSignedDocumentResult[]
+}
+
+export type GetSignatureValueRequest = Pick<ValidateSignedDocumentRequest, "signedDocument">
+
+export interface GetSignatureValueResponse {
+    signatureValue: Base64
 }

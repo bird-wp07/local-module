@@ -6,8 +6,8 @@ import { findLm, makeCsClient, makeDssClient } from "./testsHelper"
 import { httpReq } from "../src/utility"
 import { CsClient } from "../src/clients/cs"
 import * as Dss from "../src/clients/dss"
-import { DigestPDFRequest, MergePDFRequest, ValidateSignedPdfRequest, ValidateSignedPdfResponse } from "../src/server/controllers/types"
-import { EDigestAlgorithm } from "../src/types/common"
+import { DigestPDFRequest, EValidateSignedPdfResult, MergePDFRequest, ValidateSignedPdfRequest, ValidateSignedPdfResponse } from "../src/server/controllers/types"
+import { EDigestAlgorithm, EValidationSteps } from "../src/types/common"
 import { ApplicationService } from "../src/server/services"
 import { IDocumentClient } from "../src/clients"
 
@@ -20,7 +20,7 @@ describe("Digest, Sign, Merge, Verify", () => {
     before("Init", async () => {
         dssClient = await makeDssClient()
         csClient = await makeCsClient()
-        service = new ApplicationService(dssClient)
+        service = new ApplicationService(dssClient, csClient)
     })
 
     for (const pdfpath of ["./assets/unsigned.pdf", "./assets/Test5.pdf", "./assets/Test6.pdf", "./assets/Test7.pdf"]) {
@@ -36,7 +36,7 @@ describe("Digest, Sign, Merge, Verify", () => {
             expect(digestPdfRes.isErr()).to.be.false
             const digest = digestPdfRes._unsafeUnwrap().digest
 
-            const exampleSignatureRequest: Cs.ISignatureRequest = {
+            const exampleSignatureRequest: Cs.CsSignatureRequest = {
                 auditLog: "Signing of Test Document",
                 issuerId: "ID-OF-YOUR-KEY",
                 hash: digest,
@@ -66,8 +66,8 @@ describe("Digest, Sign, Merge, Verify", () => {
             // COMBAK: Adjust result and reason once the cs root certificate's metadata is complete.
             //         See #27
             const want: ValidateSignedPdfResponse = {
-                result: Dss.ESignatureValidationIndication.INDETERMINATE,
-                reason: Dss.ESignatureValidationSubIndication.TRY_LATER
+                result: EValidateSignedPdfResult.TOTAL_FAILED,
+                reasons: [{ validationStep: EValidationSteps.SIGNATURE, passed: false, reason: Dss.ESignatureValidationSubIndication.TRY_LATER }]
             }
             expect(have).to.deep.equal(want)
         })
@@ -85,7 +85,7 @@ describe("Digest, Sign, Merge, Verify", () => {
         expect(digestPdfRes.isErr()).to.be.false
         const digest = digestPdfRes._unsafeUnwrap().digest
 
-        const exampleSignatureRequest: Cs.ISignatureRequest = {
+        const exampleSignatureRequest: Cs.CsSignatureRequest = {
             auditLog: "Signing of Test Document",
             issuerId: "ID-OF-YOUR-KEY",
             hash: digest,
@@ -118,7 +118,7 @@ describe("Digest, Sign, Merge, Verify", () => {
         expect(digestPdfRes.isErr()).to.be.false
         const digest = digestPdfRes._unsafeUnwrap().digest
 
-        const exampleSignatureRequest: Cs.ISignatureRequest = {
+        const exampleSignatureRequest: Cs.CsSignatureRequest = {
             auditLog: "Signing of TestDocument",
             issuerId: "ID-OF-YOUR-KEY",
             hash: digest,
@@ -205,10 +205,11 @@ describe("Digest, Sign, Merge, Verify via HTTP APIs", () => {
             })
             expect(resValidate.isErr()).to.be.false
             const validationResult = resValidate._unsafeUnwrap().data
-            expect(validationResult).to.deep.equal({
-                result: Dss.ESignatureValidationIndication.INDETERMINATE,
-                reason: Dss.ESignatureValidationSubIndication.TRY_LATER
-            })
+            const want: ValidateSignedPdfResponse = {
+                result: EValidateSignedPdfResult.TOTAL_FAILED,
+                reasons: [{ validationStep: EValidationSteps.SIGNATURE, passed: false, reason: Dss.ESignatureValidationSubIndication.TRY_LATER }]
+            }
+            expect(validationResult).to.deep.equal(want)
         })
     }
     /* eslint-enable */

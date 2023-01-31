@@ -1,13 +1,25 @@
-import { Result } from "neverthrow"
+import { err, ok, Result } from "neverthrow"
 import { ESignatureLevel, ESignaturePackaging } from "../../types/common"
 import { IDocumentClient } from "../../clients"
-import { DigestPDFRequest, DigestPDFResponse, MergePDFRequest, MergePDFResponse, ValidateSignedPdfRequest, ValidateSignedPdfResponse } from "../controllers/types"
+import {
+    DigestPDFRequest,
+    DigestPDFResponse,
+    EValidateSignedPdfResult,
+    MergePDFRequest,
+    MergePDFResponse,
+    ValidateSignedPdfRequest,
+    ValidateSignedPdfResponse,
+    ValidateSignedPdfResult
+} from "../controllers/types"
 import { GetDataToSignRequest, MergeDocumentRequest, ValidateSignedDocumentRequest } from "./types"
 import { Inject, Singleton } from "typescript-ioc"
+import { ISignatureServiceClient } from "../../clients"
+import { CsValidationRequest, EHashType } from "../../clients/cs"
+import * as crypto from "crypto"
 
 @Singleton
 export class ApplicationService {
-    constructor(@Inject public documentClient: IDocumentClient) {}
+    constructor(@Inject private documentClient: IDocumentClient, @Inject private signatureClient: ISignatureServiceClient) {}
 
     // TODO: add validation
     public async createDigestForPDF(request: DigestPDFRequest): Promise<Result<DigestPDFResponse, Error>> {
@@ -26,7 +38,18 @@ export class ApplicationService {
                 bytes: request.bytes
             }
         }
-        return await this.documentClient.validateSignature(documentValidationRequest)
+        const validateDocumentResult = await this.documentClient.validate(documentValidationRequest)
+        if (validateDocumentResult.isErr()) {
+            return err(validateDocumentResult.error)
+        }
+
+        const overallResults = validateDocumentResult.value.results
+        const overallValidation = overallResults.every((res) => res.passed) ? EValidateSignedPdfResult.TOTAL_PASSED : EValidateSignedPdfResult.TOTAL_FAILED
+        const response: ValidateSignedPdfResponse = {
+            result: overallValidation,
+            reasons: overallResults
+        }
+        return ok(response)
     }
 
     private convertDigestPDFRequest(request: DigestPDFRequest): GetDataToSignRequest {

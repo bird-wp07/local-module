@@ -146,6 +146,16 @@ export enum ESignatureValidationSubIndication {
     /* NOTE: A TOTAL_PASSED result provides no reasons. */
 }
 
+export interface DssValidateSignature {
+    SignatureValue: Base64
+}
+
+export interface DssValidateSignatureValue {
+    DiagnosticData: {
+        Signature: DssValidateSignature[] | null
+    }
+}
+
 export interface DssSignatureOrTimestamp {
     Signature: {
         Indication: ESignatureValidationIndication

@@ -32,3 +32,8 @@ export enum EASiCContainerType {
     ASiC_S,
     ASiC_E
 }
+
+export enum EValidationSteps {
+    SIGNATURE = "signature validation",
+    ISSUER = "issuer validation"
+}

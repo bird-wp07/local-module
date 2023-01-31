@@ -8,8 +8,8 @@ import { HttpClient } from "../src/clients"
  * Creates a Cs.CsClient and calls #isOnline(), throwing in case of failure.
  */
 export async function makeCsClient(): Promise<Cs.CsClient> {
-    const csBaseUrl = process.env.WP07_CS_BASEURL ?? "https://46.83.201.35.bc.googleusercontent.com"
-    const csClient = new Cs.CsClient(csBaseUrl)
+    const csBaseUrl = process.env.WP07_CS_BASEURL ?? "http://46.83.201.35.bc.googleusercontent.com"
+    const csClient = new Cs.CsClient({ baseUrl: csBaseUrl }, new HttpClient())
     const isOnline = await csClient.isOnline()
     if (!isOnline) {
         throw new Error(`CS cannot be reached at '${csClient.baseUrl}'.`)

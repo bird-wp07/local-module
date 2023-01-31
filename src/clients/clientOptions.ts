@@ -9,3 +9,7 @@ export class DssClientOptions implements IClientOptions {
 export class CsClientOptions implements IClientOptions {
     baseUrl: string
 }
+
+export class VerificationClientOptions implements IClientOptions {
+    baseUrl: string
+}

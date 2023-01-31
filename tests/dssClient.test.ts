@@ -6,7 +6,7 @@ import { expect } from "chai"
 import chai from "chai"
 import chaiSubset from "chai-subset"
 import { GetDataToSignRequest, ValidateSignedDocumentRequest, ValidateSignedDocumentResponse } from "../src/server/services"
-import { EDigestAlgorithm, ESignatureLevel, ESignaturePackaging } from "../src/types/common"
+import { EDigestAlgorithm, ESignatureLevel, ESignaturePackaging, EValidationSteps } from "../src/types/common"
 import { DssClient, ESignatureValidationIndication, ESignatureValidationSubIndication } from "../src/clients/dss"
 import { getDigestValueFromXmldsig } from "../src/clients/dss"
 
@@ -47,10 +47,15 @@ describe(DssClient.name, () => {
                     bytes: originalFileB64
                 }
             }
-            const have = (await dssClient.validateSignature(request))._unsafeUnwrap()
+            const have = (await dssClient.validate(request))._unsafeUnwrap()
             const want: ValidateSignedDocumentResponse = {
-                result: ESignatureValidationIndication.TOTAL_PASSED,
-                reason: null
+                results: [
+                    {
+                        validationStep: EValidationSteps.SIGNATURE,
+                        passed: true,
+                        reason: null
+                    }
+                ]
             }
             expect(have).to.containSubset(want)
         })
@@ -62,11 +67,17 @@ describe(DssClient.name, () => {
                     bytes: originalFileB64
                 }
             }
-            const have = (await dssClient.validateSignature(request))._unsafeUnwrap()
+            const have = (await dssClient.validate(request))._unsafeUnwrap()
             const want: ValidateSignedDocumentResponse = {
-                result: ESignatureValidationIndication.INDETERMINATE,
-                reason: ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
+                results: [
+                    {
+                        validationStep: EValidationSteps.SIGNATURE,
+                        passed: false,
+                        reason: ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
+                    }
+                ]
             }
+
             expect(have).to.containSubset(want)
         })
 
@@ -85,11 +96,17 @@ describe(DssClient.name, () => {
                     }
                 ]
             }
-            const have = (await dssClient.validateSignature(request))._unsafeUnwrap()
+            const have = (await dssClient.validate(request))._unsafeUnwrap()
             const want: ValidateSignedDocumentResponse = {
-                result: ESignatureValidationIndication.INDETERMINATE,
-                reason: ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
+                results: [
+                    {
+                        validationStep: EValidationSteps.SIGNATURE,
+                        passed: false,
+                        reason: ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
+                    }
+                ]
             }
+
             expect(have).to.containSubset(want)
         })
 
@@ -109,10 +126,15 @@ describe(DssClient.name, () => {
                     }
                 ]
             }
-            const have = (await dssClient.validateSignature(request))._unsafeUnwrap()
+            const have = (await dssClient.validate(request))._unsafeUnwrap()
             const want: ValidateSignedDocumentResponse = {
-                result: ESignatureValidationIndication.TOTAL_FAILED,
-                reason: ESignatureValidationSubIndication.HASH_FAILURE
+                results: [
+                    {
+                        validationStep: EValidationSteps.SIGNATURE,
+                        passed: false,
+                        reason: ESignatureValidationSubIndication.HASH_FAILURE
+                    }
+                ]
             }
             expect(have).to.containSubset(want)
         })
@@ -143,7 +165,7 @@ describe(DssClient.name, () => {
                         }
                     ]
                 }
-                const response = (await dssClient.validateSignature(request))._unsafeUnwrap()
+                const response = (await dssClient.validate(request))._unsafeUnwrap()
                 responses.push(response)
             }
 
