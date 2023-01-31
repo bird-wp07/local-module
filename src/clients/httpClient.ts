@@ -4,7 +4,7 @@ import { err, ok, Result } from "neverthrow"
 export abstract class IHttpClient {
     public abstract setBaseUrl(baseUrl: string): void
 
-    public abstract get<T>(path: string): Promise<Result<T, AxiosError | Error>>
+    public abstract get<T>(path: string, queryParams?: any): Promise<Result<T, AxiosError | Error>>
 
     public abstract post<T>(path: string, body: unknown): Promise<Result<T, AxiosError | Error>>
 }
@@ -16,11 +16,13 @@ export class HttpClient implements IHttpClient {
         this.baseUrl = baseUrl
     }
 
-    public async get<T>(path: string): Promise<Result<T, AxiosError | Error>> {
+    public async get<T>(path: string, queryParams?: any): Promise<Result<T, AxiosError | Error>> {
         const config: AxiosRequestConfig = {
             method: "GET",
             url: path,
-            baseURL: this.baseUrl
+            baseURL: this.baseUrl,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            params: queryParams
         }
         const response = await this.runHttpRequest(config)
         if (response.isErr()) {

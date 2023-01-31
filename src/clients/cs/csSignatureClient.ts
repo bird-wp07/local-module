@@ -1,10 +1,10 @@
 import { ok, err, Result } from "neverthrow"
-import { CsSignatureResponse, CsSignatureRequest, CsValidationRequest, EHashType, CsValidationResponse } from "./types"
+import { CsSignatureResponse, CsSignatureRequest, CsValidationRequest, CsValidationResponse } from "./types"
 import { Inject } from "typescript-ioc"
 import { IHttpClient } from "../httpClient"
 import { ISignatureServiceClient } from "../ISignatureServiceClient"
 import { CsClientOptions } from "../clientOptions"
-import { ValidateSignedDocumentRequest, ValidateSignedDocumentResponse, ValidateSignedDocumentResult } from "../../server/services"
+import { ValidateSignedDocumentResponse, ValidateSignedDocumentResult } from "../../server/services"
 import { EValidationSteps } from "../../types/common"
 
 export class CsClient implements ISignatureServiceClient {
@@ -40,7 +40,8 @@ export class CsClient implements ISignatureServiceClient {
     }
 
     public async validate(request: CsValidationRequest): Promise<Result<ValidateSignedDocumentResponse, Error>> {
-        const validationResponse = await this.httpClient.post<CsValidationResponse>("api/v1/verifier/verifications", request)
+        const verificationQuery = this.buildVerificationQuery(request)
+        const validationResponse = await this.httpClient.get<CsValidationResponse>("api/v1/verifier/verifications" + verificationQuery)
         if (validationResponse.isErr()) {
             return err(validationResponse.error)
         }
@@ -51,10 +52,10 @@ export class CsClient implements ISignatureServiceClient {
         return ok({ results: results })
     }
 
-    private convertValidationRequest(request: ValidateSignedDocumentRequest): CsValidationRequest {
-        return {
-            hash: request.signedDocument.bytes,
-            hashType: EHashType.SIGNATURE_HASH
-        }
+    private buildVerificationQuery(request: CsValidationRequest): string {
+        const queryValues = Object.keys(request).map((key) => {
+            return `${key}=${request[key as keyof CsValidationRequest]}`
+        })
+        return "?" + queryValues.join("&")
     }
 }
