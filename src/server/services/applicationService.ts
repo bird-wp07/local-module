@@ -13,8 +13,6 @@ import {
 import { GetDataToSignRequest, MergeDocumentRequest, ValidateSignedDocumentRequest } from "./types"
 import { Inject, Singleton } from "typescript-ioc"
 import { ISignatureServiceClient } from "../../clients"
-import * as crypto from "crypto"
-import { CsValidationRequest, EHashType } from "../../clients/cs"
 
 @Singleton
 export class ApplicationService {
@@ -43,7 +41,7 @@ export class ApplicationService {
         }
 
         // TODO: currently we get the signature hash by getting the signatureValue from dss, hash it with crypto with sha 256 and base64 encode it
-        // Using this hash, the central service returns and error
+        // Using this hash, the central service returns an error
         // How to get working examples? Response from Felix:
         // Wenn Du Einen Signing-Request absendest, bekommst du einen ETag-Header mit zu deiner Antwort
         // (Das nutzen wir momentan für unsere Tests, ist also ein undokumentiertes Magic-Feature für den nichtproduktiven Gebrauch, aber sollte erstmal eine gute Hilfestellung sein).

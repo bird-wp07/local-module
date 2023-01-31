@@ -7,7 +7,7 @@ import chai from "chai"
 import chaiSubset from "chai-subset"
 import { GetDataToSignRequest, ValidateSignedDocumentRequest, ValidateSignedDocumentResponse } from "../src/server/services"
 import { EDigestAlgorithm, ESignatureLevel, ESignaturePackaging, EValidationSteps } from "../src/types/common"
-import { DssClient, ESignatureValidationIndication, ESignatureValidationSubIndication } from "../src/clients/dss"
+import { DssClient, ESignatureValidationSubIndication } from "../src/clients/dss"
 import { getDigestValueFromXmldsig } from "../src/clients/dss"
 
 chai.use(chaiSubset)
