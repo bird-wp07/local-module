@@ -6,7 +6,8 @@ export enum EDssErrorCode {
     DOC_CANNOT_BE_MODIFIED = "DOC_CANNOT_BE_MODIFIED",
     CERTIFICATE_NOT_YET_VALID = "CERTIFICATE_NOT_YET_VALID",
     CERTIFICATE_EXPIRED = "CERTIFICATE_EXPIRED",
-    UNHANDLED_ERROR = "UNHANDLED_ERROR"
+    UNHANDLED_ERROR = "UNHANDLED_ERROR",
+    PROPERTY_MISSING = "PROPERTY_MISSING"
 }
 
 /**
@@ -91,5 +92,11 @@ export class UnhandledError extends DssError {
         } else {
             super("Unhandled error", EDssErrorCode.UNHANDLED_ERROR)
         }
+    }
+}
+
+export class PropertyMissing extends DssError {
+    public constructor(propertyName: string) {
+        super(`DSS requires a ${propertyName} structure to merge the document and signature`, EDssErrorCode.PROPERTY_MISSING)
     }
 }

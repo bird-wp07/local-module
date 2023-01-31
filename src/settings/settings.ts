@@ -9,6 +9,7 @@ import { Errors } from "."
  */
 export const localModuleBaseUrlEnvvar = "WP07_LOCAL_MODULE_BASEURL"
 export const dssBaseUrlEnvvar = "WP07_DSS_BASEURL"
+export const csBaseUrlEnvvar = "WP07_CS_BASEURL"
 
 /* Initialize project-wide logger. */
 export const logger = createLogger({
@@ -44,6 +45,9 @@ export interface IApplicationSettings {
     /* Base url of the DSS API. Parsed from the 'WP07_DSS_BASEURL' envvar.
      * Never has a trailing slash. */
     dssBaseUrl: string
+
+    /* Base url of the central service API. Parsed from the 'WP07_CS_BASEURL' envvar. */
+    csBaseUrl: string
 }
 
 export function parseApplicationSettings(env = process.env): Result<IApplicationSettings, Errors.MissingEnvvar | Errors.InvalidEnvvarValue | Error> {
@@ -63,7 +67,7 @@ export function parseApplicationSettings(env = process.env): Result<IApplication
      *
      * NOTE: The protocol parsed from a url by the urllib always
      *       contains a trailing colon. */
-    for (const envvar of [dssBaseUrlEnvvar, localModuleBaseUrlEnvvar]) {
+    for (const envvar of [dssBaseUrlEnvvar, localModuleBaseUrlEnvvar, csBaseUrlEnvvar]) {
         if (env[envvar] == undefined) {
             return err(new Errors.MissingEnvvar(envvar))
         }
@@ -91,7 +95,8 @@ export function parseApplicationSettings(env = process.env): Result<IApplication
 
     const result: IApplicationSettings = {
         localModuleBaseUrl: env[localModuleBaseUrlEnvvar]!,
-        dssBaseUrl: env[dssBaseUrlEnvvar]!
+        dssBaseUrl: env[dssBaseUrlEnvvar]!,
+        csBaseUrl: env[csBaseUrlEnvvar]!
     }
     return ok(result)
 }

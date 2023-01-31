@@ -40,7 +40,7 @@ run_container() {
 
 # This is executed inside the container. We must go deeper.
 run_tests() {
-    export WP07_CS_BASEURL=https://46.83.201.35.bc.googleusercontent.com
+    export WP07_CS_BASEURL=http://46.83.201.35.bc.googleusercontent.com
     export WP07_DSS_BASEURL=http://127.0.0.1:8080
     export WP07_LOCAL_MODULE_BASEURL=http://127.0.0.1:2048
     export WP07_LOCAL_MODULE_SIGNAL_PID=$$

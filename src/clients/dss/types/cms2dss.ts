@@ -1,49 +1,13 @@
 /* eslint-disable */
-import { AsnParser, AsnSerializer } from "@peculiar/asn1-schema"
-import { SignedData } from "@peculiar/asn1-cms"
-import { OIDS } from "./oids"
-import { OIDS2DSS, OIDS2DSSMappingType } from "./oids2dss"
-import * as Dss from "../dss"
-
 import ASN1 from "@lapo/asn1js"
-import { Base64 } from "../types/common"
+import { EDigestAlgorithm, ESignatureAlgorithm, ESignatureLevel, ESignaturePackaging, DssCert, DssSignDocumentRequest } from "./dss"
+import { OIDS } from "./../../../utility/oids"
+import * as ASNSchema from "@peculiar/asn1-schema"
+import { SignedData } from "@peculiar/asn1-cms"
 
 export interface ICms2DssResponse {
     cmsContent: ICmsContent
-    dssParams: ISignDocumentRequest
-}
-
-export interface IDssCert {
-    encodedCertificate: string
-}
-
-export interface IDssBLevelParams {
-    signingDate: number
-}
-
-export interface IDssSigningParams {
-    signWithExpiredCertificate: false
-    generateTBSWithoutCertificate: false
-    signatureLevel: Dss.ESignatureLevel
-    signaturePackaging?: Dss.ESignaturePackaging
-    signatureAlgorithm?: Dss.ESignatureAlgorithm
-    encryptionAlgorithm?: Dss.EEncryptionAlgorithm
-    digestAlgorithm: Dss.EDigestAlgorithm
-    signingCertificate: IDssCert
-    certificateChain: IDssCert[]
-    blevelParams?: IDssBLevelParams
-}
-export interface IDssSignatureValue {
-    algorithm: Dss.ESignatureAlgorithm
-    value: string
-}
-
-export interface ISignDocumentRequest {
-    toSignDocument?: {
-        bytes: Base64
-    }
-    parameters: IDssSigningParams
-    signatureValue: IDssSignatureValue
+    dssParams: DssSignDocumentRequest
 }
 
 export interface ICmsContent {
@@ -57,10 +21,22 @@ export interface ICmsContent {
 export interface ICmsSignerInfo {
     version: number
     names?: string[]
-    digestAlgorithm: Dss.EDigestAlgorithm
-    signatureAlgorithm: Dss.ESignatureAlgorithm
+    digestAlgorithm: EDigestAlgorithm
+    signatureAlgorithm: ESignatureAlgorithm
     signature: string
     signedAttributes?: string[]
+}
+
+export const OIDS2DSS = {
+    ecdsaWithSHA256: "ECDSA_SHA256",
+    ecdsaWithSHA256_digest: "SHA256",
+    ecdsaWithSHA256_encryption: "ECDSA",
+    "sha-256_digest": "SHA256"
+}
+export enum OIDS2DSSMappingType {
+    Default = "",
+    Digest = "digest",
+    Encryption = "encryption"
 }
 
 export function mapOIDValueAsDigest(oidValue: string) {
@@ -79,6 +55,7 @@ export function mapOIDValue(oidValue: string, type: OIDS2DSSMappingType = OIDS2D
     return value
 }
 
+/* eslint-disable */
 export function convert(base64OfCMS: string): ICms2DssResponse {
     const OIDRepository = OIDS as any
 
@@ -87,12 +64,12 @@ export function convert(base64OfCMS: string): ICms2DssResponse {
     // Ignore the PKCS#7 Header Data, start with the first SEQUENCE within (Signed Data)
     const signedData = asn1.sub![1].sub![0]
 
-    const cms = AsnParser.parse(Buffer.from(signedData.toB64String(), "base64"), SignedData)
+    const cms = ASNSchema.AsnParser.parse(Buffer.from(signedData.toB64String(), "base64"), SignedData)
 
     const digestAlgorithm = mapOIDValueAsDigest(OIDRepository[cms.digestAlgorithms[0].algorithm].d)
     const contentType = OIDRepository[cms.encapContentInfo.eContentType].d
     const signerInfoDigestAlgorithm = "" + cms.signerInfos[0].digestAlgorithm.algorithm
-    const signerInfoBase64 = Buffer.from(AsnSerializer.serialize(cms.signerInfos[0])).toString("base64")
+    const signerInfoBase64 = Buffer.from(ASNSchema.AsnSerializer.serialize(cms.signerInfos[0])).toString("base64")
 
     const signerInfo: ICmsSignerInfo = {
         version: cms.signerInfos[0].version,
@@ -114,9 +91,9 @@ export function convert(base64OfCMS: string): ICms2DssResponse {
     }
     const certificates: any[] = []
     cms.certificates?.forEach((value: any) => {
-        certificates.push(Buffer.from(AsnSerializer.serialize(value)).toString("base64"))
+        certificates.push(Buffer.from(ASNSchema.AsnSerializer.serialize(value)).toString("base64"))
     })
-    const dssCertificateChain: IDssCert[] = []
+    const dssCertificateChain: DssCert[] = []
     certificates.forEach((value: string) => {
         dssCertificateChain.push({
             encodedCertificate: value
@@ -138,8 +115,8 @@ export function convert(base64OfCMS: string): ICms2DssResponse {
                 generateTBSWithoutCertificate: false,
                 signWithExpiredCertificate: false,
                 signatureAlgorithm: signerInfo.signatureAlgorithm,
-                signaturePackaging: Dss.ESignaturePackaging.ENVELOPED,
-                signatureLevel: Dss.ESignatureLevel.PAdES_B,
+                signaturePackaging: ESignaturePackaging.ENVELOPED,
+                signatureLevel: ESignatureLevel.PAdES_B,
                 signingCertificate: dssCertificateChain[0]
             },
             signatureValue: {

@@ -1,48 +1,54 @@
-// HACK: Local namespace imports (import * as Dss from "../../dss") bug out tsoa.
-//       Generated models, which use types that are referred to via namespace (e.g.
-//       Dss.EDigestAlgorithm), are wrong and will mess up validation.
-//       See #11.
-import { EDigestAlgorithm, ESignatureValidationIndication, ESignatureValidationSubIndication } from "../../dss"
-import { Base64 } from "../../types/common"
+import { Base64, EDigestAlgorithm, EValidationSteps } from "../../types/common"
 
-export interface IDigestBlobRequest {
+export interface DigestBlobRequest {
     bytes: Base64
     digestAlgorithm: EDigestAlgorithm
 }
 
-export interface IDigestBlobResponse {
+export interface DigestBlobResponse {
     digest: Base64
 }
 
-export interface IDigestPDFRequest {
+export interface DigestPDFRequest {
     digestAlgorithm: EDigestAlgorithm
     bytes: Base64
     signingTimestamp?: number // unix ms
 }
 
-export interface IDigestPDFResponse {
+export interface DigestPDFResponse {
     digest: Base64
 }
 
-export interface IMergePDFRequest {
+export interface MergePDFRequest {
     bytes: Base64
     signatureAsCMS: Base64
     signingTimestamp: number
 }
 
-export interface IMergePDFResponse {
+export interface MergePDFResponse {
     bytes: Base64
 }
 
-export interface IValidateSignedPdfResponse {
-    result: ESignatureValidationIndication
-    reason: ESignatureValidationSubIndication | "NO_SIGNATURE" | null
-}
-
-export interface IValidateSignedPdfRequest {
+export interface ValidateSignedPdfRequest {
     bytes: Base64
 }
 
-export interface IGetHealthResponse {
+export interface ValidateSignedPdfResult {
+    validationStep: EValidationSteps
+    passed: boolean
+    reason: string | null
+}
+
+export enum EValidateSignedPdfResult {
+    TOTAL_PASSED = "TOTAL_PASSED",
+    TOTAL_FAILED = "TOTAL_FAILED"
+}
+
+export interface ValidateSignedPdfResponse {
+    result: EValidateSignedPdfResult
+    reasons: ValidateSignedPdfResult[]
+}
+
+export interface GetHealthResponse {
     status: "ok"
 }

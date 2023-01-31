@@ -1,12 +1,32 @@
 import * as Settings from "./settings"
 import { logger } from "./settings"
-import * as Dss from "./dss"
 import http from "http"
 import { app } from "./server"
+import { DssClient } from "./clients/dss"
+import { HttpClient, IDocumentClient, IHttpClient, ISignatureServiceClient } from "./clients"
+import { CsClientOptions, DssClientOptions } from "./clients/clientOptions"
+import { Container, Scope } from "typescript-ioc"
+import "./server/controllers/signatureController"
+import "./server/services"
+import { CsClient } from "./clients/cs"
 
-let dssClient: Dss.DssClient
+const settingsRes = Settings.parseApplicationSettings()
+if (settingsRes.isErr()) {
+    console.error(settingsRes.error.message)
+    process.exit(1)
+}
+const settings = settingsRes.value
 
-async function main() {
+Container.bind(IHttpClient).to(HttpClient).scope(Scope.Local)
+Container.bind(IDocumentClient).to(DssClient).scope(Scope.Singleton)
+const dssOptions: DssClientOptions = { baseUrl: settings.dssBaseUrl }
+Container.bind(DssClientOptions).factory(() => dssOptions)
+
+Container.bind(ISignatureServiceClient).to(CsClient).scope(Scope.Singleton)
+const csOptions: CsClientOptions = { baseUrl: settings.csBaseUrl }
+Container.bind(CsClientOptions).factory(() => csOptions)
+
+function main() {
     /* Parse application settings. */
     const settingsRes = Settings.parseApplicationSettings()
     if (settingsRes.isErr()) {
@@ -14,17 +34,6 @@ async function main() {
         process.exit(1)
     }
     const settings = settingsRes.value
-
-    /* Wait for DSS startup to fininsh. */
-    dssClient = new Dss.DssClient(settings.dssBaseUrl)
-    const wait = 3600
-    logger.info(`Waiting for DSS to respond at '${settings.dssBaseUrl}' ... `)
-    const isOnline = await dssClient.isOnline({ waitSeconds: wait })
-    if (!isOnline) {
-        logger.error("DSS didn't respond. Abort.")
-        process.exit(1)
-    }
-    logger.info("DSS responded. Starting HTTP server ... ")
 
     /* Start our http server. */
     const split = settings.localModuleBaseUrl.split("://")[1].split(":")
@@ -42,7 +51,4 @@ async function main() {
     })
 }
 
-void main()
-
-// HACK: Make dssClient available in digestController
-export { dssClient }
+main()

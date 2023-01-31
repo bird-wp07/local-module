@@ -1,4 +1,4 @@
-import { Base64 } from "../types/common"
+import { Base64 } from "../../../types/common"
 
 export enum ESignatureAlgorithm {
     RSA_SHA256 = "RSA_SHA256",
@@ -40,51 +40,60 @@ export enum EDigestAlgorithm {
     SHA512 = "SHA512"
 }
 
-/**
- * Base64 encoded blob or digest with an optional filename.
- *
- * @field bytes - base64 encoded blob or digest
- * @field digestAlgorithm - the respective digest algorithm used or null/undefined for a raw blob
- * @field name - an optional filename
- */
-export interface IBlobOrDigest {
+export interface DssBLevelParams {
+    signingDate: number
+}
+
+export interface DssCert {
+    encodedCertificate: string
+}
+
+export interface DssSigningParams {
+    signWithExpiredCertificate?: boolean
+    generateTBSWithoutCertificate?: boolean
+    signatureLevel: ESignatureLevel
+    signaturePackaging?: ESignaturePackaging
+    signatureAlgorithm?: ESignatureAlgorithm
+    encryptionAlgorithm?: EEncryptionAlgorithm
+    digestAlgorithm?: EDigestAlgorithm
+    signingCertificate?: DssCert
+    certificateChain?: DssCert[]
+    blevelParams?: DssBLevelParams
+}
+
+export interface DssSignatureValue {
+    algorithm: ESignatureAlgorithm
+    value: string
+}
+
+export interface DssToSignDocumentParams {
     bytes: Base64
     digestAlgorithm?: EDigestAlgorithm | null
     name?: string
 }
 
-export interface IGetDataToSignRequest {
-    // TODO: Replace with IBlobOrDigest
+export interface DssSignDocumentRequest {
+    toSignDocument?: DssToSignDocumentParams
+    parameters: DssSigningParams
+    signatureValue: DssSignatureValue
+}
+
+export interface DssSignDocumentResponse {
+    bytes: Base64
+}
+
+export interface DssGetDataToSignRequest {
     toSignDocument: {
         bytes: Base64
         name?: string
     }
-    parameters?: {
-        signingCertificate?: {
-            encodedCertificate: Base64
-        }
-        signatureLevel?: ESignatureLevel
-        signaturePackaging?: ESignaturePackaging
-        signatureAlgorithm?: ESignatureAlgorithm
-        digestAlgorithm?: EDigestAlgorithm
-        encryptionAlgorithm?: EEncryptionAlgorithm
-        generateTBSWithoutCertificate?: boolean
-        blevelParams?: {
-            signingDate: number
-        }
-    }
+    parameters: DssSigningParams
 }
 
-export interface IGetDataToSignResponse {
+export interface DssGetDataToSignResponse {
     bytes: Base64
 }
 
-export interface ISignDataResponse {
-    bytes: Base64
-}
-export interface IDigestResponse {
-    digest: string
-}
 /**
  * Possible results ("indications") of a signature validation. See
  *
@@ -137,7 +146,17 @@ export enum ESignatureValidationSubIndication {
     /* NOTE: A TOTAL_PASSED result provides no reasons. */
 }
 
-export interface ISignatureOrTimestamp {
+export interface DssValidateSignature {
+    SignatureValue: Base64
+}
+
+export interface DssValidateSignatureValue {
+    DiagnosticData: {
+        Signature: DssValidateSignature[] | null
+    }
+}
+
+export interface DssSignatureOrTimestamp {
     Signature: {
         Indication: ESignatureValidationIndication
 
@@ -146,16 +165,16 @@ export interface ISignatureOrTimestamp {
     }
 }
 
-export interface IValidateSignatureResponse {
+export interface DssValidateSignatureResponse {
     SimpleReport: {
         // NOTE: the lowercase 's' is not a typo
-        signatureOrTimestamp: ISignatureOrTimestamp[] | null
+        signatureOrTimestamp: DssSignatureOrTimestamp[] | null
     }
 }
 
-export interface IValidateSignatureRequest {
-    signedDocument: IBlobOrDigest
-    originalDocuments: IBlobOrDigest[]
+export interface DssValidateSignatureRequest {
+    signedDocument: DssToSignDocumentParams
+    originalDocuments: DssToSignDocumentParams[]
     policy: null
     signatureId: null
 }

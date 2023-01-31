@@ -1,38 +1,42 @@
 import { expect } from "chai"
 import { describe, test } from "mocha"
 import * as fs from "fs"
-import * as Cs from "../src/cs"
-import * as Dss from "../src/dss"
-import * as service from "../src/server/controllers"
-import { IDigestPDFRequest, IMergePDFRequest, IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "../src/server/controllers/types"
+import * as Cs from "../src/clients/cs"
 import { findLm, makeCsClient, makeDssClient } from "./testsHelper"
 import { httpReq } from "../src/utility"
-import { CsClient } from "../src/cs"
+import { CsClient } from "../src/clients/cs"
+import * as Dss from "../src/clients/dss"
+import { DigestPDFRequest, EValidateSignedPdfResult, MergePDFRequest, ValidateSignedPdfRequest, ValidateSignedPdfResponse } from "../src/server/controllers/types"
+import { EDigestAlgorithm, EValidationSteps } from "../src/types/common"
+import { ApplicationService } from "../src/server/services"
+import { IDocumentClient } from "../src/clients"
 
 describe("Digest, Sign, Merge, Verify", () => {
     // NOTE: The signing certificate used by the cs is valid
     //       from 2022-11-25T12:29:00Z to 2023-11-25T12:29:00Z
-    let dssClient: Dss.DssClient
+    let dssClient: IDocumentClient
     let csClient: Cs.CsClient
+    let service: ApplicationService
     before("Init", async () => {
         dssClient = await makeDssClient()
         csClient = await makeCsClient()
+        service = new ApplicationService(dssClient, csClient)
     })
 
     for (const pdfpath of ["./assets/unsigned.pdf", "./assets/Test5.pdf", "./assets/Test6.pdf", "./assets/Test7.pdf"]) {
         test(`Happy path for ${pdfpath}`, async () => {
             const timestampUnixms = Number(new Date("2022-11-25T12:30:00Z"))
             const pdfBase64 = fs.readFileSync(pdfpath).toString("base64")
-            const digestPdfRequest: IDigestPDFRequest = {
+            const digestPdfRequest: DigestPDFRequest = {
                 bytes: pdfBase64,
-                digestAlgorithm: Dss.EDigestAlgorithm.SHA256,
+                digestAlgorithm: EDigestAlgorithm.SHA256,
                 signingTimestamp: timestampUnixms
             }
-            const digestPdfRes = await new service.DigestFacade(dssClient).digestPDF(digestPdfRequest)
+            const digestPdfRes = await service.createDigestForPDF(digestPdfRequest)
             expect(digestPdfRes.isErr()).to.be.false
             const digest = digestPdfRes._unsafeUnwrap().digest
 
-            const exampleSignatureRequest: Cs.ISignatureRequest = {
+            const exampleSignatureRequest: Cs.CsSignatureRequest = {
                 auditLog: "Signing of Test Document",
                 issuerId: "ID-OF-YOUR-KEY",
                 hash: digest,
@@ -43,27 +47,27 @@ describe("Digest, Sign, Merge, Verify", () => {
             const signedCms = getSignedCmsRes._unsafeUnwrap()
             const cms = signedCms.cms
 
-            const mergePdfRequest: IMergePDFRequest = {
+            const mergePdfRequest: MergePDFRequest = {
                 bytes: pdfBase64,
                 signatureAsCMS: cms,
                 signingTimestamp: timestampUnixms
             }
-            const mergePdfRes = await new service.MergeFacade(dssClient).mergePDF(mergePdfRequest)
+            const mergePdfRes = await service.mergePDF(mergePdfRequest)
             expect(mergePdfRes.isErr()).to.be.false
             const signedPdfBase64 = mergePdfRes._unsafeUnwrap()
 
-            const validateSignatureRequest: IValidateSignedPdfRequest = {
+            const validateSignatureRequest: ValidateSignedPdfRequest = {
                 bytes: signedPdfBase64.bytes
             }
             // COMBAK: Add authorization check to validation eventually.
-            const validationResult = await new service.ValidateFacade(dssClient).validateSignature(validateSignatureRequest)
+            const validationResult = await service.validatePDFSignature(validateSignatureRequest)
             expect(validationResult.isErr()).to.be.false
             const have = validationResult._unsafeUnwrap()
             // COMBAK: Adjust result and reason once the cs root certificate's metadata is complete.
             //         See #27
-            const want: IValidateSignedPdfResponse = {
-                result: Dss.ESignatureValidationIndication.INDETERMINATE,
-                reason: Dss.ESignatureValidationSubIndication.TRY_LATER
+            const want: ValidateSignedPdfResponse = {
+                result: EValidateSignedPdfResult.TOTAL_FAILED,
+                reasons: [{ validationStep: EValidationSteps.SIGNATURE, passed: false, reason: Dss.ESignatureValidationSubIndication.TRY_LATER }]
             }
             expect(have).to.deep.equal(want)
         })
@@ -72,16 +76,16 @@ describe("Digest, Sign, Merge, Verify", () => {
     test("Merging a signature based on an expired certificate doesn't work", async () => {
         const timestampUnixms = Number(new Date("2028-01-01T12:30:00Z"))
         const pdfBase64 = fs.readFileSync("./assets/unsigned.pdf").toString("base64")
-        const digestPdfRequest: IDigestPDFRequest = {
+        const digestPdfRequest: DigestPDFRequest = {
             bytes: pdfBase64,
-            digestAlgorithm: Dss.EDigestAlgorithm.SHA256,
+            digestAlgorithm: EDigestAlgorithm.SHA256,
             signingTimestamp: timestampUnixms
         }
-        const digestPdfRes = await new service.DigestFacade(dssClient).digestPDF(digestPdfRequest)
+        const digestPdfRes = await service.createDigestForPDF(digestPdfRequest)
         expect(digestPdfRes.isErr()).to.be.false
         const digest = digestPdfRes._unsafeUnwrap().digest
 
-        const exampleSignatureRequest: Cs.ISignatureRequest = {
+        const exampleSignatureRequest: Cs.CsSignatureRequest = {
             auditLog: "Signing of Test Document",
             issuerId: "ID-OF-YOUR-KEY",
             hash: digest,
@@ -92,29 +96,29 @@ describe("Digest, Sign, Merge, Verify", () => {
         const signedCms = getSignedCmsRes._unsafeUnwrap()
         const cms = signedCms.cms
 
-        const mergePdfRequest: IMergePDFRequest = {
+        const mergePdfRequest: MergePDFRequest = {
             bytes: pdfBase64,
             signatureAsCMS: cms,
             signingTimestamp: timestampUnixms
         }
-        const mergePdfRes = await new service.MergeFacade(dssClient).mergePDF(mergePdfRequest)
+        const mergePdfRes = await service.mergePDF(mergePdfRequest)
         expect(mergePdfRes.isErr()).to.be.true
-        expect(mergePdfRes._unsafeUnwrapErr()).to.be.instanceOf(Dss.Errors.CertificateExpired)
+        expect(mergePdfRes._unsafeUnwrapErr()).to.be.instanceOf(Dss.CertificateExpired)
     })
 
     test("Merging a signature based on a not-yet-valid certificate doesn't work", async () => {
         const timestampUnixms = Number(new Date("2021-01-01T12:30:00Z"))
         const pdfBase64 = fs.readFileSync("./assets/unsigned.pdf").toString("base64")
-        const digestPdfRequest: IDigestPDFRequest = {
+        const digestPdfRequest: DigestPDFRequest = {
             bytes: pdfBase64,
-            digestAlgorithm: Dss.EDigestAlgorithm.SHA256,
+            digestAlgorithm: EDigestAlgorithm.SHA256,
             signingTimestamp: timestampUnixms
         }
-        const digestPdfRes = await new service.DigestFacade(dssClient).digestPDF(digestPdfRequest)
+        const digestPdfRes = await service.createDigestForPDF(digestPdfRequest)
         expect(digestPdfRes.isErr()).to.be.false
         const digest = digestPdfRes._unsafeUnwrap().digest
 
-        const exampleSignatureRequest: Cs.ISignatureRequest = {
+        const exampleSignatureRequest: Cs.CsSignatureRequest = {
             auditLog: "Signing of TestDocument",
             issuerId: "ID-OF-YOUR-KEY",
             hash: digest,
@@ -125,14 +129,14 @@ describe("Digest, Sign, Merge, Verify", () => {
         const signedCms = getSignedCmsRes._unsafeUnwrap()
         const cms = signedCms.cms
 
-        const mergePdfRequest: IMergePDFRequest = {
+        const mergePdfRequest: MergePDFRequest = {
             bytes: pdfBase64,
             signatureAsCMS: cms,
             signingTimestamp: timestampUnixms
         }
-        const mergePdfRes = await new service.MergeFacade(dssClient).mergePDF(mergePdfRequest)
+        const mergePdfRes = await service.mergePDF(mergePdfRequest)
         expect(mergePdfRes.isErr()).to.be.true
-        expect(mergePdfRes._unsafeUnwrapErr()).to.be.instanceOf(Dss.Errors.CertificateNotYetValid)
+        expect(mergePdfRes._unsafeUnwrapErr()).to.be.instanceOf(Dss.CertificateNotYetValid)
     })
 })
 
@@ -201,10 +205,11 @@ describe("Digest, Sign, Merge, Verify via HTTP APIs", () => {
             })
             expect(resValidate.isErr()).to.be.false
             const validationResult = resValidate._unsafeUnwrap().data
-            expect(validationResult).to.deep.equal({
-                result: Dss.ESignatureValidationIndication.INDETERMINATE,
-                reason: Dss.ESignatureValidationSubIndication.TRY_LATER
-            })
+            const want: ValidateSignedPdfResponse = {
+                result: EValidateSignedPdfResult.TOTAL_FAILED,
+                reasons: [{ validationStep: EValidationSteps.SIGNATURE, passed: false, reason: Dss.ESignatureValidationSubIndication.TRY_LATER }]
+            }
+            expect(validationResult).to.deep.equal(want)
         })
     }
     /* eslint-enable */

@@ -1,6 +1,6 @@
 {
     "name": "@bird-wp07/local-module",
-    "version": "0.0.59",
+    "version": "0.0.60",
     "license": "",
     "bin": "./bin/start",
     "files": [
@@ -33,12 +33,14 @@
         "@tsoa/runtime": "^4.1.3",
         "@types/node": "^18.11.9",
         "axios": "^1.2.2",
+        "crypto": "^1.0.1",
         "express": "^4.18.2",
         "fs": "^0.0.1-security",
         "neverthrow": "^5.1.0",
         "swagger-ui-express": "^4.6.0",
         "tsoa": "^4.1.3",
         "typescript": "^4.9.3",
+        "typescript-ioc": "^3.2.2",
         "wait-for-event": "^2.0.1",
         "winston": "^3.8.2",
         "xml2js": "^0.4.23"

@@ -4,7 +4,7 @@ import swaggerDoc from "../../generated/swagger.json"
 import express, { json, urlencoded, Request as ExRequest, Response as ExResponse, NextFunction } from "express"
 import { RegisterRoutes } from "../../generated/routes"
 import { logger } from "../settings"
-import * as Dss from "../dss"
+import { DssError } from "../clients/dss"
 
 export const HTTP_MAX_PAYLOAD_SIZE_BYTES = 80000000
 
@@ -43,7 +43,7 @@ app.use(function errorHandler(err: unknown, req: ExRequest, res: ExResponse, nex
         }
 
         /* Process DSS-related errors. */
-        if (err instanceof Dss.Errors.DssError) {
+        if (err instanceof DssError) {
             logger.debug(`Caught DSS Error for ${req.path}.`)
             return res.status(400).json({
                 code: `DSS_${err.code}`,
@@ -65,6 +65,7 @@ app.use(function errorHandler(err: unknown, req: ExRequest, res: ExResponse, nex
         }
 
         logger.error(`Caught unhandled error for ${req.path}.`)
+        logger.error(JSON.stringify(err))
         return res.status(500).json({
             code: "SYS_UNHANDLED_ERROR",
             message: `Unhandled error: ${JSON.stringify(err)}`

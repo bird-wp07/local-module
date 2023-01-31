@@ -1,15 +1,20 @@
-import * as Cs from "../src/cs"
-import * as Dss from "../src/dss"
+import * as Cs from "../src/clients/cs"
+import { DssClientOptions } from "../src/clients/clientOptions"
+import { DssClient } from "../src/clients/dss/dssClient"
 import { httpReq } from "../src/utility"
+import { HttpClient } from "../src/clients"
 
 /**
  * Creates a Cs.CsClient and calls #isOnline(), throwing in case of failure.
  */
 export async function makeCsClient(): Promise<Cs.CsClient> {
-    const csBaseUrl = process.env.WP07_CS_BASEURL ?? "https://46.83.201.35.bc.googleusercontent.com"
-    const csClient = new Cs.CsClient(csBaseUrl)
+    const csBaseUrl = process.env.WP07_CS_BASEURL ?? "http://46.83.201.35.bc.googleusercontent.com"
+    const csClient = new Cs.CsClient({ baseUrl: csBaseUrl }, new HttpClient())
     const isOnline = await csClient.isOnline()
-    if (!isOnline) {
+    if (isOnline.isErr()) {
+        throw new Error(`CS cannot be reached at '${csClient.baseUrl}'.`)
+    }
+    if (!isOnline.value) {
         throw new Error(`CS cannot be reached at '${csClient.baseUrl}'.`)
     }
     return csClient
@@ -18,12 +23,14 @@ export async function makeCsClient(): Promise<Cs.CsClient> {
 /**
  * Creates a Dss.DssClient and calls #isOnline(), throwing in case of failure.
  */
-export async function makeDssClient(): Promise<Dss.DssClient> {
+export async function makeDssClient(): Promise<DssClient> {
     const dssBaseUrl = process.env.WP07_DSS_BASEURL ?? "http://127.0.0.1:8080"
-    const dssClient = new Dss.DssClient(dssBaseUrl)
+    const clientOptions: DssClientOptions = { baseUrl: dssBaseUrl }
+    const dssClient = new DssClient(new HttpClient(), clientOptions)
+
     const isOnline = await dssClient.isOnline()
-    if (!isOnline) {
-        throw new Error(`DSS cannot be reached at '${dssClient.baseUrl}'.`)
+    if (isOnline.isErr() || !isOnline.value.valueOf()) {
+        throw new Error(`DSS cannot be reached at '${dssBaseUrl}'.`)
     }
     return dssClient
 }
