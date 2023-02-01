@@ -25,12 +25,12 @@ DSS_PID_FILE=".dss.pid"
 if [ -t 1 ]; then
     __log() {
         a="$1"; b="$2"; c="$3"; shift 3;
-        printf -- "$@\n" | sed "s/^/[$a] $c$b\x1b[0m: /"
+        printf -- "$*\n" | sed "s/^/[$a] $c$b\x1b[0m: /"
     }
 else
     __log() {
         a="$1"; b="$2"; c="$3"; shift 3;
-        printf -- "$@\n" | sed "s/^/[$a] $c: /"
+        printf -- "$*\n" | sed "s/^/[$a] $c: /"
     }
 fi
 prefix="start.sh" # beware: must escape sed-relevant characters

@@ -18,7 +18,6 @@ run_container() {
     # TODO: Use git and shellmagic to dynamically generate this list
     docker run -it --rm \
         -v "$(realpath ./assets)":/root/assets \
-        -v "$(realpath ./bin)":/root/bin \
         -v "$(realpath ./bundle)":/root/bundle \
         -v "$(realpath ./.eslintrc)":/root/.eslintrc \
         -v "$(realpath ./.github)":/root/.github \

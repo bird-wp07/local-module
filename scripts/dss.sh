@@ -19,7 +19,7 @@ dss_run() {
     fi
 
     build_docker_image
-    docker run -it${detach} -p $port:8080 --rm --name "$PROJECT_DOCKER_IMAGE_NAME-dss-$port" "$PROJECT_DOCKER_IMAGE_NAME"
+    docker run -it${detach} -p $port:8089 --rm --name "$PROJECT_DOCKER_IMAGE_NAME-dss-$port" "$PROJECT_DOCKER_IMAGE_NAME" ./start.sh start_dss
 }
 
 dss_stop() {
