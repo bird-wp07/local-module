@@ -149,3 +149,61 @@ export function convert(base64OfCMS: string): ICms2DssResponse {
         }
     }
 }
+
+/**
+ * Parses a CMS structure and returns certain fields of interest in their
+ * cleartext name.
+ */
+export function parseCms(cms: Buffer): ICmsContent {
+    const OIDRepository = OIDS as any
+
+    const asn1 = ASN1.decode(cms)
+    // const asn1 = ASN1.decode(Buffer.from(cms, "base64"))
+
+    // Ignore the PKCS#7 Header Data, start with the first SEQUENCE within (Signed Data)
+    const signedData = asn1.sub![1].sub![0]
+
+    const cmsStruct = AsnParser.parse(Buffer.from(signedData.toB64String(), "base64"), SignedData)
+
+    const digestAlgorithm = mapOIDValueAsDigest(OIDRepository[cmsStruct.digestAlgorithms[0].algorithm].d)
+    const contentType = OIDRepository[cmsStruct.encapContentInfo.eContentType].d
+    const signerInfoDigestAlgorithm = "" + cmsStruct.signerInfos[0].digestAlgorithm.algorithm
+    const signerInfoBase64 = Buffer.from(AsnSerializer.serialize(cmsStruct.signerInfos[0])).toString("base64")
+
+    const signerInfo: ICmsSignerInfo = {
+        version: cmsStruct.signerInfos[0].version,
+        names: cmsStruct.signerInfos[0].sid.issuerAndSerialNumber?.issuer.map((value: any) => {
+            if (OIDRepository[value[0].type]) {
+                return `${OIDRepository[value[0].type].d as string} = ${value[0].value as string}`
+            }
+            return `${value[0].type as string} = ${value[0].value as string}`
+        }),
+        digestAlgorithm: mapOIDValueAsDigest(OIDRepository[signerInfoDigestAlgorithm].d),
+        signatureAlgorithm: mapOIDValue(OIDRepository[cmsStruct.signerInfos[0].signatureAlgorithm.algorithm].d),
+        signature: Buffer.from(cmsStruct.signerInfos[0].signature.buffer).toString("base64"),
+        signedAttributes: cmsStruct.signerInfos[0].signedAttrs?.map((value: any) => {
+            if (OIDRepository[value.attrType]) {
+                return `${OIDRepository[value.attrType].d as string} = ${Buffer.from(value.attrValues[0]).toString("base64")}`
+            }
+            return `${value.attrType} = ${Buffer.from(value.attrValues[0]).toString("base64")}`
+        })
+    }
+    const certificates: any[] = []
+    cmsStruct.certificates?.forEach((value: any) => {
+        certificates.push(Buffer.from(AsnSerializer.serialize(value)).toString("base64"))
+    })
+    const dssCertificateChain: IDssCert[] = []
+    certificates.forEach((value: string) => {
+        dssCertificateChain.push({
+            encodedCertificate: value
+        })
+    })
+
+    return {
+            digestAlgorithm,
+            contentType,
+            signerInfo,
+            signerInfoBase64,
+            certificates
+    }
+}
