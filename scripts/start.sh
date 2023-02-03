@@ -62,7 +62,6 @@ install_dss() {
         jq -r '.assets[] | select(.browser_download_url | endswith("tar.gz")).browser_download_url' |
         xargs -n1 curl -Lso - |
         tar -xvzf - --strip-components 1 -C "$1"
-    rm -r "$1/java" # delete windows jre
 }
 
 # Installs standalone node into $1. $PATH is not modified.
