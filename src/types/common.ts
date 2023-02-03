@@ -1,1 +1,6 @@
-export type Base64 = string
+/* eslint-disable */ // disable eslint to use &{} Hack; See https://github.com/microsoft/TypeScript/issues/31940.
+
+/**
+ * Base64 encoded binary.
+ */
+export type Base64 = string & {}

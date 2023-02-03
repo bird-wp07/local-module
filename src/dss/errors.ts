@@ -70,7 +70,7 @@ export class CertificateNotYetValid extends DssError {
 }
 
 /**
- *  Error indicating an expired certificate. May be caused by attempting to
+ * Error indicating an expired certificate. May be caused by attempting to
  * merge a signature with a document using a timestamp that's outside the
  * temporal scope of the certificate.
  */

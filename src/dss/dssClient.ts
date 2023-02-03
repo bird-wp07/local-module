@@ -4,7 +4,6 @@ import { AxiosError, AxiosRequestConfig } from "axios"
 import * as Utility from "../utility"
 import { IGetDataToSignRequest, IGetDataToSignResponse, ISignDataResponse, IValidateSignatureRequest, IValidateSignatureResponse } from "./types"
 import { Base64 } from "../types/common"
-import { ISignDocumentRequest } from "../utility"
 import * as Dss from "."
 
 // TODO: makeDssClient()
@@ -65,7 +64,7 @@ export class DssClient {
         return ok(response.value.data)
     }
 
-    public async signDocument(request: ISignDocumentRequest): Promise<Result<ISignDataResponse, Error>> {
+    public async signDocument(request: Dss.ISignDocumentRequest): Promise<Result<ISignDataResponse, Error>> {
         const config: AxiosRequestConfig = {
             method: "POST",
             url: "/services/rest/signature/one-document/signDocument",
@@ -95,11 +94,7 @@ export class DssClient {
 
     /**
      * Transforms the response produced by invalid or unsuccessful DSS requests
-     * into meaningful, typed errors.
-     *
-     * Implemented on a need-to-have basis; WIP
-     *
-     * @param err The error returned by httpReq
+     * into meaningful, typed errors. Paths are implemented as needed.
      */
     static parseError(err: any): Error {
         if (err instanceof AxiosError) {

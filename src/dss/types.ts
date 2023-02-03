@@ -159,3 +159,36 @@ export interface IValidateSignatureRequest {
     policy: null
     signatureId: null
 }
+
+export interface IDssCert {
+    encodedCertificate: string
+}
+
+export interface IDssBLevelParams {
+    signingDate: number
+}
+
+export interface IDssSigningParams {
+    signWithExpiredCertificate: false
+    generateTBSWithoutCertificate: false
+    signatureLevel: ESignatureLevel
+    signaturePackaging?: ESignaturePackaging
+    signatureAlgorithm?: ESignatureAlgorithm
+    encryptionAlgorithm?: EEncryptionAlgorithm
+    digestAlgorithm: EDigestAlgorithm
+    signingCertificate: IDssCert
+    certificateChain: IDssCert[]
+    blevelParams?: IDssBLevelParams
+}
+export interface IDssSignatureValue {
+    algorithm: ESignatureAlgorithm
+    value: string
+}
+
+export interface ISignDocumentRequest {
+    toSignDocument?: {
+        bytes: Base64
+    }
+    parameters: IDssSigningParams
+    signatureValue: IDssSignatureValue
+}

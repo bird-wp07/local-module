@@ -4,7 +4,7 @@ import { ok, err, Result } from "neverthrow"
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios"
 import axios from "axios"
 
-/*
+/**
  * Neverthrow axios wrapper.
  */
 export async function httpReq(config: AxiosRequestConfig): Promise<Result<AxiosResponse, AxiosError | Error>> {
@@ -23,7 +23,7 @@ export async function sleepms(ms: number) {
     return util.promisify(setTimeout)(ms)
 }
 
-/*
+/**
  * Checks whether 'port' is a valid port, i.e. an integer in (0, 65535].
  */
 export function isValidPort(port: number) {
@@ -33,7 +33,7 @@ export function isValidPort(port: number) {
     return true
 }
 
-/*
+/**
  * Parses a file of utf-8 encoded, single-line key=value pairs. Lines
  * starting with a literal '#' character are ignored, as well as lines not
  * containing a literal '='. The first literal '=' character is used to
