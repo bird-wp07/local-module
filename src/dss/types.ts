@@ -1,4 +1,4 @@
-import { Base64 } from "../types/common"
+import { Base64, UnixTimeMs } from "../types/common"
 
 /**
  * Possible results ("indications") of a signature validation. See
@@ -111,7 +111,7 @@ export interface IGetDataToSignRequest {
         encryptionAlgorithm?: EEncryptionAlgorithm
         generateTBSWithoutCertificate?: boolean
         blevelParams?: {
-            signingDate: number
+            signingDate: UnixTimeMs
         }
     }
 }
@@ -169,7 +169,7 @@ export interface ISignDocumentRequest {
         signingCertificate: IDssCert
         certificateChain: IDssCert[]
         blevelParams?: {
-            signingDate: number
+            signingDate: UnixTimeMs
         }
     }
 

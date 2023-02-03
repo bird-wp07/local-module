@@ -3,12 +3,12 @@
 //       Dss.EDigestAlgorithm), are wrong and will mess up validation.
 //       See #11.
 import { EDigestAlgorithm, ESignatureValidationIndication, ESignatureValidationSubIndication } from "../../dss"
-import { Base64 } from "../../types/common"
+import { Base64, UnixTimeMs } from "../../types/common"
 
 export interface IDigestPDFRequest {
     digestAlgorithm: EDigestAlgorithm
     bytes: Base64
-    signingTimestamp?: number // unix ms
+    signingTimestamp?: UnixTimeMs
 }
 
 export interface IDigestPDFResponse {
@@ -18,7 +18,7 @@ export interface IDigestPDFResponse {
 export interface IMergePDFRequest {
     bytes: Base64
     signatureAsCMS: Base64
-    signingTimestamp: number
+    signingTimestamp: UnixTimeMs
 }
 
 export interface IMergePDFResponse {
