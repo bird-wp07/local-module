@@ -1,94 +1,8 @@
 import { Base64 } from "../types/common"
 
-export enum ESignatureAlgorithm {
-    RSA_SHA256 = "RSA_SHA256",
-    ECDSA_SHA256 = "ECDSA_SHA256"
-}
-
-export enum EEncryptionAlgorithm {
-    RSA = "RSA",
-    ECDSA = "ECDSA"
-}
-
-export enum EASiCContainerType {
-    ASiC_S,
-    ASiC_E
-}
-
-export enum ESignatureLevel {
-    PAdES_B = "PAdES_BASELINE_B",
-    PAdES_LT = "PAdES_BASELINE_LT",
-    PAdES_LTA = "PAdES_BASELINE_LTA",
-    XAdES_B = "XAdES_BASELINE_B"
-}
-
-/**
- * See https://ec.europa.eu/digital-building-blocks/wikis/display/ESIGKB/What+is+the+packaging+enveloped+-+detached+-+enveloping+and+internally+detached+of+a+signature
- */
-export enum ESignaturePackaging {
-    ENVELOPING = "ENVELOPING",
-    ENVELOPED = "ENVELOPED",
-    DETACHED = "DETACHED",
-    INTERNALLY_DETACHED = "INTERNALLY_DETACHED"
-}
-
-/** DSS offers much more options, see public enum DigestAlgorithm */
-export enum EDigestAlgorithm {
-    SHA1 = "SHA1",
-    SHA224 = "SHA224",
-    SHA256 = "SHA256",
-    SHA512 = "SHA512"
-}
-
-/**
- * Base64 encoded blob or digest with an optional filename.
- *
- * @field bytes - base64 encoded blob or digest
- * @field digestAlgorithm - the respective digest algorithm used or null/undefined for a raw blob
- * @field name - an optional filename
- */
-export interface IBlobOrDigest {
-    bytes: Base64
-    digestAlgorithm?: EDigestAlgorithm | null
-    name?: string
-}
-
-export interface IGetDataToSignRequest {
-    // TODO: Replace with IBlobOrDigest
-    toSignDocument: {
-        bytes: Base64
-        name?: string
-    }
-    parameters?: {
-        signingCertificate?: {
-            encodedCertificate: Base64
-        }
-        signatureLevel?: ESignatureLevel
-        signaturePackaging?: ESignaturePackaging
-        signatureAlgorithm?: ESignatureAlgorithm
-        digestAlgorithm?: EDigestAlgorithm
-        encryptionAlgorithm?: EEncryptionAlgorithm
-        generateTBSWithoutCertificate?: boolean
-        blevelParams?: {
-            signingDate: number
-        }
-    }
-}
-
-export interface IGetDataToSignResponse {
-    bytes: Base64
-}
-
-export interface ISignDataResponse {
-    bytes: Base64
-}
-export interface IDigestResponse {
-    digest: string
-}
 /**
  * Possible results ("indications") of a signature validation. See
- *
- *     https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/doc/dss-documentation.html#SignatureValidationModel
+ * https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/doc/dss-documentation.html#SignatureValidationModel
  *
  * NOTE: In contrast to the documentation, the DSS response uses underscores instead of dashes (e.g. 'TOTAL_PASSED',
  *       not 'TOTAL-PASSED').
@@ -101,8 +15,7 @@ export enum ESignatureValidationIndication {
 
 /**
  * Possible reasons ("subindication") for all possible validation results. See
- *
- *     https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/doc/dss-documentation.html#SignatureValidationModel
+ * https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/doc/dss-documentation.html#SignatureValidationModel
  */
 export enum ESignatureValidationSubIndication {
     /* INDETERMINATE reasons. */
@@ -137,20 +50,81 @@ export enum ESignatureValidationSubIndication {
     /* NOTE: A TOTAL_PASSED result provides no reasons. */
 }
 
-export interface ISignatureOrTimestamp {
-    Signature: {
-        Indication: ESignatureValidationIndication
+/**
+ * Subset of signature algorithms (tuple of encryption and digest algorithms) known to DSS. Implemented as needed.
+ */
+export enum ESignatureAlgorithm {
+    RSA_SHA256 = "RSA_SHA256",
+    ECDSA_SHA256 = "ECDSA_SHA256"
+}
 
-        /* A 'null' subindication is returned iff the indication is TOTAL_PASSED. */
-        SubIndication: ESignatureValidationSubIndication | null
+/**
+ * Subset of encryption algorithms known to DSS. Implemented as needed.
+ */
+export enum EEncryptionAlgorithm {
+    RSA = "RSA",
+    ECDSA = "ECDSA"
+}
+
+// TODOC
+export enum ESignatureLevel {
+    PAdES_B = "PAdES_BASELINE_B",
+    PAdES_LT = "PAdES_BASELINE_LT",
+    PAdES_LTA = "PAdES_BASELINE_LTA",
+    XAdES_B = "XAdES_BASELINE_B" // FIXME: Do we need XAdES... ? Aren't we exclusively concerned with PDFs?
+}
+
+/**
+ * Signature packaging schemes. See
+ * https://ec.europa.eu/digital-building-blocks/wikis/display/ESIGKB/What+is+the+packaging+enveloped+-+detached+-+enveloping+and+internally+detached+of+a+signature
+ */
+export enum ESignaturePackaging {
+    ENVELOPING = "ENVELOPING",
+    ENVELOPED = "ENVELOPED",
+    DETACHED = "DETACHED",
+    INTERNALLY_DETACHED = "INTERNALLY_DETACHED"
+}
+
+/**
+ * Subset of digest algorithms known to DSS. Implemented as needed.
+ */
+export enum EDigestAlgorithm {
+    SHA1 = "SHA1",
+    SHA224 = "SHA224",
+    SHA256 = "SHA256",
+    SHA512 = "SHA512"
+}
+
+export interface IGetDataToSignRequest {
+    toSignDocument: {
+        bytes: Base64
+        name?: string
+    }
+    parameters?: {
+        signingCertificate?: {
+            encodedCertificate: Base64
+        }
+        signatureLevel?: ESignatureLevel
+        signaturePackaging?: ESignaturePackaging
+        signatureAlgorithm?: ESignatureAlgorithm
+        digestAlgorithm?: EDigestAlgorithm
+        encryptionAlgorithm?: EEncryptionAlgorithm
+        generateTBSWithoutCertificate?: boolean
+        blevelParams?: {
+            signingDate: number
+        }
     }
 }
 
-export interface IValidateSignatureResponse {
-    SimpleReport: {
-        // NOTE: the lowercase 's' is not a typo
-        signatureOrTimestamp: ISignatureOrTimestamp[] | null
-    }
+export interface IGetDataToSignResponse {
+    bytes: Base64
+}
+
+/** Helper interface */
+interface IBlobOrDigest {
+    bytes: Base64
+    digestAlgorithm?: EDigestAlgorithm | null
+    name?: string
 }
 
 export interface IValidateSignatureRequest {
@@ -160,35 +134,51 @@ export interface IValidateSignatureRequest {
     signatureId: null
 }
 
-export interface IDssCert {
+export interface IValidateSignatureResponse {
+    SimpleReport: {
+        signatureOrTimestamp: // NOTE: the lowercase 's' is not a typo
+        | {
+                  Signature: {
+                      Indication: ESignatureValidationIndication
+
+                      /* A 'null' subindication is returned iff the indication is TOTAL_PASSED. */
+                      SubIndication: ESignatureValidationSubIndication | null
+                  }
+              }[]
+            | null
+    }
+}
+
+/** Helper interface */
+interface IDssCert {
     encodedCertificate: string
-}
-
-export interface IDssBLevelParams {
-    signingDate: number
-}
-
-export interface IDssSigningParams {
-    signWithExpiredCertificate: false
-    generateTBSWithoutCertificate: false
-    signatureLevel: ESignatureLevel
-    signaturePackaging?: ESignaturePackaging
-    signatureAlgorithm?: ESignatureAlgorithm
-    encryptionAlgorithm?: EEncryptionAlgorithm
-    digestAlgorithm: EDigestAlgorithm
-    signingCertificate: IDssCert
-    certificateChain: IDssCert[]
-    blevelParams?: IDssBLevelParams
-}
-export interface IDssSignatureValue {
-    algorithm: ESignatureAlgorithm
-    value: string
 }
 
 export interface ISignDocumentRequest {
     toSignDocument?: {
         bytes: Base64
     }
-    parameters: IDssSigningParams
-    signatureValue: IDssSignatureValue
+    parameters: {
+        signWithExpiredCertificate: false
+        generateTBSWithoutCertificate: false
+        signatureLevel: ESignatureLevel
+        signaturePackaging?: ESignaturePackaging
+        signatureAlgorithm?: ESignatureAlgorithm
+        encryptionAlgorithm?: EEncryptionAlgorithm
+        digestAlgorithm: EDigestAlgorithm
+        signingCertificate: IDssCert
+        certificateChain: IDssCert[]
+        blevelParams?: {
+            signingDate: number
+        }
+    }
+
+    signatureValue: {
+        algorithm: ESignatureAlgorithm
+        value: string
+    }
+}
+
+export interface ISignDocumentResponse {
+    bytes: Base64
 }

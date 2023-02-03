@@ -1,21 +1,11 @@
 import { makeDssClient } from "./testsHelper"
-import { createHash } from "node:crypto"
-import fs from "fs"
+import * as fs from "fs"
 import { describe, test } from "mocha"
 import { expect } from "chai"
 import chai from "chai"
 import chaiSubset from "chai-subset"
 import * as Dss from "../src/dss"
-import {
-    EDigestAlgorithm,
-    ESignatureLevel,
-    ESignaturePackaging,
-    ESignatureValidationIndication,
-    ESignatureValidationSubIndication,
-    IGetDataToSignRequest,
-    IValidateSignatureRequest,
-    IValidateSignatureResponse
-} from "../src/dss/types"
+import { ESignatureValidationIndication, ESignatureValidationSubIndication, IValidateSignatureRequest, IValidateSignatureResponse } from "../src/dss/types"
 
 chai.use(chaiSubset)
 
@@ -24,32 +14,6 @@ describe("Dss", () => {
         let dssClient: Dss.DssClient
         before("Init", async () => {
             dssClient = await makeDssClient()
-        })
-
-        describe("#getDataToSign()", () => {
-            for (const filename of ["books.xml", "sheep.jpg"]) {
-                test(`produces a correct SHA256 hash of '${filename}'`, async () => {
-                    const bytes = fs.readFileSync(`./assets/${filename}`)
-                    const request: IGetDataToSignRequest = {
-                        parameters: {
-                            signatureLevel: ESignatureLevel.XAdES_B,
-                            digestAlgorithm: EDigestAlgorithm.SHA256,
-                            signaturePackaging: ESignaturePackaging.ENVELOPING,
-                            generateTBSWithoutCertificate: true
-                        },
-                        toSignDocument: {
-                            bytes: bytes.toString("base64")
-                        }
-                    }
-                    const response = await dssClient.getDataToSign(request)
-                    expect(response.isOk()).to.be.true
-                    const data = response._unsafeUnwrap()
-                    const xmldsig = Buffer.from(data.bytes, "base64").toString("utf8")
-                    const have = await Dss.getDigestValueFromXmldsig(xmldsig)
-                    const want = createHash("sha256").update(bytes).digest("base64")
-                    expect(have).to.equal(want)
-                })
-            }
         })
 
         describe("#validateSignature()", () => {

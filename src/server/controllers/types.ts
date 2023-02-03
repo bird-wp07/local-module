@@ -5,15 +5,6 @@
 import { EDigestAlgorithm, ESignatureValidationIndication, ESignatureValidationSubIndication } from "../../dss"
 import { Base64 } from "../../types/common"
 
-export interface IDigestBlobRequest {
-    bytes: Base64
-    digestAlgorithm: EDigestAlgorithm
-}
-
-export interface IDigestBlobResponse {
-    digest: Base64
-}
-
 export interface IDigestPDFRequest {
     digestAlgorithm: EDigestAlgorithm
     bytes: Base64
@@ -34,13 +25,13 @@ export interface IMergePDFResponse {
     bytes: Base64
 }
 
+export interface IValidateSignedPdfRequest {
+    bytes: Base64
+}
+
 export interface IValidateSignedPdfResponse {
     result: ESignatureValidationIndication
     reason: ESignatureValidationSubIndication | "NO_SIGNATURE" | null
-}
-
-export interface IValidateSignedPdfRequest {
-    bytes: Base64
 }
 
 export interface IGetHealthResponse {

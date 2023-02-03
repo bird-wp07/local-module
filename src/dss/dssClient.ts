@@ -1,12 +1,10 @@
-import * as xml2js from "xml2js"
 import { ok, err, Result } from "neverthrow"
 import { AxiosError, AxiosRequestConfig } from "axios"
 import * as Utility from "../utility"
-import { IGetDataToSignRequest, IGetDataToSignResponse, ISignDataResponse, IValidateSignatureRequest, IValidateSignatureResponse } from "./types"
-import { Base64 } from "../types/common"
+import { IGetDataToSignRequest, IGetDataToSignResponse, ISignDocumentResponse, IValidateSignatureRequest, IValidateSignatureResponse } from "./types"
 import * as Dss from "."
 
-// TODO: makeDssClient()
+// TODO: move makeDssClient to dss code.
 
 export class DssClient {
     public baseUrl: string
@@ -64,7 +62,7 @@ export class DssClient {
         return ok(response.value.data)
     }
 
-    public async signDocument(request: Dss.ISignDocumentRequest): Promise<Result<ISignDataResponse, Error>> {
+    public async signDocument(request: Dss.ISignDocumentRequest): Promise<Result<ISignDocumentResponse, Error>> {
         const config: AxiosRequestConfig = {
             method: "POST",
             url: "/services/rest/signature/one-document/signDocument",
@@ -129,21 +127,4 @@ export class DssClient {
         }
         return new Dss.Errors.UnhandledError(err)
     }
-}
-
-/**
- * Extracts the base64 encoded digest value from a xmldsig.
- *
- * @param xml - the complete xmldsig XML structure.
- * @returns The base64 encoded signature value.
- *
- * See 'https://www.w3.org/TR/xmldsig-core1/#sec-SignedInfo'.
- */
-export async function getDigestValueFromXmldsig(xml: string): Promise<Base64> {
-    /* eslint-disable */ // xml2js declarations suck
-    const xmlStruct = await xml2js.parseStringPromise(xml)
-    const digest64: string = xmlStruct["ds:SignedInfo"]["ds:Reference"].filter((e: any) => e.$.Type === "http://www.w3.org/2000/09/xmldsig#Object")[0]["ds:DigestValue"][0]
-    /* eslint-enable */
-
-    return digest64
 }
