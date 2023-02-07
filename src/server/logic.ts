@@ -1,10 +1,11 @@
 import { Result, ok, err } from "neverthrow"
-import { UnixTimeMs, EDigestAlgorithm, IDigestPDFRequest, IDigestPDFResponse } from "./types"
-import * as TsIoc from "typescript-ioc"
+import { EDigestAlgorithm, IDigestPdfRequest, IDigestPDFResponse, IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "./types"
+import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
 
+// TODO: request Object in einzelne pargs aufbrechen für Lesbarkeit
 export class Logic {
-    constructor(@TsIoc.Inject private dssClient: Dss.IDssClient) {
+    constructor(@Ioc.Inject private dssClient: Dss.IDssClient) {
         this.dssClient = dssClient
     }
 
@@ -12,7 +13,7 @@ export class Logic {
         return await this.dssClient.isOnline()
     }
 
-    public async digestPdf(request: IDigestPDFRequest): Promise<Result<IDigestPDFResponse, Error>> {
+    public async digestPdf(request: IDigestPdfRequest): Promise<Result<IDigestPDFResponse, Error>> {
         const getDataToSignRequest: Dss.IGetDataToSignRequest = {
             toSignDocument: {
                 bytes: request.bytes
@@ -33,6 +34,45 @@ export class Logic {
         return ok({ bytes: response.value.bytes })
     }
 
+    public async validateSignedPdf(request: IValidateSignedPdfRequest): Promise<Result<IValidateSignedPdfResponse, Error>> {
+        /* Perform validation by DSS */
+        const validateSignatureRequest: Dss.IValidateSignatureRequest = {
+            signedDocument: {
+                bytes: request.bytes,
+                digestAlgorithm: null
+            },
+            originalDocuments: [],
+            policy: null,
+            signatureId: null
+        }
+        const validateSignatureResponse = await this.dssClient.validateSignature(validateSignatureRequest)
+        if (validateSignatureResponse.isErr()) {
+            return err(validateSignatureResponse.error)
+        }
+
+        /* Check for checked signature. If none are returned, we respond with
+         * an error, in contrast to DSS. */
+        const signatures = validateSignatureResponse.value.SimpleReport.signatureOrTimestamp
+        const numSignatures = signatures == undefined ? 0 : signatures.length
+        if (signatures == undefined || signatures.length !== 1) {
+            return ok({
+                valid: false,
+                details: `document must contain exactly one signature, found ${numSignatures}`
+            })
+        }
+        if (signatures[0].Signature.Indication !== Dss.ESignatureValidationIndication.TOTAL_PASSED) {
+            return ok({
+                valid: false,
+                details: signatures[0].Signature.SubIndication
+            })
+        }
+        return ok({
+            valid: true,
+            details: {}
+        })
+    }
+
+    // TODOC;
     static digestAlgorithmToDss(alg: EDigestAlgorithm): Dss.EDigestAlgorithm {
         switch (alg) {
             case EDigestAlgorithm.SHA256:

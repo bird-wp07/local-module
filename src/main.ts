@@ -1,11 +1,9 @@
 import * as Settings from "./settings"
 import { logger } from "./settings"
 import * as Dss from "./dss"
+import { makeApp } from "./server"
+import * as Ioc from "typescript-ioc"
 import http from "http"
-import * as TsIoc from "typescript-ioc"
-import { Server } from "./server"
-
-let dssClient: Dss.DssClient
 
 async function main() {
     /* Parse application settings. */
@@ -17,7 +15,8 @@ async function main() {
     const settings = settingsRes.value
 
     /* Wait for DSS startup to fininsh. */
-    dssClient = new Dss.DssClient(settings.dssBaseUrl)
+    const dssClient = new Dss.DssClient(settings.dssBaseUrl)
+    Ioc.Container.bind(Dss.IDssClient).factory(() => dssClient)
     const wait = 3600
     logger.info(`Waiting for DSS to respond at '${settings.dssBaseUrl}' ... `)
     const isOnline = await dssClient.isOnline({ waitSeconds: wait })
@@ -31,13 +30,7 @@ async function main() {
     const split = settings.localModuleBaseUrl.split("://")[1].split(":")
     const port = Number(split[1])
     const hostname = split[0]
-
-    TsIoc.Container.bind(Dss.IDssClient).factory(() => dssClient)
-    // .scope(TsIoc.Scope.Singleton)
-
-    const server = TsIoc.Container.get(Server)
-
-    http.createServer(server.expressApp).listen(port, hostname, () => {
+    http.createServer(makeApp()).listen(port, hostname, () => {
         logger.info(`Listening on ${settings.localModuleBaseUrl}. See '/swagger'.`)
 
         /* Send USR1 signal to process waiting for local module to start up.
@@ -50,6 +43,3 @@ async function main() {
 }
 
 void main()
-
-// HACK: Make dssClient available in digestController
-export { dssClient }
