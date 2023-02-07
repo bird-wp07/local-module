@@ -2,7 +2,8 @@ import * as Settings from "./settings"
 import { logger } from "./settings"
 import * as Dss from "./dss"
 import http from "http"
-import { app } from "./server"
+import * as TsIoc from "typescript-ioc"
+import { Server } from "./server"
 
 let dssClient: Dss.DssClient
 
@@ -30,7 +31,13 @@ async function main() {
     const split = settings.localModuleBaseUrl.split("://")[1].split(":")
     const port = Number(split[1])
     const hostname = split[0]
-    http.createServer(app).listen(port, hostname, () => {
+
+    TsIoc.Container.bind(Dss.IDssClient).factory(() => dssClient)
+    // .scope(TsIoc.Scope.Singleton)
+
+    const server = TsIoc.Container.get(Server)
+
+    http.createServer(server.expressApp).listen(port, hostname, () => {
         logger.info(`Listening on ${settings.localModuleBaseUrl}. See '/swagger'.`)
 
         /* Send USR1 signal to process waiting for local module to start up.

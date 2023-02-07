@@ -1,4 +1,4 @@
-import { Base64 } from "../types/common"
+import { Base64 } from "../types"
 
 export interface ISignatureRequest {
     issuerId: string

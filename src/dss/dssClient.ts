@@ -4,9 +4,14 @@ import * as Utility from "../utility"
 import { IGetDataToSignRequest, IGetDataToSignResponse, ISignDocumentResponse, IValidateSignatureRequest, IValidateSignatureResponse } from "./types"
 import * as Dss from "."
 
-// TODO: move makeDssClient to dss code.
+export abstract class IDssClient {
+    public abstract isOnline(options?: { waitSeconds?: number }): Promise<boolean>
+    public abstract getDataToSign(request: IGetDataToSignRequest): Promise<Result<IGetDataToSignResponse, Error>>
+    public abstract signDocument(request: Dss.ISignDocumentRequest): Promise<Result<ISignDocumentResponse, Error>>
+    public abstract validateSignature(request: IValidateSignatureRequest): Promise<Result<IValidateSignatureResponse, Error>>
+}
 
-export class DssClient {
+export class DssClient implements IDssClient {
     public baseUrl: string
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl

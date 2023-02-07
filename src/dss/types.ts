@@ -1,4 +1,4 @@
-import { Base64, UnixTimeMs } from "../types/common"
+import { Base64, UnixTimeMs } from "../types"
 
 /**
  * Possible results ("indications") of a signature validation. See

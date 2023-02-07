@@ -1,5 +1,5 @@
 import * as Dss from "."
-import { Base64 } from "../types/common"
+import { Base64 } from "../types"
 
 import * as ASN1CMS from "@peculiar/asn1-cms"
 import * as ASN1Schema from "@peculiar/asn1-schema"
