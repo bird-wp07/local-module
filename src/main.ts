@@ -1,7 +1,7 @@
 import * as Settings from "./settings"
 import { logger } from "./settings"
 import * as Dss from "./dss"
-import { makeApp } from "./server"
+import * as Server from "./server"
 import * as Ioc from "typescript-ioc"
 import http from "http"
 
@@ -17,6 +17,7 @@ async function main() {
     /* Wait for DSS startup to fininsh. */
     const dssClient = new Dss.DssClient(settings.dssBaseUrl)
     Ioc.Container.bind(Dss.IDssClient).factory(() => dssClient)
+    Ioc.Container.bind(Server.IImpl).to(Server.Impl)
     const wait = 3600
     logger.info(`Waiting for DSS to respond at '${settings.dssBaseUrl}' ... `)
     const isOnline = await dssClient.isOnline({ waitSeconds: wait })
@@ -30,7 +31,7 @@ async function main() {
     const split = settings.localModuleBaseUrl.split("://")[1].split(":")
     const port = Number(split[1])
     const hostname = split[0]
-    http.createServer(makeApp()).listen(port, hostname, () => {
+    http.createServer(Server.makeApp()).listen(port, hostname, () => {
         logger.info(`Listening on ${settings.localModuleBaseUrl}. See '/swagger'.`)
 
         /* Send USR1 signal to process waiting for local module to start up.

@@ -1,10 +1,18 @@
 import { Result, ok, err } from "neverthrow"
-import { EDigestAlgorithm, IDigestPdfRequest, IDigestPDFResponse, IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "./types"
+import { EDigestAlgorithm, IDigestPdfRequest, IDigestPdfResponse, IMergePdfRequest, IMergePdfResponse, IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "./types"
 import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
 
+export abstract class IImpl {
+    public abstract health(): Promise<boolean>
+    public abstract digestPdf(request: IDigestPdfRequest): Promise<Result<IDigestPdfResponse, Error>>
+    public abstract mergePdf(request: IMergePdfRequest): Promise<Result<IMergePdfResponse, Error>>
+    public abstract validateSignedPdf(request: IValidateSignedPdfRequest): Promise<Result<IValidateSignedPdfResponse, Error>>
+}
+
+// Logic ein aufrufbares Singleton machen, damit nicht instanziiert werden muss.
 // TODO: request Object in einzelne pargs aufbrechen für Lesbarkeit
-export class Logic {
+export class Impl implements IImpl {
     constructor(@Ioc.Inject private dssClient: Dss.IDssClient) {
         this.dssClient = dssClient
     }
@@ -13,13 +21,13 @@ export class Logic {
         return await this.dssClient.isOnline()
     }
 
-    public async digestPdf(request: IDigestPdfRequest): Promise<Result<IDigestPDFResponse, Error>> {
+    public async digestPdf(request: IDigestPdfRequest): Promise<Result<IDigestPdfResponse, Error>> {
         const getDataToSignRequest: Dss.IGetDataToSignRequest = {
             toSignDocument: {
                 bytes: request.bytes
             },
             parameters: {
-                digestAlgorithm: Logic.digestAlgorithmToDss(request.digestAlgorithm),
+                digestAlgorithm: Impl.digestAlgorithmToDss(request.digestAlgorithm),
                 signatureLevel: Dss.ESignatureLevel.PAdES_B,
                 generateTBSWithoutCertificate: true,
                 blevelParams: {
@@ -32,6 +40,39 @@ export class Logic {
             return err(response.error)
         }
         return ok({ bytes: response.value.bytes })
+    }
+
+    public async mergePdf(request: IMergePdfRequest): Promise<Result<IMergePdfResponse, Error>> {
+        const cms = Dss.Utils.parseCms(Buffer.from(request.signatureAsCMS, "base64"))
+        const signDocumentReq: Dss.ISignDocumentRequest = {
+            parameters: {
+                certificateChain: cms.certificateChain,
+                digestAlgorithm: cms.digestAlgorithm,
+                signatureAlgorithm: cms.signatureAlgorithm,
+                signingCertificate: cms.signingCertificate,
+                signaturePackaging: Dss.ESignaturePackaging.ENVELOPED,
+                signWithExpiredCertificate: false,
+                generateTBSWithoutCertificate: false,
+                signatureLevel: Dss.ESignatureLevel.PAdES_B,
+                blevelParams: {
+                    signingDate: request.signingTimestamp
+                }
+            },
+            signatureValue: {
+                algorithm: cms.signatureAlgorithm,
+                value: cms.signatureValue
+            },
+            toSignDocument: {
+                bytes: request.bytes
+            }
+        }
+        const signDocumentRes = await this.dssClient.signDocument(signDocumentReq)
+        if (signDocumentRes.isErr()) {
+            return err(signDocumentRes.error)
+        }
+
+        const result: IMergePdfResponse = { bytes: signDocumentRes.value.bytes }
+        return ok(result)
     }
 
     public async validateSignedPdf(request: IValidateSignedPdfRequest): Promise<Result<IValidateSignedPdfResponse, Error>> {
@@ -50,7 +91,7 @@ export class Logic {
             return err(validateSignatureResponse.error)
         }
 
-        /* Check for checked signature. If none are returned, we respond with
+        /* Check for signatures. If none are returned, we respond with
          * an error, in contrast to DSS. */
         const signatures = validateSignatureResponse.value.SimpleReport.signatureOrTimestamp
         const numSignatures = signatures == undefined ? 0 : signatures.length
@@ -70,6 +111,8 @@ export class Logic {
             valid: true,
             details: {}
         })
+
+        // TODO: Implement validation of aspects relating to the central service.
     }
 
     // TODOC;

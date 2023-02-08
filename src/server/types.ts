@@ -21,7 +21,7 @@ export const Schema_IDigestPdfRequest = Joi.object().keys({
     signingTimestamp: Joi.number().min(0)
 })
 
-export interface IDigestPDFResponse {
+export interface IDigestPdfResponse {
     bytes: Base64
 }
 
