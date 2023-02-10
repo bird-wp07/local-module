@@ -3,16 +3,34 @@ import * as Joi from "joi"
 import { HTTP_MAX_REQUEST_BODY_SIZE_BYTES } from "./routes"
 
 export enum EDigestAlgorithm {
-    SHA256 = "SHA256",
-    SHA512 = "SHA512"
+    SHA256 = "SHA256"
 }
 
 export const Schema_EDigestAlgorithm = Joi.valid(...Object.values(EDigestAlgorithm))
 
+export enum EEncryptionAlgorithm {
+    ECDSA = "ECDSA"
+}
+
+export const Schema_EEncryptionAlgorithm = Joi.valid(...Object.values(EEncryptionAlgorithm))
+
+export enum ESignatureAlgorithm {
+    ECDSA_SHA256 = "ECDSA_SHA256"
+}
+
+/**
+ * TODOC
+ */
 export interface IDigestPdfRequest {
-    digestAlgorithm: EDigestAlgorithm
+    /**
+     * Base64 encoded PDF.
+     */
     bytes: Base64
-    signingTimestamp?: UnixTimeMs
+
+    /**
+     * Timestamp in ms since epoch.
+     */
+    timestamp: UnixTimeMs
 }
 
 export const Schema_IDigestPdfRequest = Joi.object().keys({

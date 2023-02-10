@@ -5,8 +5,6 @@ import { expect } from "chai"
 import chai from "chai"
 import chaiSubset from "chai-subset"
 import * as Dss from "../src/dss"
-import { ESignatureValidationIndication, ESignatureValidationSubIndication, IValidateSignatureRequest, IValidateSignatureResponse } from "../src/dss/types"
-import { Base64 } from "../src/types"
 
 chai.use(chaiSubset)
 
@@ -18,68 +16,20 @@ describe("Dss", () => {
         })
 
         describe("DssClient#getDataToSign()", () => {
-            // ???: DSS implicitly hashes the PDF's bytes AND a timestamp.
-            //      Why? Which bytes are exactly hashed? Is this an existing standard?
-            test("generate SHA256 digest of a PDF+timestamp", async () => {
-                const pdf: Base64 = fs.readFileSync("./tests/files/unsigned.pdf").toString("base64")
-                const request: Dss.IGetDataToSignRequest = {
-                    toSignDocument: {
-                        bytes: pdf
-                    },
-                    parameters: {
-                        digestAlgorithm: Dss.EDigestAlgorithm.SHA256,
-                        signatureLevel: Dss.ESignatureLevel.PAdES_B,
-                        generateTBSWithoutCertificate: true,
-                        blevelParams: {
-                            signingDate: Number(new Date("2022-11-25T12:30:00Z"))
-                        }
-                    }
-                }
-                const have: Dss.IGetDataToSignResponse = (await dssClient.getDataToSign(request))._unsafeUnwrap()
-                const want: Dss.IGetDataToSignResponse = {
-                    bytes: "MUswGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAvBgkqhkiG9w0BCQQxIgQgHo3ZE65djFgt13EWvWawopwZIARH4JjjdCA1FB42Tko="
-                }
-                expect(have).to.deep.equal(want)
-            })
-        })
-
-        describe.skip("TODO; DssClient#signDocument()", () => {
-            test("embed an enveloped signature into a PDF", () => {
-                "TODO;"
+            test.skip("TODO; generate SHA256 digest of a combined PDF/timestamp", () => {
+                // Implement as soon as we've understood how DSS generates combined PDF/timestamp digests.
+                return
             })
         })
 
         describe("DssClient#validateSignature()", () => {
-            test.skip("handles a valid QES-signed PDF correctly", async () => {
-                const doc: Base64 = fs.readFileSync(`./assets/TODO.pdf`).toString("base64")
-                const request: IValidateSignatureRequest = {
-                    signedDocument: {
-                        bytes: doc,
-                        digestAlgorithm: null
-                    },
-                    originalDocuments: [],
-                    policy: null,
-                    signatureId: null
-                }
-                const have = (await dssClient.validateSignature(request))._unsafeUnwrap()
-                const want: IValidateSignatureResponse = {
-                    SimpleReport: {
-                        signatureOrTimestamp: [
-                            {
-                                Signature: {
-                                    Indication: ESignatureValidationIndication.TOTAL_PASSED,
-                                    SubIndication: null
-                                }
-                            }
-                        ]
-                    }
-                }
-                expect(have).to.containSubset(want)
+            test.skip("TODO; handles a valid QES-signed PDF correctly", () => {
+                return
             })
 
             test("handles a self-signed PDF correctly", async () => {
                 const pdf = fs.readFileSync("./assets/selfsigned-js.pdf").toString("base64")
-                const request: IValidateSignatureRequest = {
+                const request: Dss.IValidateSignatureRequest = {
                     signedDocument: {
                         bytes: pdf,
                         digestAlgorithm: null
@@ -89,19 +39,25 @@ describe("Dss", () => {
                     signatureId: null
                 }
                 const have = (await dssClient.validateSignature(request))._unsafeUnwrap()
-                const want: IValidateSignatureResponse = {
+                const want: Dss.IValidateSignatureResponse = {
                     SimpleReport: {
                         signatureOrTimestamp: [
                             {
                                 Signature: {
-                                    Indication: ESignatureValidationIndication.INDETERMINATE,
-                                    SubIndication: ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
+                                    Indication: Dss.ESignatureValidationIndication.INDETERMINATE,
+                                    SubIndication: Dss.ESignatureValidationSubIndication.NO_CERTIFICATE_CHAIN_FOUND
                                 }
                             }
                         ]
                     }
                 }
                 expect(have).to.containSubset(want)
+            })
+        })
+
+        describe("DssClient#signDocument()", () => {
+            test.skip("TODO;", () => {
+                return
             })
         })
     })

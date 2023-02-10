@@ -1,7 +1,10 @@
+import * as ASN1 from "@lapo/asn1js"
+import * as ASNSchema from "@peculiar/asn1-schema"
 import { Result, ok, err } from "neverthrow"
-import { EDigestAlgorithm, IDigestPdfRequest, IDigestPdfResponse, IMergePdfRequest, IMergePdfResponse, IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "./types"
+import { IDigestPdfRequest, IDigestPdfResponse, IMergePdfRequest, IMergePdfResponse, IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "./types"
 import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
+import { Base64 } from "../types"
 
 export abstract class IImpl {
     public abstract health(): Promise<boolean>
@@ -21,17 +24,27 @@ export class Impl implements IImpl {
         return await this.dssClient.isOnline()
     }
 
+    /**
+     * Returns the combined SHA256 digest of a PDF and a timestamp.
+     *
+     * ???: What's the point with the non-TSA timestamp?
+     *      How exactly is that digest created? What's the binary format?
+     *      Does this conform to some standard process or is this a DSS hack?
+     */
     public async digestPdf(request: IDigestPdfRequest): Promise<Result<IDigestPdfResponse, Error>> {
         const getDataToSignRequest: Dss.IGetDataToSignRequest = {
             toSignDocument: {
                 bytes: request.bytes
             },
             parameters: {
-                digestAlgorithm: Impl.digestAlgorithmToDss(request.digestAlgorithm),
+                digestAlgorithm: Dss.EDigestAlgorithm.SHA256,
+                encryptionAlgorithm: Dss.EEncryptionAlgorithm.ECDSA,
                 signatureLevel: Dss.ESignatureLevel.PAdES_B,
                 generateTBSWithoutCertificate: true,
+                signaturePackaging: Dss.ESignaturePackaging.ENVELOPED,
+                signatureAlgorithm: Dss.ESignatureAlgorithm.ECDSA_SHA256,
                 blevelParams: {
-                    signingDate: request.signingTimestamp ?? 0 // TODO: Why is signingDate optional?
+                    signingDate: request.timestamp
                 }
             }
         }
@@ -39,7 +52,10 @@ export class Impl implements IImpl {
         if (response.isErr()) {
             return err(response.error)
         }
-        return ok({ bytes: response.value.bytes })
+
+        const cms = Buffer.from(response.value.bytes, "base64")
+        const digest = Impl.extractDigestFromCMS(cms)
+        return ok({ bytes: digest })
     }
 
     public async mergePdf(request: IMergePdfRequest): Promise<Result<IMergePdfResponse, Error>> {
@@ -115,15 +131,11 @@ export class Impl implements IImpl {
         // TODO: Implement validation of aspects relating to the central service.
     }
 
-    // TODOC;
-    static digestAlgorithmToDss(alg: EDigestAlgorithm): Dss.EDigestAlgorithm {
-        switch (alg) {
-            case EDigestAlgorithm.SHA256:
-                return Dss.EDigestAlgorithm.SHA256
-            case EDigestAlgorithm.SHA512:
-                return Dss.EDigestAlgorithm.SHA512
-            default:
-                throw new Error("missing implementation")
-        }
+    static extractDigestFromCMS(cms: Buffer): Base64 {
+        const cmsStruct = ASN1.default.decode(cms)
+        const octetString = cmsStruct.sub![1].sub![1].sub![0]
+        const messageDigest = ASNSchema.AsnParser.parse(Buffer.from(octetString.toB64String(), "base64"), ASNSchema.OctetString)
+        const documentHash = Buffer.from(new Uint8Array(messageDigest.buffer)).toString("base64")
+        return documentHash
     }
 }
