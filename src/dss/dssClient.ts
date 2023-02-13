@@ -109,28 +109,28 @@ export class DssClient implements IDssClient {
                     dssErrorMsg.startsWith("Illegal unquoted character") ||
                     dssErrorMsg.startsWith("Unexpected end-of-input")
                 ) {
-                    return new Dss.Errors.DeserializationError()
+                    return new Dss.DeserializationError()
                 }
 
                 if (dssErrorMsg.startsWith("java.io.IOException: Error: End-of-File, expected line")) {
-                    return new Dss.Errors.UnexpectedInput()
+                    return new Dss.UnexpectedInput()
                 }
 
                 if (dssErrorMsg.startsWith("The document cannot be modified!")) {
-                    return new Dss.Errors.DocumentCannotBeModified()
+                    return new Dss.DocumentCannotBeModified()
                 }
 
                 let match = dssErrorMsg.match(/^The signing certificate \(notBefore : ([^,]+), notAfter : ([^)]+)\) is not yet valid at signing time ([^!]+)!/)
                 if (match != null && match.length === 4) {
-                    return new Dss.Errors.CertificateNotYetValid(`Certificate (valid from '${match[1]}' to '${match[2]}') is not yet valid at signing time '${match[3]}'.`)
+                    return new Dss.CertificateNotYetValid(`Certificate (valid from '${match[1]}' to '${match[2]}') is not yet valid at signing time '${match[3]}'.`)
                 }
 
                 match = dssErrorMsg.match(/^The signing certificate \(notBefore : ([^,]+), notAfter : ([^)]+)\) is expired at signing time ([^!]+)!/)
                 if (match != null && match.length === 4) {
-                    return new Dss.Errors.CertificateExpired(`Certificate (valid from '${match[1]}' to '${match[2]}') is expired at signing time '${match[3]}'.`)
+                    return new Dss.CertificateExpired(`Certificate (valid from '${match[1]}' to '${match[2]}') is expired at signing time '${match[3]}'.`)
                 }
             }
         }
-        return new Dss.Errors.UnhandledError(err)
+        return new Dss.UnhandledError(err)
     }
 }

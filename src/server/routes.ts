@@ -81,7 +81,7 @@ function makeValidationController(impl: IImpl): Express.RequestHandler {
  * Maps errors occurring during processing of requests to our own,
  * outside-facing errors.
  */
-// eslint-disable-next-line -- HACK: don't delete the 'next' arg, or else express will make a RequestHandler() out of this.
+// eslint-disable-next-line -- HACK: don't delete the 'next' arg, or express will make a RequestHandler() out of this.
 const errorHandler: Express.ErrorRequestHandler = (err: Error, _: Express.Request, res: Express.Response, next: Express.NextFunction) => {
     /* Process validation errors due to joi schema mismatch of valid json bodies. */
     if (err instanceof Joi.ValidationError) {
