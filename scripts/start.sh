@@ -118,7 +118,9 @@ start_lm() {
     (
         cd "$LM_ROOT"
         [ -d "./node_modules" ] && nobuild=":nobuild"
-        PATH="$(realpath "$NODE_ROOT")/bin:$PATH" npm run start"$nobuild"
+        WP07_LOCAL_MODULE_BASEURL="$WP07_LOCAL_MODULE_BASEURL" \
+            WP07_DSS_BASEURL="$WP07_DSS_BASEURL" \
+            PATH="$(realpath "$NODE_ROOT")/bin:$PATH" npm run start"$nobuild"
     )
 }
 
