@@ -56,7 +56,7 @@ export function parseCms(cms: Buffer): {
 
 /**
  * OID lookup table returning DSS specific entities. OIDs are implemented as
- * needed and unknown OIDs will return an error.
+ * needed and unmapped OIDs will return an error.
  *
  * See http://oid-info.com for information about individual OIDs.
  */

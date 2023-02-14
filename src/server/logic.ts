@@ -25,11 +25,14 @@ export class Impl implements IImpl {
     }
 
     /**
-     * Returns the combined SHA256 digest of a PDF and a timestamp.
+     * Returns the digest of the data to be signed.
      *
-     * ???: What's the point with the non-TSA timestamp?
-     *      How exactly is that digest created? What's the binary format?
-     *      Does this conform to some standard process or is this a DSS hack?
+     * The data to be signed consists of the original PDF and a signature
+     * section, added as an incremental update. The signature dictionary in the
+     * signature section contains the claimed timestamp of the signature in its
+     * entry with key 'M'. The digest value thus depends on the timestamp.
+     *
+     * See EN 319 142-2.
      */
     public async digestPdf(request: IDigestPdfRequest): Promise<Result<IDigestPdfResponse, Error>> {
         const getDataToSignRequest: Dss.IGetDataToSignRequest = {

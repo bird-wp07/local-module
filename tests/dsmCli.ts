@@ -34,7 +34,7 @@ async function main() {
             console.error(`Digest failed for file '${pdfpath}':\n${JSON.stringify((resDigest as any).error.response.data, null, 4)}`)
             process.exit(1)
         }
-        const digest = resDigest.value.data.digest
+        const digest = resDigest.value.data.bytes
 
         const resSign = await httpReq({
             method: "POST",

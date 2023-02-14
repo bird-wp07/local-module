@@ -26,7 +26,11 @@ export class CsClient {
         return true
     }
 
-    // TODO: Rename
+    /**
+     * Returns a CAdES-conforming CMS object.
+     *
+     * See EN 319 122-1.
+     */
     async getSignedCms(request: ISignatureRequest): Promise<Result<ISignatureResponse, Error>> {
         const config: AxiosRequestConfig = {
             method: "POST",
