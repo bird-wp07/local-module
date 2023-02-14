@@ -56,8 +56,9 @@ export class Impl implements IImpl {
             return err(response.error)
         }
 
-        const cms = Buffer.from(response.value.bytes, "base64")
-        const digest = Impl.extractDigestFromCMS(cms)
+        // ???: Which data structure does DSS#getDataToSign() return here?
+        const asn1blob = Buffer.from(response.value.bytes, "base64")
+        const digest = Impl.extractDigestFromDigestPdfResponse(asn1blob)
         return ok({ bytes: digest })
     }
 
@@ -134,9 +135,24 @@ export class Impl implements IImpl {
         // TODO: Implement validation of aspects relating to the central service.
     }
 
-    static extractDigestFromCMS(cms: Buffer): Base64 {
-        const cmsStruct = ASN1.default.decode(cms)
-        const octetString = cmsStruct.sub![1].sub![1].sub![0]
+    /**
+     * Extract the digest value from a IDigestPdfResponse's bytes.
+     *
+     * ???: What's the exact data (values and structure) we are dealing with here?
+     *      Inspection of the DER-encoded ASN.1 reveals the following structure
+     *      SET(2 elem)
+     *        SEQUENCE(2 elem)
+     *          OBJECT IDENTIFIER 1.2.840.113549.1.9.3
+     *          SET(1 elem)
+     *            OBJECT IDENTIFIER1.2.840.113549.1.7.1
+     *        SEQUENCE(2 elem)
+     *          OBJECT IDENTIFIER 1.2.840.113549.1.9.4
+     *          SET(1 elem)
+     *              OCTET STRING(32 byte) 85D9B433D8A47....
+     */
+    static extractDigestFromDigestPdfResponse(asn1blob: Buffer): Base64 {
+        const asnStruct = ASN1.default.decode(asn1blob)
+        const octetString = asnStruct.sub![1].sub![1].sub![0]
         const messageDigest = ASNSchema.AsnParser.parse(Buffer.from(octetString.toB64String(), "base64"), ASNSchema.OctetString)
         const documentHash = Buffer.from(new Uint8Array(messageDigest.buffer)).toString("base64")
         return documentHash
