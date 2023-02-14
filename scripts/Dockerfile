@@ -26,7 +26,7 @@ ENV PATH="/root/$NODE_ROOT/bin:$PATH"
 # Install local module
 RUN ./start.sh install_lm "$LM_ROOT"
 
-# Ports are determined by start.sh
+# Ports must match those used in start.sh
 EXPOSE 2048
 EXPOSE 8089
 CMD bash

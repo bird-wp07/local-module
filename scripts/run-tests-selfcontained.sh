@@ -38,10 +38,8 @@ run_container() {
 
 # This is executed inside the container. We must go deeper.
 run_tests() {
-    export DSS_PORT=8080
-    export LOCAL_MODULE_PORT=2048
-    export WP07_DSS_BASEURL="http://127.0.0.1:$DSS_PORT"
-    export WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:$LOCAL_MODULE_PORT"
+    export WP07_DSS_BASEURL="http://127.0.0.1:8080"
+    export WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:2048"
     ./start.sh start_dss >/dev/null 2>&1 &
 
     # NOTE: We want to install for, build and run the local module from the

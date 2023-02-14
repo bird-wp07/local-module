@@ -9,16 +9,20 @@ set -e
 # ######################
 # ADMINISTRATOR SETTINGS
 # ######################
-LOCAL_MODULE_PORT=${LOCAL_MODULE_PORT:-2048}
-DSS_PORT=${DSS_PORT:-8089}
+WP07_DSS_BASEURL="${WP07_DSS_BASEURL:-"http://127.0.0.1:8089"}"
+WP07_LOCAL_MODULE_BASEURL="${WP07_LOCAL_MODULE_BASEURL:-"http://127.0.0.1:2048"}"
 
-# Default installation path names.
-# --------------------------------
+# Default installation path names
+# -------------------------------
 JDK_ROOT="${JDK_ROOT:-jdk}"
 DSS_ROOT="${DSS_ROOT:-dss}"
 NODE_ROOT="${NODE_ROOT:-node}"
 LM_ROOT="${LM_ROOT:-local-module}"
+
+# Miscellaneous parameters
+# ------------------------
 DSS_PID_FILE=".dss.pid"
+DSS_PORT="$(printf -- "$WP07_DSS_BASEURL" | cut -d: -f3-)"
 
 # Configure logging. Depending on whether we're running inside a terminal use
 # colors or don't.
@@ -42,13 +46,13 @@ install_jdk() {
     [ -z "$1" ] && { log_err "missing JDK output directory path"; return 1; }
     [ -d "$1" ] && { log_info "JDK found at '$1'. Skipping install."; return; }
     log_info "Installing JDK at '$1'."
-
+    
     # The archive contents' paths are prefixed with 'jdk-<VERSION>'. We remove
     # this prefix while unpacking for consistent naming of the JDK root
     # directory, independent of the JDK version we're using.
     mkdir -p "$1"
     curl -Lso - "https://download.oracle.com/java/19/archive/jdk-19.0.1_linux-x64_bin.tar.gz" |
-        tar -xvzf - --strip-components 1 -C "$1"
+    tar -xvzf - --strip-components 1 -C "$1"
 }
 
 # Installs DSS into $1.
@@ -56,12 +60,12 @@ install_dss() {
     [ -z "$1" ] && { log_err "missing DSS output directory path"; return 1; }
     [ -d "$1" ] && { log_info "DSS found at '$1'. Skipping install."; return; }
     log_info "Installing DSS at '$1'."
-
+    
     mkdir -p "$1"
     curl -Ls "https://api.github.com/repos/bird-wp07/dss-demonstrations/releases/latest" |
-        jq -r '.assets[] | select(.browser_download_url | endswith("tar.gz")).browser_download_url' |
-        xargs -n1 curl -Lso - |
-        tar -xvzf - --strip-components 1 -C "$1"
+    jq -r '.assets[] | select(.browser_download_url | endswith("tar.gz")).browser_download_url' |
+    xargs -n1 curl -Lso - |
+    tar -xvzf - --strip-components 1 -C "$1"
 }
 
 # Installs standalone node into $1. $PATH is not modified.
@@ -69,10 +73,10 @@ install_node() {
     [ -z "$1" ] && { log_err "missing Node output directory path"; return 1; }
     [ -d "$1" ] && { log_info "Node found at '$1'. Skipping install."; return; }
     log_info "Installing Node at '$1'."
-
+    
     mkdir -p "$1"
     curl -Lso - "https://nodejs.org/dist/v18.12.1/node-v18.12.1-linux-x64.tar.xz" |
-        tar -xvJf - --strip-components 1 -C "$1"
+    tar -xvJf - --strip-components 1 -C "$1"
 }
 
 # Installs local module into $1. $2 chooses a tag to install, defaulting to the latest release.
@@ -83,14 +87,14 @@ install_lm() {
     [ -z "$1" ] && { log_err "missing local module output directory path"; return 1; }
     [ -d "$1" ] && { log_info "Local module found at '$1'. Skipping install."; return; }
     log_info "Installing local module at '$1'."
-
+    
     mkdir -p "$1"
     [ ! -z $2 ] && urlsuffix="tags/$2" || urlsuffix="latest"
     curl -Ls "https://api.github.com/repos/bird-wp07/local-module/releases/$urlsuffix" |
-        jq -r ".tarball_url" |
-        xargs -n1 curl -Lso - |
-        tar -xvzf - --strip-components 1 -C "$1"
-
+    jq -r ".tarball_url" |
+    xargs -n1 curl -Lso - |
+    tar -xvzf - --strip-components 1 -C "$1"
+    
     cd "$1"
     npm install
     npm run build
@@ -114,9 +118,7 @@ start_lm() {
     (
         cd "$LM_ROOT"
         [ -d "./node_modules" ] && nobuild=":nobuild"
-        WP07_DSS_BASEURL="http://127.0.0.1:$DSS_PORT" \
-            WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:$LOCAL_MODULE_PORT" \
-            PATH="$(realpath "$NODE_ROOT")/bin:$PATH" npm run start"$nobuild"
+        PATH="$(realpath "$NODE_ROOT")/bin:$PATH" npm run start"$nobuild"
     )
 }
 
@@ -126,13 +128,13 @@ start_lm() {
 # file.
 start_dss() {
     [ -z "$JAVA_HOME" ] && ! command -v java >/dev/null && { log_err "java not found and \$JAVA_HOME undefined"; return 1; }
-
+    
     # HACK: Replace the server's default port by in-file substitution.
     #       Unfortunately, there is no easier method as we're not in control of
     #       the server's configuration.
     cfg_xml="$DSS_ROOT/apache-tomcat-8.5.82/conf/server.xml"
     sed -i -E 's|(<Connector port=")([^"]+)(" protocol="HTTP/1.1")|\1'"$DSS_PORT"'\3|g' "$cfg_xml"
-
+    
     if [ -z "$1" ]; then
         bash "$DSS_ROOT/apache-tomcat-8.5.82/bin/catalina.sh" run 2>&1
     else
@@ -158,10 +160,10 @@ serve_all() {
     # local module version tag.
     tag="$(cat VERSION 2>/dev/null)" || tag=""
     install_all "$tag"
-
+    
     # Ensure cleanup of DSS process.
     trap "stop_dss" EXIT
-
+    
     # Start DSS in the background and fire up the local module.
     JAVA_HOME="$(realpath "$JDK_ROOT")" start_dss "$DSS_PID_FILE" >/dev/null
     PATH="$(realpath "$NODE_ROOT")/bin:$PATH" start_lm

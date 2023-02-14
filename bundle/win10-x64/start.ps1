@@ -7,15 +7,27 @@ $scriptDir = if (-not $PSScriptRoot) { Split-Path -Parent (Convert-Path ([enviro
 Set-Location $scriptDir
 Write-Host "Starting script at '$scriptDir'."
 
-$LOCAL_MODULE_PORT = Get-Content "$scriptDir\CONFIG" | Select-String "^LOCAL_MODULE_PORT=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
-$DSS_PORT = Get-Content "$scriptDir\CONFIG" | Select-String "^DSS_PORT=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+# If not defined via the environment, set baseurls from config file.
+if ($null -eq $env:WP07_LOCAL_MODULE_BASEURL) {
+    $env:WP07_LOCAL_MODULE_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_LOCAL_MODULE_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+}
+if ($null -eq $env:WP07_DSS_BASEURL) {
+    $env:WP07_DSS_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_DSS_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+}
+
+# Installation paths
+# ------------------
 $nodeRootPath = "$scriptDir\node-v18.12.1-win-x64"
 $dssRootPath = "$scriptDir\dss-demo-bundle-5.11"
-$dssPidFilePath = "$scriptDir\dss.pid"
 $dssServerConfigPath = "$dssRootPath\apache-tomcat-8.5.82\conf\server.xml" # apache config file
 $localModulePath = "$scriptDir\local-module"
 $nodeUrl = "https://nodejs.org/dist/v18.12.1/node-v18.12.1-win-x64.zip"
 $dssUrl = "https://github.com/bird-wp07/dss-demonstrations/releases/download/5.11/dss-demo-bundle-5.11.zip"
+
+# Miscellaneous parameters
+# ------------------------
+$dssPidFilePath = "$scriptDir\dss.pid"
+$dssPort=$env:WP07_DSS_BASEURL.split(":")[2]
 
 function Stop-ProcessTree
 {
@@ -32,7 +44,7 @@ function Start-DSS {
     #       Unfortunately, there is no easier method as we're not in control of
     #       the server's configuration.
     [xml]$cfg = Get-Content $dssServerConfigPath
-    $cfg.Server.Service.Connector.port = "$DSS_PORT"
+    $cfg.Server.Service.Connector.port = "$dssPort"
     $cfg.Save($dssServerConfigPath) # NOTE: writeback requires abspath
 
     # Start DSS in its proper environment and write the (parent cmd.exe's) process id to file.
@@ -139,8 +151,6 @@ function main {
     try {
         Start-DSS
 
-        $env:WP07_LOCAL_MODULE_BASEURL = "http://127.0.0.1:$LOCAL_MODULE_PORT"
-        $env:WP07_DSS_BASEURL = "http://127.0.0.1:$DSS_PORT"
         $env:Path = "$nodeRootPath;$env:Path"
         Push-Location $localModulePath
         npm run start-windows

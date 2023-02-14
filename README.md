@@ -64,7 +64,7 @@ abgesetzt werden, wobei <BASIS_PFAD> den Pfad zur 'start.ps1' Datei vom Arbeitsv
 
 #### 2.2.1.3 Konfiguration
 
-Die Ports des lokalen Moduls, sowie des im Hintergrund laufenden DSS Servers können über die beiligende Datei *CONFIG* konfiguriert werden, falls Kollisionen mit belegten Ports auftreten sollten.
+Die Base-URLs des lokalen Moduls, sowie des im Hintergrund laufenden DSS Servers können über die beiligende Datei *CONFIG* konfiguriert werden. Die Base-URLs müssen in der ausführlichen Form `SCHEMA://HOST:PORT` vorliegen und sollten statt `localhost` explit die Loopbackadresse 127.0.0.1 verwenden.
 
 #### 2.2.1.4 Start
 
@@ -115,7 +115,7 @@ Dieser Vorgang muss nicht wiederholt werden. Zukünftig kann die Datei durch Dop
    tar -xvf "local-module.tar.xz"
    ```
 
-3. Optional können zur Vermeidung von Portkollisionen in der Datei *start.sh* die Ports für das lokale Modul und den DSS Hintergrunddienst konfiguriert werden. Der relevante Abschnitt der Datei ist mit *ADMINISTRATOR SETTINGS* gekennzeichnet. Alternativ können die Ports über die Umgebungsvariablen *DSS_PORT* und *LOCAL_MODULE_PORT* gesetzt werden.
+3. Die Base-URLs für das lokale Modul und den DSS Hintergrunddienst können über die Umgebungsvariablen *WP07_LOCAL_MODULE_BASEURL* und *WP07_DSS_BASEURL* konfiguriert werden. Alternativ kann direkt in den Kopfzeilen der *start.sh* Datei im Abschnitt *ADMINISTRATOR SETTINGS* konfiguriert werden. Die Base-URLs müssen in der ausgeschriebenen Form `SCHEMA://HOST:PORT` vorliegen. Desweiteren sollte statt `localhost` zu verwenden explizit die Loopbackadresse 127.0.0.1 angegeben werden.
 
 4. Starten des Lokalen Moduls durch Ausführen des Startupskripts. Hierbei werden alle benötigen Hintergrunddienste gestartet. Zum Betrieb werden neben den Linux Standardapplikationen `tar`, `curl`, `xz-utils`, `gzip` und `jq` benötigt. Bei einem Fehler während der Initialisierung aufgrund fehlender Programme empfehlen wir den gesamten Prozess in einem leeren Verzeichnis erneut durchzuführen.
 
