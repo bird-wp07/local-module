@@ -35,11 +35,7 @@ Dies ist in den Standards von digitalen Signaturen und Zertifikaten (zumindest b
 
 ## 2.1 Download
 
-Die jeweils neueste Version des Lokalen Moduls kann über die Releases des GitHub Repositorys heruntergeladen werden: https://github.com/bird-wp07/local-module/releases 
-
-Es gibt hierbei zwei Versionen für Windows und Linux:
-* Die Standard-Variante ist ein sehr kleiner Download, der die entsprechenden Abhängigkeiten wie den Digital Signature Service oder auch NodeJS herunterlädt. Der Release selbst ist daher sehr klein, der erste Start dauert jedoch aufgrund des Downloads eine Weile.
-* Die Standalone-Variante ist ein großer Download, der aber schon alle Abhängigkeiten im Bauch hat. Der Download beim ersten Start des Programms entfällt daher.
+Die jeweils neueste Version des Lokalen Moduls kann über die Releases des GitHub Repositorys heruntergeladen werden: https://github.com/bird-wp07/local-module/releases. Es stehen Versionen für Linux sowie Windows Systeme in x64 Architektur zur Verfügung.
 
 ## 2.2 Betrieb unter Windows
 

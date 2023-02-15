@@ -18,6 +18,14 @@ export enum ESignatureAlgorithm {
     ECDSA_SHA256 = "ECDSA_SHA256"
 }
 
+export enum EHealthStatus {
+    OK = "OK",
+    DSS_NO_REPLY = "DSS_NO_REPLY"
+}
+export interface IHealthResponse {
+    status: EHealthStatus
+}
+
 /**
  * TODOC
  */

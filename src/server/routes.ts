@@ -17,11 +17,12 @@ import { Container } from "typescript-ioc"
 export const HTTP_MAX_REQUEST_BODY_SIZE_BYTES = 8000000
 
 function makeHealthController(impl: IImpl): Express.RequestHandler {
-    const fn = async (req: Express.Request, res: Express.Response): Promise<Express.Response> => {
+    const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         const response = await impl.health()
-        return res.status(200).json({
-            ok: response
-        })
+        if (response.isErr()) {
+            return next(response.error)
+        }
+        return res.status(200).json(response.value)
     }
     return fn as Express.RequestHandler
 }

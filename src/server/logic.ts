@@ -1,13 +1,22 @@
 import * as ASN1 from "@lapo/asn1js"
 import * as ASNSchema from "@peculiar/asn1-schema"
 import { Result, ok, err } from "neverthrow"
-import { IDigestPdfRequest, IDigestPdfResponse, IMergePdfRequest, IMergePdfResponse, IValidateSignedPdfRequest, IValidateSignedPdfResponse } from "./types"
+import {
+    IDigestPdfRequest,
+    IDigestPdfResponse,
+    IHealthResponse,
+    IMergePdfRequest,
+    IMergePdfResponse,
+    IValidateSignedPdfRequest,
+    IValidateSignedPdfResponse,
+    EHealthStatus
+} from "./types"
 import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
 import { Base64 } from "../types"
 
 export abstract class IImpl {
-    public abstract health(): Promise<boolean>
+    public abstract health(): Promise<Result<IHealthResponse, Error>>
     public abstract digestPdf(request: IDigestPdfRequest): Promise<Result<IDigestPdfResponse, Error>>
     public abstract mergePdf(request: IMergePdfRequest): Promise<Result<IMergePdfResponse, Error>>
     public abstract validateSignedPdf(request: IValidateSignedPdfRequest): Promise<Result<IValidateSignedPdfResponse, Error>>
@@ -20,8 +29,14 @@ export class Impl implements IImpl {
         this.dssClient = dssClient
     }
 
-    public async health(): Promise<boolean> {
-        return await this.dssClient.isOnline()
+    public async health(): Promise<Result<IHealthResponse, Error>> {
+        let status: EHealthStatus
+        if (!(await this.dssClient.isOnline())) {
+            status = EHealthStatus.DSS_NO_REPLY
+        } else {
+            status = EHealthStatus.OK
+        }
+        return ok({ status: status })
     }
 
     /**
@@ -57,6 +72,7 @@ export class Impl implements IImpl {
         }
 
         // ???: Which data structure does DSS#getDataToSign() return here?
+        //      See question below.
         const asn1blob = Buffer.from(response.value.bytes, "base64")
         const digest = Impl.extractDigestFromDigestPdfResponse(asn1blob)
         return ok({ bytes: digest })
