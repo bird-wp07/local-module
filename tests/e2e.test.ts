@@ -32,13 +32,12 @@ describe("End-to-end", () => {
             expect(digestPdfRes.isErr()).to.be.false
             const digest = digestPdfRes._unsafeUnwrap().bytes
 
-            const exampleSignatureRequest: Cs.ISignatureRequest = {
-                auditLog: "Signing of Test Document",
-                issuerId: "ID-OF-YOUR-KEY",
+            const fetchSignedCmsRequest: Cs.IFetchSignatureRequest = {
                 hash: digest,
-                digestMethod: "SHA256"
+                digestMethod: Cs.EDigestAlgorithm.SHA256,
+                auditLog: "Signing of Test Document"
             }
-            const getSignedCmsRes = await csClient.getSignedCms(exampleSignatureRequest)
+            const getSignedCmsRes = await csClient.fetchSignature(fetchSignedCmsRequest)
             expect(getSignedCmsRes.isErr()).to.be.false
             const signedCms = getSignedCmsRes._unsafeUnwrap()
             const cms = signedCms.cms

@@ -13,9 +13,9 @@ export abstract class IDssClient {
 
 // TODO: Validierung für Dss' Reponse einbauen. (Fallnetz für Reverse Engineering)
 export class DssClient implements IDssClient {
-    public baseUrl: string
-    constructor(baseUrl: string) {
-        this.baseUrl = baseUrl
+    baseurl: string
+    constructor(baseurl: string) {
+        this.baseurl = baseurl
     }
 
     /**
@@ -33,7 +33,7 @@ export class DssClient implements IDssClient {
         let responseData = ""
         let gotResponse = false
         const config: AxiosRequestConfig = {
-            baseURL: this.baseUrl,
+            baseURL: this.baseurl,
             method: "GET",
             timeout: 3000
         }
@@ -58,7 +58,7 @@ export class DssClient implements IDssClient {
         const config: AxiosRequestConfig = {
             method: "POST",
             url: "/services/rest/signature/one-document/getDataToSign",
-            baseURL: this.baseUrl,
+            baseURL: this.baseurl,
             data: request
         }
         const response = await Utility.httpReq(config)
@@ -72,7 +72,7 @@ export class DssClient implements IDssClient {
         const config: AxiosRequestConfig = {
             method: "POST",
             url: "/services/rest/signature/one-document/signDocument",
-            baseURL: this.baseUrl,
+            baseURL: this.baseurl,
             data: request
         }
         const response = await Utility.httpReq(config)
@@ -86,7 +86,7 @@ export class DssClient implements IDssClient {
         const config: AxiosRequestConfig = {
             method: "POST",
             url: "/services/rest/validation/validateSignature",
-            baseURL: this.baseUrl,
+            baseURL: this.baseurl,
             data: request
         }
         const response = await Utility.httpReq(config)

@@ -4,25 +4,14 @@ export class InvalidSettings extends Error {
     }
 }
 
-export class MissingEnvvar extends InvalidSettings {
-    public envvar: string
-    public constructor(envvar: string, messageAppendix?: string) {
-        let message = `Mandatory environment variable '${envvar}' is unset.`
-        if (messageAppendix !== undefined) {
-            message += ` ${messageAppendix}`
-        }
-        super(message)
-        this.envvar = envvar
-    }
-}
-
 export class InvalidEnvvarValue extends InvalidSettings {
     public envvar: string
-    public value: string
-    public constructor(envvar: string, value: string, messageAppendix?: string) {
-        let message = `Mandatory environment variable '${envvar}' has invalid value '${value}'.`
+    public value?: string
+    public constructor(envvar: string, value?: string, messageAppendix?: unknown) {
+        const valStr = value == undefined ? "" : value
+        let message = `Mandatory environment variable '${envvar}' has invalid value '${valStr}'.`
         if (messageAppendix !== undefined) {
-            message += ` ${messageAppendix}`
+            message += ` Details: ${JSON.stringify(messageAppendix, null, 4)}`
         }
         super(message)
         this.envvar = envvar

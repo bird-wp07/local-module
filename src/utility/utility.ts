@@ -24,16 +24,6 @@ export async function sleepms(ms: number) {
 }
 
 /**
- * Checks whether 'port' is a valid port, i.e. an integer in (0, 65535].
- */
-export function isValidPort(port: number) {
-    if (isNaN(port) || port <= 0 || 65536 <= port || Math.floor(port) !== port) {
-        return false
-    }
-    return true
-}
-
-/**
  * Parses a file of utf-8 encoded, single-line key=value pairs. Lines
  * starting with a literal '#' character are ignored, as well as lines not
  * containing a literal '='. The first literal '=' character is used to

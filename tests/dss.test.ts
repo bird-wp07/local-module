@@ -9,7 +9,7 @@ import * as Dss from "../src/dss"
 chai.use(chaiSubset)
 
 describe("Dss", () => {
-    describe("HTTP API Sanity Checks", () => {
+    describe("API Sanity Checks", () => {
         let dssClient: Dss.DssClient
         before("Init", async () => {
             dssClient = await makeDssClient()

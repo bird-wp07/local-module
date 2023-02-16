@@ -38,7 +38,7 @@ async function main() {
 
         const resSign = await httpReq({
             method: "POST",
-            baseURL: csClient.baseUrl,
+            baseURL: csClient.baseurl,
             url: "/api/v1/signer/issuances",
             data: {
                 auditLog: "Signing of TestDocument",
