@@ -79,7 +79,7 @@ export class Impl implements IImpl {
     }
 
     public async mergePdf(request: IMergePdfRequest): Promise<Result<IMergePdfResponse, Error>> {
-        const cms = Dss.Utils.parseCms(Buffer.from(request.signatureAsCMS, "base64"))
+        const cms = Dss.Utils.parseCms(Buffer.from(request.cms, "base64"))
         const signDocumentReq: Dss.ISignDocumentRequest = {
             parameters: {
                 certificateChain: cms.certificateChain,

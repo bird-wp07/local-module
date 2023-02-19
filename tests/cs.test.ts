@@ -23,12 +23,10 @@ describe("Central Service", () => {
             }
             const fetchSignatureResponse = await csClient.fetchSignature(request)
             expect(fetchSignatureResponse.isErr()).to.be.false
-            const cms = Buffer.from(fetchSignatureResponse._unsafeUnwrap().cms, "base64")
 
             // TODO: Implement once signature checking and revocation routes are implemented
-            const { signatureValue } = Dss.Utils.parseCms(cms)
-            // CONTINUEHERE: Signaturen werden offenbar nicht zentral abgelegt.
-            //               Ist unsere issuerId "qualified"?
+            // const cms = Buffer.from(fetchSignatureResponse._unsafeUnwrap().cms, "base64")
+            // const { signatureValue } = Dss.Utils.parseCms(cms)
         })
     })
 })

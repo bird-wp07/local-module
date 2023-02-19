@@ -33,11 +33,19 @@ run_container() {
         -v "$(realpath ./tests)":/root/tests \
         -v "$(realpath ./tsconfig.json)":/root/tsconfig.json \
         -v "$(realpath ./tsoa.json)":/root/tsoa.json \
+        -v "$(realpath ./.env)":/root/.env \
+        -v "$(realpath ./cs-auth-mtls-client-certkey.p12)":/root/cs-auth-mtls-client-certkey.p12 \
+        -v "$(realpath ./cs-auth-mtls-server-cert.pem)":/root/cs-auth-mtls-server-cert.pem \
         $PROJECT_DOCKER_IMAGE_NAME /bin/zsh ./scripts/run-tests-selfcontained.sh run_tests
 }
 
 # This is executed inside the container. We must go deeper.
 run_tests() {
+    cat .env | grep -E '^[A-Za-z0-9_]+=.+$' | while read line; do
+        k="$(printf -- "$line" | cut -d= -f1)"
+        v="$(printf -- "$line" | cut -d= -f2-)"
+        eval "export $k=$v"
+    done
     export WP07_DSS_BASEURL="http://127.0.0.1:8080"
     export WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:2048"
     ./start.sh start_dss >/dev/null 2>&1 &
@@ -51,6 +59,7 @@ run_tests() {
 
     # Wait for local module startup to finish to send a signal to this process
     # to continue execution.
+    # TODO: Remove signal and just poll /system/health
     trap 'lm_ready=1' USR1
     lm_ready=0
     while [ "$lm_ready" -ne 1 ]; do

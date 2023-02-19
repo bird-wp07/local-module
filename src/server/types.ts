@@ -53,7 +53,7 @@ export interface IDigestPdfResponse {
 
 export interface IMergePdfRequest {
     bytes: Base64
-    signatureAsCMS: Base64 // TODO: rename field
+    cms: Base64
     signingTimestamp: UnixTimeMs
 }
 

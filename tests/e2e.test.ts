@@ -44,7 +44,7 @@ describe("End-to-end", () => {
 
             const mergePdfRequest: Server.IMergePdfRequest = {
                 bytes: pdfBase64,
-                signatureAsCMS: cms,
+                cms: cms,
                 signingTimestamp: timestampUnixms
             }
             const mergePdfRes = await appImpl.mergePdf(mergePdfRequest)
