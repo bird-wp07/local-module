@@ -6,6 +6,10 @@ export enum EDigestAlgorithm {
 }
 
 export interface IGenerateSignatureRequest {
+    /**
+     * Base64 encoded data to be signed, here referred to as 'hash' (of the
+     * (augmented) PDF in question).
+     */
     hash: Base64
     digestMethod: EDigestAlgorithm
     auditLog?: string
@@ -26,6 +30,8 @@ export interface IVerifySignatureRequest {
 /**
  * Returned only for happy path (signature exists). See implementation for
  * details.
+ *
+ * TODO: Implement once CS api is cleared up.
  */
 export interface IVerifySignatureResponse {
     valid: boolean

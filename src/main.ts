@@ -2,6 +2,7 @@ import * as Settings from "./settings"
 import { logger } from "./settings"
 import * as Dss from "./dss"
 import * as Cs from "./cs"
+import * as Applogic from "./applogic"
 import * as Server from "./server"
 import * as Ioc from "typescript-ioc"
 import http from "http"
@@ -38,7 +39,7 @@ async function main() {
     /* Ioc container setup. */
     Ioc.Container.bind(Dss.IDssClient).factory(() => dssClient)
     Ioc.Container.bind(Cs.ICsClient).factory(() => csClient)
-    Ioc.Container.bind(Server.IAppLayer).to(Server.IAppLayer)
+    Ioc.Container.bind(Applogic.IAppLogic).to(Applogic.AppLogic)
 
     /* Start our http server. */
     const split = cfg.lmBaseurl.split("://")[1].split(":")

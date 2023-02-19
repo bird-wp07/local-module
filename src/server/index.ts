@@ -1,3 +1,3 @@
 export * from "./routes"
-export * from "./impl"
+export * from "../applogic/impl"
 export * from "./types"

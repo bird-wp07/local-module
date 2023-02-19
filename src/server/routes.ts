@@ -9,14 +9,17 @@ import {
     Schema_IDigestPdfRequest,
     ProcessingRequestError,
     Schema_IMergePdfRequest,
-    IMergePdfRequest
+    IMergePdfRequest,
+    IDigestPdfResponse,
+    IMergePdfResponse,
+    IValidateSignedPdfResponse
 } from "./types"
-import { IAppLayer } from "./impl"
+import { IAppLogic } from "../applogic/base"
 import { Container } from "typescript-ioc"
 
 export const HTTP_MAX_REQUEST_BODY_SIZE_BYTES = 8000000
 
-function makeHealthController(impl: IAppLayer): Express.RequestHandler {
+function makeHealthController(impl: IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         const response = await impl.health()
         if (response.isErr()) {
@@ -27,53 +30,72 @@ function makeHealthController(impl: IAppLayer): Express.RequestHandler {
     return fn as Express.RequestHandler
 }
 
-function makeDigestController(impl: IAppLayer): Express.RequestHandler {
+function makeDigestController(impl: IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
+        /* Validate incoming request. */
         const validationResponse = Schema_IDigestPdfRequest.validate(req.body)
         if (validationResponse.error !== undefined) {
             return next(validationResponse.error)
         }
+        const body = req.body as IDigestPdfRequest
 
-        const response = await impl.digestPdf(req.body as IDigestPdfRequest)
+        /* Call implementation. */
+        const pdf = body.bytes
+        const timestamp = new Date(body.signingTimestamp)
+        const response = await impl.generateDataToBeSigned(pdf, timestamp)
         if (response.isErr()) {
             return next(response.error)
         }
-
-        return res.status(200).json({
-            bytes: response.value.bytes
-        })
+        const responseBody: IDigestPdfResponse = {
+            bytes: response.value
+        }
+        return res.status(200).json(responseBody)
     }
     return fn as Express.RequestHandler
 }
 
-function makeMergeController(impl: IAppLayer): Express.RequestHandler {
+function makeMergeController(impl: IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
+        /* Validate incoming request. */
         const validationResponse = Schema_IMergePdfRequest.validate(req.body)
         if (validationResponse.error !== undefined) {
             return next(validationResponse.error)
         }
+        const body = req.body as IMergePdfRequest
 
-        const response = await impl.mergePdf(req.body as IMergePdfRequest)
+        /* Call implementation. */
+        const pdf = body.bytes
+        const timestamp = new Date(body.signingTimestamp)
+        const cms = body.cms
+        const response = await impl.embedSignatureIntoPdf(pdf, timestamp, cms)
         if (response.isErr()) {
             return next(response.error)
         }
-        return res.status(200).json(response.value)
+        const responseBody: IMergePdfResponse = {
+            bytes: response.value
+        }
+        return res.status(200).json(responseBody)
     }
     return fn as Express.RequestHandler
 }
 
-function makeValidationController(impl: IAppLayer): Express.RequestHandler {
+function makeValidationController(impl: IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
+        /* Validate incoming request. */
         const validationResponse = Schema_IValidateSignedPdfRequest.validate(req.body)
         if (validationResponse.error !== undefined) {
             return next(validationResponse.error)
         }
+        const body = req.body as IValidateSignedPdfRequest
 
-        const response = await impl.validateSignedPdf(req.body as IValidateSignedPdfRequest)
+        /* Call implementation. */
+        const pdf = body.bytes
+        const response = await impl.validateSignedPdf(pdf)
         if (response.isErr()) {
             return next(response.error)
         }
-        return res.status(200).json(response.value)
+        const responseBody: IValidateSignedPdfResponse = response.value
+        return res.status(200).json(responseBody)
     }
     return fn as Express.RequestHandler
 }
@@ -109,16 +131,16 @@ const errorHandler: Express.ErrorRequestHandler = (err: Error, _: Express.Reques
 }
 
 export function makeApp(): Express.Express {
-    const impl = Container.get(IAppLayer)
+    const impl = Container.get(IAppLogic)
 
     const app = Express.default()
-    // _expressApp.use(Express.urlencoded({ extended: true }))
+    // _expressApp.use(Express.urlencoded({ extended: true })) TODO: Do we need this?
     app.use(Express.json({ limit: HTTP_MAX_REQUEST_BODY_SIZE_BYTES }))
 
     app.get("/system/health", makeHealthController(impl))
     app.post("/digest/pdf", makeDigestController(impl))
     app.post("/merge/pdf", makeMergeController(impl))
-    app.post("/validate/pdf", makeValidationController(impl)) // TODO: use nouns consistently; validate -> validation
+    app.post("/validate/pdf", makeValidationController(impl))
 
     app.use(errorHandler)
 

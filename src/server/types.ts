@@ -1,22 +1,13 @@
-import { Base64, UnixTimeMs } from "../utility"
-import * as Joi from "joi"
+/**
+ * Interface definitions and their respective validation schemas. We restrict
+ * the subset of allowed values to a minimum for simplicity's sake.
+ */
+
+import * as Applogic from "../applogic"
 import { HTTP_MAX_REQUEST_BODY_SIZE_BYTES } from "./routes"
 
-export enum EDigestAlgorithm {
-    SHA256 = "SHA256"
-}
-
-export const Schema_EDigestAlgorithm = Joi.valid(...Object.values(EDigestAlgorithm))
-
-export enum EEncryptionAlgorithm {
-    ECDSA = "ECDSA"
-}
-
-export const Schema_EEncryptionAlgorithm = Joi.valid(...Object.values(EEncryptionAlgorithm))
-
-export enum ESignatureAlgorithm {
-    ECDSA_SHA256 = "ECDSA_SHA256"
-}
+import { Base64, UnixTimeMs } from "../utility"
+import * as Joi from "joi"
 
 export enum EHealthStatus {
     OK = "OK",
@@ -26,9 +17,6 @@ export interface IHealthResponse {
     status: EHealthStatus
 }
 
-/**
- * TODOC
- */
 export interface IDigestPdfRequest {
     /**
      * Base64 encoded PDF.
@@ -36,25 +24,38 @@ export interface IDigestPdfRequest {
     bytes: Base64
 
     /**
-     * Timestamp in ms since epoch.
+     * Timestamp in milliseconds since epoch.
      */
-    timestamp: UnixTimeMs
+    signingTimestamp: UnixTimeMs
 }
 
 export const Schema_IDigestPdfRequest = Joi.object().keys({
-    digestAlgorithm: Schema_EDigestAlgorithm,
     bytes: Joi.string().base64(),
     signingTimestamp: Joi.number().min(0)
 })
 
 export interface IDigestPdfResponse {
+    /**
+     * Base64 encoded data to be signed.
+     */
     bytes: Base64
 }
 
 export interface IMergePdfRequest {
+    /**
+     * Base64 encoded original PDF used to generate the data to be signed
+     */
     bytes: Base64
-    cms: Base64
+
+    /**
+     * Original signing timestamp used to generate the data to be signed
+     */
     signingTimestamp: UnixTimeMs
+
+    /**
+     * Base64 encoded signature in CMS format
+     */
+    cms: Base64
 }
 
 export const Schema_IMergePdfRequest = Joi.object().keys({
@@ -64,10 +65,16 @@ export const Schema_IMergePdfRequest = Joi.object().keys({
 })
 
 export interface IMergePdfResponse {
+    /**
+     * Base64 encoded signed PDF
+     */
     bytes: Base64
 }
 
 export interface IValidateSignedPdfRequest {
+    /**
+     * Base64 encoded signed PDF
+     */
     bytes: Base64
 }
 
@@ -75,13 +82,10 @@ export const Schema_IValidateSignedPdfRequest = Joi.object().keys({
     bytes: Joi.string().base64()
 })
 
-export interface IValidateSignedPdfResponse {
-    valid: boolean
-    details: unknown
-}
+export type IValidateSignedPdfResponse = Applogic.IValidationResult
 
 /**
- * Errors
+ * Errors returned by the API.
  */
 export enum EErrorCode {
     REQUEST_VALIDATION_ERROR = "REQUEST_VALIDATION_ERROR",

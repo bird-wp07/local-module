@@ -2,65 +2,48 @@ import chai, { expect } from "chai"
 import chaiSubset from "chai-subset"
 import { describe, test } from "mocha"
 import * as fs from "fs"
-import * as Cs from "../src/cs"
-import * as Server from "../src/server"
+import * as Applogic from "../src/applogic"
 import { makeCsClient, makeDssClient } from "./testsHelper"
+import { Base64 } from "../src/utility"
 
 chai.use(chaiSubset)
 
-describe("End-to-end", () => {
-    // NOTE: The signing certificate used by the cs is valid
-    //       from 2022-11-25T12:29:00Z to 2023-11-25T12:29:00Z
-    let csClient: Cs.CsClient
-    let appImpl: Server.IAppLayer
+describe("End-to-end tests", () => {
+    let appImpl: Applogic.IAppLogic
     before("Init", async () => {
         const dssClient = await makeDssClient()
-        appImpl = new Server.AppImpl(dssClient)
-        csClient = await makeCsClient()
+        const csClient = await makeCsClient()
+        appImpl = new Applogic.AppLogic(dssClient, csClient)
     })
 
     describe("Digest, sign, merge and verify of a PDF", () => {
         const pdfpath = "./tests/files/unsigned.pdf"
         test(`Happy path for ${pdfpath}`, async () => {
-            const timestampUnixms = Number(new Date("2022-11-25T12:30:00Z"))
-            const pdfBase64 = fs.readFileSync(pdfpath).toString("base64")
-            const digestPdfRequest: Server.IDigestPdfRequest = {
-                bytes: pdfBase64,
-                timestamp: timestampUnixms
-            }
-            const digestPdfRes = await appImpl.digestPdf(digestPdfRequest)
-            expect(digestPdfRes.isErr()).to.be.false
-            const digest = digestPdfRes._unsafeUnwrap().bytes
+            // NOTE: The signing certificate used by the cs is valid
+            //       from 2022-11-25T12:29:00Z to 2023-11-25T12:29:00Z
+            const timestamp = new Date("2022-11-25T12:30:00Z")
+            const pdf: Base64 = fs.readFileSync(pdfpath).toString("base64")
 
-            const fetchSignedCmsRequest: Cs.IGenerateSignatureRequest = {
-                hash: digest,
-                digestMethod: Cs.EDigestAlgorithm.SHA256,
-                auditLog: "Signing of Test Document"
-            }
-            const getSignedCmsRes = await csClient.generateSignature(fetchSignedCmsRequest)
-            expect(getSignedCmsRes.isErr()).to.be.false
-            const signedCms = getSignedCmsRes._unsafeUnwrap()
-            const cms = signedCms.cms
+            /* Digest */
+            const resultDigest = await appImpl.generateDataToBeSigned(pdf, timestamp)
+            expect(resultDigest.isErr()).to.be.false
+            const dataToBeSigned: Base64 = resultDigest._unsafeUnwrap()
 
-            const mergePdfRequest: Server.IMergePdfRequest = {
-                bytes: pdfBase64,
-                cms: cms,
-                signingTimestamp: timestampUnixms
-            }
-            const mergePdfRes = await appImpl.mergePdf(mergePdfRequest)
-            expect(mergePdfRes.isErr()).to.be.false
-            const signedPdfBase64 = mergePdfRes._unsafeUnwrap()
+            /* Sign */
+            const resultSign = await appImpl.generateSignature(dataToBeSigned)
+            expect(resultSign.isErr()).to.be.false
+            const cms: Base64 = resultSign._unsafeUnwrap()
 
-            const validateSignedPdfRequest: Server.IValidateSignedPdfRequest = {
-                bytes: signedPdfBase64.bytes
-            }
-            const validationResult = await appImpl.validateSignedPdf(validateSignedPdfRequest)
-            expect(validationResult.isErr()).to.be.false
-            const have = validationResult._unsafeUnwrap()
-            const want: Partial<Server.IValidateSignedPdfResponse> = {
-                valid: false
-            }
-            expect(have).to.containSubset(want)
+            /* Merge */
+            const resultMerge = await appImpl.embedSignatureIntoPdf(pdf, timestamp, cms)
+            expect(resultMerge.isErr()).to.be.false
+            const signedPdf: Base64 = resultMerge._unsafeUnwrap()
+
+            /* Verify */
+            const resultVerify = await appImpl.validateSignedPdf(signedPdf)
+            expect(resultVerify.isErr()).to.be.false
+            const validationResult = resultVerify._unsafeUnwrap()
+            expect(validationResult.valid).to.be.false // COMBACK: Change once we have a trusted certificate
         })
     })
 })
