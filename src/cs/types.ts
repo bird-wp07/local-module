@@ -19,6 +19,35 @@ export const Schema_IFetchSignatureResponse = Joi.object().keys({
     cms: Joi.string().base64()
 })
 
+export interface IVerifySignatureRequest {
+    digest: Base64
+}
+
+export interface IVerifySignatureResponse {
+    valid: boolean
+    results?: [
+        {
+            policyId: string
+            policyDescription: string
+            passed: boolean
+        }
+    ]
+}
+
+/**
+ * Returned in case of success. Failure results in a 404.
+ */
+export const Schema_IVerifySignatureResponse = Joi.object().keys({
+    valid: Joi.boolean().required(),
+    results: Joi.array().items(
+        Joi.object().keys({
+            policyId: Joi.string().required(),
+            policyDescription: Joi.string().required(),
+            passed: Joi.boolean().required()
+        })
+    )
+})
+
 export interface IFetchAuthTokenResponse {
     access_token: Base64
     expires_in: number

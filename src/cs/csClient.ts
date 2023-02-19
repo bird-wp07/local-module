@@ -1,6 +1,7 @@
 import { AxiosRequestConfig } from "axios"
 import { ok, err, Result } from "neverthrow"
-import { IFetchSignatureResponse, IFetchSignatureRequest, Schema_IFetchAuthToken, IFetchAuthTokenResponse } from "./types"
+import { IFetchSignatureResponse, IFetchSignatureRequest, Schema_IFetchAuthToken, IFetchAuthTokenResponse, IVerifySignatureRequest, IVerifySignatureResponse } from "./types"
+import * as qs from "qs"
 import * as Utility from "../utility"
 import * as https from "https"
 import * as fs from "fs"
@@ -79,6 +80,31 @@ export class CsClient implements ICsClient {
         const response = await Utility.httpReq(config)
         if (response.isErr()) {
             return err(response.error)
+        }
+        return ok(response.value.data)
+    }
+
+    // TODO: Central Service: Refactor endpoint
+    //       - Don't use 404 to designate unknown signatures
+    //       - Return consistent payload for known valid, known revoked and unknown signatures.
+    //       - Use POST request for consistency (HTTP vs REST)
+    //       - Clarify 'hash of a signature'
+    //
+    //       Afterwards: write sanity checks and tests
+    async verifySignature(request: IVerifySignatureRequest): Promise<Result<IVerifySignatureResponse, Error>> {
+        const config: AxiosRequestConfig = {
+            method: "GET",
+            url: "/api/v1/verifier/verifications",
+            baseURL: this.baseurl,
+            params: {
+                hash: request.digest,
+                hashType: "SIGNATURE_HASH"
+            },
+            paramsSerializer: { serialize: (params) => qs.stringify(params) }
+        }
+        const response = await Utility.httpReq(config)
+        if (response.isErr()) {
+            return ok({ valid: false })
         }
         return ok(response.value.data)
     }
