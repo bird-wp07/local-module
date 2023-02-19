@@ -1,3 +1,6 @@
+/**
+ * Application logic abstraction "layer"
+ */
 import * as ASN1 from "@lapo/asn1js"
 import * as ASNSchema from "@peculiar/asn1-schema"
 import { Result, ok, err } from "neverthrow"
@@ -15,20 +18,28 @@ import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
 import { Base64 } from "../utility"
 
-export abstract class IImpl {
+export abstract class IAppLayer {
     public abstract health(): Promise<Result<IHealthResponse, Error>>
     public abstract digestPdf(request: IDigestPdfRequest): Promise<Result<IDigestPdfResponse, Error>>
     public abstract mergePdf(request: IMergePdfRequest): Promise<Result<IMergePdfResponse, Error>>
     public abstract validateSignedPdf(request: IValidateSignedPdfRequest): Promise<Result<IValidateSignedPdfResponse, Error>>
 }
 
-// Logic ein aufrufbares Singleton machen, damit nicht instanziiert werden muss.
-// TODO: request Object in einzelne pargs aufbrechen für Lesbarkeit
-export class Impl implements IImpl {
+/**
+ * Implements application logic using DSS and CS API calls.
+ *
+ * TODO: Spread function arguments into separate pargs for readability
+ */
+export class AppImpl implements IAppLayer {
     constructor(@Ioc.Inject private dssClient: Dss.IDssClient) {
         this.dssClient = dssClient
     }
 
+    /**
+     * Returns system health status depending on the subsystems' health states.
+     *
+     * TODO: Check CS health.
+     */
     public async health(): Promise<Result<IHealthResponse, Error>> {
         let status: EHealthStatus
         if (!(await this.dssClient.isOnline())) {
@@ -74,10 +85,17 @@ export class Impl implements IImpl {
         // ???: Which data structure does DSS#getDataToSign() return here?
         //      See question below.
         const asn1blob = Buffer.from(response.value.bytes, "base64")
-        const digest = Impl.extractDigestFromDigestPdfResponse(asn1blob)
+        const digest = AppImpl.extractDigestFromDigestPdfResponse(asn1blob)
         return ok({ bytes: digest })
     }
 
+    /**
+     * Create a signed PDF from the original PDF which, in conjunction with the
+     * signing timestamp, was used to generate the digest sent to the CS in
+     * order to create the signature.
+     *
+     * ???: Is the input the original or the 'data-to-be-signed' version of the document?
+     */
     public async mergePdf(request: IMergePdfRequest): Promise<Result<IMergePdfResponse, Error>> {
         const cms = Dss.Utils.parseCms(Buffer.from(request.cms, "base64"))
         const signDocumentReq: Dss.ISignDocumentRequest = {
@@ -111,6 +129,9 @@ export class Impl implements IImpl {
         return ok(result)
     }
 
+    /**
+     * TODOC;
+     */
     public async validateSignedPdf(request: IValidateSignedPdfRequest): Promise<Result<IValidateSignedPdfResponse, Error>> {
         /* Perform validation by DSS */
         const validateSignatureRequest: Dss.IValidateSignatureRequest = {

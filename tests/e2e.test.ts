@@ -12,10 +12,10 @@ describe("End-to-end", () => {
     // NOTE: The signing certificate used by the cs is valid
     //       from 2022-11-25T12:29:00Z to 2023-11-25T12:29:00Z
     let csClient: Cs.CsClient
-    let appImpl: Server.Impl
+    let appImpl: Server.IAppLayer
     before("Init", async () => {
         const dssClient = await makeDssClient()
-        appImpl = new Server.Impl(dssClient)
+        appImpl = new Server.AppImpl(dssClient)
         csClient = await makeCsClient()
     })
 
@@ -32,12 +32,12 @@ describe("End-to-end", () => {
             expect(digestPdfRes.isErr()).to.be.false
             const digest = digestPdfRes._unsafeUnwrap().bytes
 
-            const fetchSignedCmsRequest: Cs.IFetchSignatureRequest = {
+            const fetchSignedCmsRequest: Cs.IGenerateSignatureRequest = {
                 hash: digest,
                 digestMethod: Cs.EDigestAlgorithm.SHA256,
                 auditLog: "Signing of Test Document"
             }
-            const getSignedCmsRes = await csClient.fetchSignature(fetchSignedCmsRequest)
+            const getSignedCmsRes = await csClient.generateSignature(fetchSignedCmsRequest)
             expect(getSignedCmsRes.isErr()).to.be.false
             const signedCms = getSignedCmsRes._unsafeUnwrap()
             const cms = signedCms.cms

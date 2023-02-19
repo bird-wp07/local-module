@@ -5,17 +5,17 @@ export enum EDigestAlgorithm {
     SHA256 = "SHA256"
 }
 
-export interface IFetchSignatureRequest {
+export interface IGenerateSignatureRequest {
     hash: Base64
     digestMethod: EDigestAlgorithm
     auditLog?: string
 }
 
-export interface IFetchSignatureResponse {
+export interface IGenerateSignatureResponse {
     cms: Base64
 }
 
-export const Schema_IFetchSignatureResponse = Joi.object().keys({
+export const Schema_IGenerateSignatureResponse = Joi.object().keys({
     cms: Joi.string().base64()
 })
 
@@ -23,6 +23,10 @@ export interface IVerifySignatureRequest {
     digest: Base64
 }
 
+/**
+ * Returned only for happy path (signature exists). See implementation for
+ * details.
+ */
 export interface IVerifySignatureResponse {
     valid: boolean
     results?: [
@@ -34,9 +38,6 @@ export interface IVerifySignatureResponse {
     ]
 }
 
-/**
- * Returned in case of success. Failure results in a 404.
- */
 export const Schema_IVerifySignatureResponse = Joi.object().keys({
     valid: Joi.boolean().required(),
     results: Joi.array().items(
@@ -47,6 +48,22 @@ export const Schema_IVerifySignatureResponse = Joi.object().keys({
         })
     )
 })
+
+export interface IRevokeSignatureRequest {
+    hash: Base64
+    revocationReason: string
+    auditLog?: string
+}
+
+/**
+ * Returned only for happy path (signature was successfully revoked). Failure
+ * results in a 4xx code and a different payload. See implementation for
+ * details.
+ */
+export interface IRevokeSignatureResponse {
+    revocationDate?: string
+    revoked: boolean
+}
 
 export interface IFetchAuthTokenResponse {
     access_token: Base64

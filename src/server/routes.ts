@@ -11,12 +11,12 @@ import {
     Schema_IMergePdfRequest,
     IMergePdfRequest
 } from "./types"
-import { IImpl } from "./logic"
+import { IAppLayer } from "./impl"
 import { Container } from "typescript-ioc"
 
 export const HTTP_MAX_REQUEST_BODY_SIZE_BYTES = 8000000
 
-function makeHealthController(impl: IImpl): Express.RequestHandler {
+function makeHealthController(impl: IAppLayer): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         const response = await impl.health()
         if (response.isErr()) {
@@ -27,7 +27,7 @@ function makeHealthController(impl: IImpl): Express.RequestHandler {
     return fn as Express.RequestHandler
 }
 
-function makeDigestController(impl: IImpl): Express.RequestHandler {
+function makeDigestController(impl: IAppLayer): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         const validationResponse = Schema_IDigestPdfRequest.validate(req.body)
         if (validationResponse.error !== undefined) {
@@ -46,7 +46,7 @@ function makeDigestController(impl: IImpl): Express.RequestHandler {
     return fn as Express.RequestHandler
 }
 
-function makeMergeController(impl: IImpl): Express.RequestHandler {
+function makeMergeController(impl: IAppLayer): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         const validationResponse = Schema_IMergePdfRequest.validate(req.body)
         if (validationResponse.error !== undefined) {
@@ -62,7 +62,7 @@ function makeMergeController(impl: IImpl): Express.RequestHandler {
     return fn as Express.RequestHandler
 }
 
-function makeValidationController(impl: IImpl): Express.RequestHandler {
+function makeValidationController(impl: IAppLayer): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         const validationResponse = Schema_IValidateSignedPdfRequest.validate(req.body)
         if (validationResponse.error !== undefined) {
@@ -109,7 +109,7 @@ const errorHandler: Express.ErrorRequestHandler = (err: Error, _: Express.Reques
 }
 
 export function makeApp(): Express.Express {
-    const impl = Container.get(IImpl)
+    const impl = Container.get(IAppLayer)
 
     const app = Express.default()
     // _expressApp.use(Express.urlencoded({ extended: true }))

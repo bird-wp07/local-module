@@ -1,14 +1,25 @@
 import { AxiosRequestConfig } from "axios"
 import { ok, err, Result } from "neverthrow"
-import { IFetchSignatureResponse, IFetchSignatureRequest, Schema_IFetchAuthToken, IFetchAuthTokenResponse, IVerifySignatureRequest, IVerifySignatureResponse } from "./types"
+import {
+    IGenerateSignatureResponse,
+    IGenerateSignatureRequest,
+    Schema_IFetchAuthToken,
+    IFetchAuthTokenResponse,
+    IVerifySignatureRequest,
+    IVerifySignatureResponse,
+    IRevokeSignatureRequest,
+    IRevokeSignatureResponse
+} from "./types"
 import * as qs from "qs"
 import * as Utility from "../utility"
 import * as https from "https"
 import * as fs from "fs"
 
 export abstract class ICsClient {
-    public abstract isOnline(): Promise<boolean>
-    public abstract fetchSignature(request: IFetchSignatureRequest): Promise<Result<IFetchSignatureResponse, Error>>
+    abstract isOnline(): Promise<boolean>
+    abstract generateSignature(request: IGenerateSignatureRequest): Promise<Result<IGenerateSignatureResponse, Error>>
+    abstract verifySignature(request: IVerifySignatureRequest): Promise<Result<IVerifySignatureResponse, Error>>
+    abstract revokeSignature(request: IRevokeSignatureRequest): Promise<Result<IRevokeSignatureResponse, Error>>
 }
 
 export class CsClient implements ICsClient {
@@ -28,7 +39,7 @@ export class CsClient implements ICsClient {
     }
 
     /**
-     * Factory for exception-less construction of CsClients.
+     * Factory for exception-free construction of CsClients.
      */
     static make(baseurl: string, issuerId: string, tokenUrl: string, mtlsClientPfxFile: string, mtslClientPfxFilePassword: string, mtlsCaPemfile: string): Result<CsClient, Error> {
         try {
@@ -63,7 +74,7 @@ export class CsClient implements ICsClient {
      *
      * See EN 319 122-1.
      */
-    async fetchSignature(request: IFetchSignatureRequest): Promise<Result<IFetchSignatureResponse, Error>> {
+    async generateSignature(request: IGenerateSignatureRequest): Promise<Result<IGenerateSignatureResponse, Error>> {
         const fetchAuthTokenResult = await this.fetchAuthToken()
         if (fetchAuthTokenResult.isErr()) {
             return err(fetchAuthTokenResult.error)
@@ -105,6 +116,33 @@ export class CsClient implements ICsClient {
         const response = await Utility.httpReq(config)
         if (response.isErr()) {
             return ok({ valid: false })
+        }
+        return ok(response.value.data)
+    }
+
+    // TODO: implement
+    async revokeSignature(request: IRevokeSignatureRequest): Promise<Result<IRevokeSignatureResponse, Error>> {
+        const fetchAuthTokenResult = await this.fetchAuthToken()
+        if (fetchAuthTokenResult.isErr()) {
+            return err(fetchAuthTokenResult.error)
+        }
+        const tokenContainer = fetchAuthTokenResult.value
+
+        const config: AxiosRequestConfig = {
+            method: "POST",
+            url: "/api/v1/revocation/signaturerevocations",
+            baseURL: this.baseurl,
+            headers: { Authorization: `Bearer ${tokenContainer.access_token}` },
+            data: {
+                hash: request.hash,
+                revocationReason: request.revocationReason,
+                hashType: "SIGNATURE_HASH",
+                auditLog: request.auditLog
+            }
+        }
+        const response = await Utility.httpReq(config)
+        if (response.isErr()) {
+            return ok({ revoked: false })
         }
         return ok(response.value.data)
     }

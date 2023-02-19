@@ -38,7 +38,7 @@ async function main() {
     /* Ioc container setup. */
     Ioc.Container.bind(Dss.IDssClient).factory(() => dssClient)
     Ioc.Container.bind(Cs.ICsClient).factory(() => csClient)
-    Ioc.Container.bind(Server.IImpl).to(Server.Impl)
+    Ioc.Container.bind(Server.IAppLayer).to(Server.IAppLayer)
 
     /* Start our http server. */
     const split = cfg.lmBaseurl.split("://")[1].split(":")
