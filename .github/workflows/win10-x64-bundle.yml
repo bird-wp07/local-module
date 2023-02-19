@@ -17,14 +17,14 @@ jobs:
           Copy-Item @(".\bundle\win10-x64\*", ".\postman.json") -Destination ".\zip\"
           Set-Content -Path .\zip\VERSION -Value $env:GITHUB_REF_NAME
           choco install --yes pandoc
-          pandoc --standalone --embed-resources --output=./zip/README.html README.md
+          pandoc --standalone --embed-resources --output=./zip/README.html ./docs/README.md
 
       - shell: powershell # see https://github.com/MScholtes/PS2EXE/issues/82
         working-directory: zip
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module ps2exe
-          Invoke-ps2exe -inputFile .\start.ps1 -iconFile ..\assets\bird.ico -outputFile .\start.exe
+          Invoke-ps2exe -inputFile .\start.ps1 -iconFile ..\bundle\win10-x64\bird.ico -outputFile .\start.exe
 
       - name: Build archive
         working-directory: zip

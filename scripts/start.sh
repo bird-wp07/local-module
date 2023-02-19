@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Bootstrap DSS and local module, downloading all dependencies for x64 linux.
-# We use bash instead of zsh as this script is deployed to institutional IT
-# systems. This self-contained script is exported as the 'start.sh' in the
-# linux bundles.
+
+# Bootstraps DSS and local module, downloading all dependencies for x64
+# linux. We use bash instead of zsh as this script is deployed to
+# institutional IT systems. This self-contained script is exported as the
+# 'start.sh' in the linux bundles and is used to build the dev docker image.
+# There is no reason to run this script manually during development.
 
 set -e
 
@@ -119,8 +121,8 @@ start_lm() {
         cd "$LM_ROOT"
         [ -d "./node_modules" ] && nobuild=":nobuild"
         WP07_LOCAL_MODULE_BASEURL="$WP07_LOCAL_MODULE_BASEURL" \
-            WP07_DSS_BASEURL="$WP07_DSS_BASEURL" \
-            PATH="$(realpath "$NODE_ROOT")/bin:$PATH" npm run start"$nobuild"
+        WP07_DSS_BASEURL="$WP07_DSS_BASEURL" \
+        PATH="$(realpath "$NODE_ROOT")/bin:$PATH" npm run start"$nobuild"
     )
 }
 

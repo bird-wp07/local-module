@@ -6,9 +6,16 @@ import * as Joi from "joi"
 import { InvalidEnvvarValue } from "./errors"
 
 /**
- * Dict of all configuration parameters, their defaults and their joi
- * validation schemas. All configuration parameters are set via environment
- * variables.
+ * Dict of all runtime configuration parameters, the name of the envvar from
+ * which their values are derived, the values' defaults and their joi validation
+ * schemas.
+ *
+ * All parameters are configured via environment variables first and foremost.
+ * Optionally, an additional UTF-8 encoded file named '.env' containing lines
+ * in 'key=value' format can be used to augment the environment (parameters
+ * already configured via their respective envvar will not be overwritten). The
+ * .env file's default path can be changed via the $WP07_LOCAL_MODULE_ENVFILE
+ * envvar.
  */
 export const configParams = {
     /*
@@ -22,16 +29,19 @@ export const configParams = {
     },
 
     /*
-     * Winston log level
+     * Winston log level.
      */
     lmLogLevel: {
         envvar: "WP07_LOCAL_MODULE_LOGLEVEL",
-        default: "debug",
+        default: "info",
         schema: Joi.string().valid("debug", "info")
     },
 
     /*
-     * Local module origin
+     * Local module baseurl. This parameter is used to set the local ip address
+     * and the port of the local module's webserver. Use an explicit ip address
+     * instead of localhost, as nodejs resolves 'localhost' to either ipv4 or
+     * ipv6 depending on its version.
      */
     lmBaseurl: {
         envvar: "WP07_LOCAL_MODULE_BASEURL",
@@ -40,7 +50,11 @@ export const configParams = {
     },
 
     /*
-     * DSS origin
+     * DSS baseurl.
+     *
+     * The ip address must be 127.0.0.1 due to limitations in the ability to
+     * configure the DSS demonstration webapp. See
+     * https://github.com/esig/dss-demonstrations/issues/44.
      */
     dssBaseurl: {
         envvar: "WP07_DSS_BASEURL",
@@ -65,7 +79,7 @@ export const configParams = {
     },
 
     /*
-     * Central service auth token url.
+     * Central service' openid-connect auth token url.
      */
     csTokenUrl: {
         envvar: "WP07_CS_TOKEN_URL",
@@ -135,7 +149,13 @@ export interface IApplicationSettings {
     csCaPem: string
 }
 
-// FIXME: Use proper typing below.
+/**
+ *
+ * We allow to pick another dict instead of process.env to allow this function
+ * to be tested.
+ *
+ * FIXME: Use proper types in implementation
+ */
 export function parseApplicationSettings(env = process.env): Result<IApplicationSettings, Error> {
     /* Merge environment with .env file, if provided. Existing envvars are
      * not overwritten by the contents of the .env file. */

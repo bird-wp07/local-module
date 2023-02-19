@@ -27,7 +27,7 @@ describe("Dss", () => {
             })
 
             test("handles a self-signed PDF correctly", async () => {
-                const pdf = fs.readFileSync("./assets/selfsigned-js.pdf").toString("base64")
+                const pdf = fs.readFileSync("./tests/files/selfsigned-js.pdf").toString("base64")
                 const request: Dss.IValidateSignatureRequest = {
                     signedDocument: {
                         bytes: pdf,

@@ -1,3 +1,5 @@
+# Dockerfile used to build images for development and self-contained testing.
+
 FROM ubuntu:latest
 RUN apt update -y && apt upgrade -y
 RUN apt install -y curl zsh bash xz-utils jq

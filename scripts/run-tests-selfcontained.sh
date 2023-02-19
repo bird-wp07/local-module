@@ -1,4 +1,8 @@
 #!/usr/bin/env zsh
+
+# Executes all tests inside a self-contained ephemeral container. See --help
+# for detailed usage.
+
 set -e
 cd $(dirname ${0:A:h}) # cd into project root
 source ./scripts/common.sh
@@ -15,7 +19,8 @@ fi
 
 run_container() {
     build_docker_image
-    # TODO: Use git and shellmagic to dynamically generate this list
+    # TODO: Use git and shellmagic to dynamically generate this list.
+    #       Separate versioned files from non-versioned files containing secrets.
     docker run -it --rm \
         -v "$(realpath ./assets)":/root/assets \
         -v "$(realpath ./bundle)":/root/bundle \
@@ -46,8 +51,6 @@ run_tests() {
         v="$(printf -- "$line" | cut -d= -f2-)"
         eval "export $k=$v"
     done
-    export WP07_DSS_BASEURL="http://127.0.0.1:8080"
-    export WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:2048"
     ./start.sh start_dss >/dev/null 2>&1 &
 
     # NOTE: We want to install for, build and run the local module from the

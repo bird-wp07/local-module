@@ -1,4 +1,8 @@
 #!/usr/bin/env zsh
+
+# Utility script to start and stop containerized instances of the DSS. See
+# --help for full command list.
+
 set -e
 cd $(dirname ${0:A:h}) # cd into project root
 source ./scripts/common.sh

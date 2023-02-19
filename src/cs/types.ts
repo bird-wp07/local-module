@@ -1,4 +1,4 @@
-import { Base64 } from "../types"
+import { Base64 } from "../utility"
 import * as Joi from "joi"
 
 export enum EDigestAlgorithm {

@@ -1,4 +1,4 @@
-import { Base64, UnixTimeMs } from "../types"
+import { Base64, UnixTimeMs } from "../utility"
 import * as Joi from "joi"
 import { HTTP_MAX_REQUEST_BODY_SIZE_BYTES } from "./routes"
 

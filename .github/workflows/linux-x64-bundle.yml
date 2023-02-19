@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: docker://pandoc/core:2.19
         with:
-          args: "--standalone --embed-resources --output ./README.html ./README.md"
+          args: "--standalone --embed-resources --output ./README.html ./docs/README.md"
       - run: |
           mkdir ./zip
           cp ./postman.json ./README.html ./scripts/start.sh ./zip

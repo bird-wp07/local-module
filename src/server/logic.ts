@@ -13,7 +13,7 @@ import {
 } from "./types"
 import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
-import { Base64 } from "../types"
+import { Base64 } from "../utility"
 
 export abstract class IImpl {
     public abstract health(): Promise<Result<IHealthResponse, Error>>
