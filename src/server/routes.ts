@@ -12,10 +12,17 @@ import {
     IMergePdfRequest,
     IDigestPdfResponse,
     IMergePdfResponse,
-    IValidateSignedPdfResponse
+    IValidateSignedPdfResponse,
+    Schema_IIssueRequest,
+    IIssueRequest,
+    IIssueResponse,
+    Schema_ISignPdfRequest,
+    ISignPdfRequest,
+    ISignPdfResponse
 } from "./types"
 import { IAppLogic } from "../applogic/base"
 import { Container } from "typescript-ioc"
+import { Base64 } from "../utility"
 
 export const HTTP_MAX_REQUEST_BODY_SIZE_BYTES = 8000000
 
@@ -42,12 +49,37 @@ function makeDigestController(impl: IAppLogic): Express.RequestHandler {
         /* Call implementation. */
         const pdf = body.bytes
         const timestamp = new Date(body.signingTimestamp)
-        const response = await impl.generateDataToBeSigned(pdf, timestamp)
+        const response = await impl.generatePdfDigestToBeSigned(pdf, timestamp)
         if (response.isErr()) {
             return next(response.error)
         }
         const responseBody: IDigestPdfResponse = {
             bytes: response.value
+        }
+        return res.status(200).json(responseBody)
+    }
+    return fn as Express.RequestHandler
+}
+
+function makeIssueController(impl: IAppLogic): Express.RequestHandler {
+    const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
+        /* Validate incoming request. */
+        const validationResponse = Schema_IIssueRequest.validate(req.body)
+        if (validationResponse.error !== undefined) {
+            return next(validationResponse.error)
+        }
+        const body = req.body as IIssueRequest
+
+        /* Call implementation. */
+        const digestToBeSigned = body.bytes
+        const issuerId = body.issuerId
+        const auditLog = body.auditLog
+        const response = await impl.issueSignature(digestToBeSigned, issuerId, auditLog)
+        if (response.isErr()) {
+            return next(response.error)
+        }
+        const responseBody: IIssueResponse = {
+            cms: response.value
         }
         return res.status(200).json(responseBody)
     }
@@ -100,6 +132,47 @@ function makeValidationController(impl: IAppLogic): Express.RequestHandler {
     return fn as Express.RequestHandler
 }
 
+function makeSignController(impl: IAppLogic): Express.RequestHandler {
+    const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
+        /* Validate incoming request. */
+        const validationResponse = Schema_ISignPdfRequest.validate(req.body)
+        if (validationResponse.error !== undefined) {
+            return next(validationResponse.error)
+        }
+        const body = req.body as ISignPdfRequest
+        const pdf = body.bytes
+        const issuerId = body.issuerId
+        const timestamp = new Date()
+
+        /* Digest */
+        const resultDigest = await impl.generatePdfDigestToBeSigned(pdf, timestamp)
+        if (resultDigest.isErr()) {
+            return next(resultDigest.error)
+        }
+        const digestToBeSigned: Base64 = resultDigest.value
+
+        /* Issue */
+        const resultIssue = await impl.issueSignature(digestToBeSigned, issuerId)
+        if (resultIssue.isErr()) {
+            return next(resultIssue.error)
+        }
+        const cms: Base64 = resultIssue.value
+
+        /* Merge */
+        const resultMerge = await impl.embedSignatureIntoPdf(pdf, timestamp, cms)
+        if (resultMerge.isErr()) {
+            return next(resultMerge.error)
+        }
+        const signedPdf: Base64 = resultMerge.value
+
+        const responseBody: ISignPdfResponse = {
+            bytes: signedPdf
+        }
+        return res.status(200).json(responseBody)
+    }
+    return fn as Express.RequestHandler
+}
+
 /**
  * Maps errors occurring during processing of requests to our own,
  * outside-facing errors.
@@ -139,8 +212,12 @@ export function makeApp(): Express.Express {
 
     app.get("/system/health", makeHealthController(impl))
     app.post("/digest/pdf", makeDigestController(impl))
+    app.post("/issue", makeIssueController(impl))
     app.post("/merge/pdf", makeMergeController(impl))
     app.post("/validate/pdf", makeValidationController(impl))
+
+    // TODO;
+    app.post("/sign/pdf", makeSignController(impl))
 
     app.use(errorHandler)
 

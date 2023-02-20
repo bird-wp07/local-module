@@ -1,9 +1,11 @@
 import { describe, test } from "mocha"
 import { expect } from "chai"
 import * as Cs from "../src/cs"
+import * as Utility from "../src/utility"
 import { makeCsClient } from "./testsHelper"
 
 describe("Central Service", () => {
+    const csIssuerId = (Utility.parseKeyValueFile(".env") as any).WP07_CS_ISSUER_ID as string
     describe("API Sanity Checks", () => {
         let csClient: Cs.CsClient
         before("Init", async () => {
@@ -16,11 +18,12 @@ describe("Central Service", () => {
         })
 
         test("CsClient#generateSignature(), #isValid", async () => {
-            const request: Cs.IGenerateSignatureRequest = {
+            const request: Cs.IIssueSignatureRequest = {
                 hash: "qGGJNxM84aPD3Cj5zX4ef7Pe5NV8zHCMchoZUkZfXX8=",
-                digestMethod: Cs.EDigestAlgorithm.SHA256
+                digestMethod: Cs.EDigestAlgorithm.SHA256,
+                issuerId: csIssuerId
             }
-            const generateSignatureResponse = await csClient.generateSignature(request)
+            const generateSignatureResponse = await csClient.issueSignature(request)
             expect(generateSignatureResponse.isErr()).to.be.false
         })
 

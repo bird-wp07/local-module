@@ -1,8 +1,8 @@
 import { AxiosRequestConfig } from "axios"
 import { ok, err, Result } from "neverthrow"
 import {
-    IGenerateSignatureResponse,
-    IGenerateSignatureRequest,
+    IIssueSignatureResponse,
+    IIssueSignatureRequest,
     Schema_IFetchAuthToken,
     IFetchAuthTokenResponse,
     IVerifySignatureRequest,
@@ -17,19 +17,17 @@ import * as fs from "fs"
 
 export abstract class ICsClient {
     abstract isOnline(): Promise<boolean>
-    abstract generateSignature(request: IGenerateSignatureRequest): Promise<Result<IGenerateSignatureResponse, Error>>
+    abstract issueSignature(request: IIssueSignatureRequest): Promise<Result<IIssueSignatureResponse, Error>>
     abstract verifySignature(request: IVerifySignatureRequest): Promise<Result<IVerifySignatureResponse, Error>>
     abstract revokeSignature(request: IRevokeSignatureRequest): Promise<Result<IRevokeSignatureResponse, Error>>
 }
 
 export class CsClient implements ICsClient {
     baseurl: string
-    issuerId: string
     tokenUrl: string
     authHttpsAgent: https.Agent
-    constructor(baseurl: string, issuerId: string, tokenUrl: string, mtlsClientPfxFile: string, mtslClientPfxFilePassword: string, mtlsCaPemfile: string) {
+    constructor(baseurl: string, tokenUrl: string, mtlsClientPfxFile: string, mtslClientPfxFilePassword: string, mtlsCaPemfile: string) {
         this.baseurl = baseurl
-        this.issuerId = issuerId
         this.tokenUrl = tokenUrl
         this.authHttpsAgent = new https.Agent({
             ca: fs.readFileSync(mtlsCaPemfile),
@@ -41,9 +39,9 @@ export class CsClient implements ICsClient {
     /**
      * Factory for exception-free construction of CsClients.
      */
-    static make(baseurl: string, issuerId: string, tokenUrl: string, mtlsClientPfxFile: string, mtslClientPfxFilePassword: string, mtlsCaPemfile: string): Result<CsClient, Error> {
+    static make(baseurl: string, tokenUrl: string, mtlsClientPfxFile: string, mtslClientPfxFilePassword: string, mtlsCaPemfile: string): Result<CsClient, Error> {
         try {
-            return ok(new CsClient(baseurl, issuerId, tokenUrl, mtlsClientPfxFile, mtslClientPfxFilePassword, mtlsCaPemfile))
+            return ok(new CsClient(baseurl, tokenUrl, mtlsClientPfxFile, mtslClientPfxFilePassword, mtlsCaPemfile))
         } catch (error: unknown) {
             if (error instanceof Error) {
                 return err(error)
@@ -74,7 +72,7 @@ export class CsClient implements ICsClient {
      *
      * See EN 319 122-1.
      */
-    async generateSignature(request: IGenerateSignatureRequest): Promise<Result<IGenerateSignatureResponse, Error>> {
+    async issueSignature(request: IIssueSignatureRequest): Promise<Result<IIssueSignatureResponse, Error>> {
         const fetchAuthTokenResult = await this.fetchAuthToken()
         if (fetchAuthTokenResult.isErr()) {
             return err(fetchAuthTokenResult.error)
@@ -86,7 +84,12 @@ export class CsClient implements ICsClient {
             url: "/api/auth/v1/signer/issuances",
             baseURL: this.baseurl,
             headers: { Authorization: `Bearer ${tokenContainer.access_token}` },
-            data: { ...request, issuerId: this.issuerId }
+            data: {
+                hash: request.hash,
+                issuerId: request.issuerId,
+                auditLog: request.auditLog,
+                digestMethod: request.digestMethod
+            }
         }
         const response = await Utility.httpReq(config)
         if (response.isErr()) {

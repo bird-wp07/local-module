@@ -30,15 +30,40 @@ export interface IDigestPdfRequest {
 }
 
 export const Schema_IDigestPdfRequest = Joi.object().keys({
-    bytes: Joi.string().base64(),
-    signingTimestamp: Joi.number().min(0)
+    bytes: Joi.string().base64().required(),
+    signingTimestamp: Joi.number().min(0).required()
 })
 
 export interface IDigestPdfResponse {
     /**
-     * Base64 encoded data to be signed.
+     * Base64 encoded SHA256 digest to be signed.
      */
     bytes: Base64
+}
+
+/**
+ * Signature issue request.
+ */
+export interface IIssueRequest {
+    /**
+     * Base64 encoded SHA256 digest to be signed.
+     */
+    bytes: Base64
+    issuerId: string
+    auditLog?: string
+}
+
+export const Schema_IIssueRequest = Joi.object().keys({
+    bytes: Joi.string().base64().required(),
+    issuerId: Joi.string().required(),
+    auditLog: Joi.string()
+})
+
+export interface IIssueResponse {
+    /**
+     * Base64 encoded signature in CMS format.
+     */
+    cms: Base64
 }
 
 export interface IMergePdfRequest {
@@ -59,9 +84,9 @@ export interface IMergePdfRequest {
 }
 
 export const Schema_IMergePdfRequest = Joi.object().keys({
-    bytes: Joi.string().base64(),
-    signatureAsCMS: Joi.string().base64(),
-    signingTimestamp: Joi.number().min(0)
+    bytes: Joi.string().base64().required(),
+    signingTimestamp: Joi.number().min(0).required(),
+    cms: Joi.string().base64().required()
 })
 
 export interface IMergePdfResponse {
@@ -79,13 +104,37 @@ export interface IValidateSignedPdfRequest {
 }
 
 export const Schema_IValidateSignedPdfRequest = Joi.object().keys({
-    bytes: Joi.string().base64()
+    bytes: Joi.string().base64().required()
 })
 
 export type IValidateSignedPdfResponse = Applogic.IValidationResult
 
+export interface ISignPdfRequest {
+    /**
+     * Base64 encoded PDF
+     */
+    bytes: Base64
+
+    /**
+     * Issuer ID required to issue signatures
+     */
+    issuerId: string
+}
+
+export const Schema_ISignPdfRequest = Joi.object().keys({
+    bytes: Joi.string().base64().required(),
+    issuerId: Joi.string().required()
+})
+
+export interface ISignPdfResponse {
+    /**
+     * Base64 encoded signed PDF
+     */
+    bytes: Base64
+}
+
 /**
- * Errors returned by the API.
+ * Errors returned by the HTTP API.
  */
 export enum EErrorCode {
     REQUEST_VALIDATION_ERROR = "REQUEST_VALIDATION_ERROR",

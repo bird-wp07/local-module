@@ -5,22 +5,23 @@ export enum EDigestAlgorithm {
     SHA256 = "SHA256"
 }
 
-export interface IGenerateSignatureRequest {
+export interface IIssueSignatureRequest {
     /**
-     * Base64 encoded data to be signed, here referred to as 'hash' (of the
+     * Base64 encoded digest to be signed, here referred to as 'hash' (of the
      * (augmented) PDF in question).
      */
     hash: Base64
     digestMethod: EDigestAlgorithm
+    issuerId: string
     auditLog?: string
 }
 
-export interface IGenerateSignatureResponse {
+export interface IIssueSignatureResponse {
     cms: Base64
 }
 
-export const Schema_IGenerateSignatureResponse = Joi.object().keys({
-    cms: Joi.string().base64()
+export const Schema_IIssueSignatureResponse = Joi.object().keys({
+    cms: Joi.string().base64().required()
 })
 
 export interface IVerifySignatureRequest {
@@ -83,12 +84,12 @@ export interface IFetchAuthTokenResponse {
 }
 
 export const Schema_IFetchAuthToken = Joi.object().keys({
-    access_token: Joi.string(), // apparently base64-url encoded; same for refresh_token
-    expires_in: Joi.number(),
-    refresh_expires_in: Joi.number(),
-    refresh_token: Joi.string(),
-    token_type: Joi.valid("Bearer"),
-    "not-before-policy": Joi.number(),
-    session_state: Joi.string(),
-    scope: Joi.valid("issueing")
+    access_token: Joi.string().required(), // apparently base64-url encoded; same for refresh_token
+    expires_in: Joi.number().required(),
+    refresh_expires_in: Joi.number().required(),
+    refresh_token: Joi.string().required(),
+    token_type: Joi.valid("Bearer").required(),
+    "not-before-policy": Joi.number().required(),
+    session_state: Joi.string().required(),
+    scope: Joi.valid("issueing").required()
 })

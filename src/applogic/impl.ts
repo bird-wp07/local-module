@@ -4,7 +4,7 @@ import { Result, ok, err } from "neverthrow"
 import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
 import * as Cs from "../cs"
-import { EPadesConformanceStatus, ERevocationStatus, IAppLogic, IHealthStatus, IValidationResult } from "./base"
+import { EDocumentValidityStatus, EIssuanceStatus, IAppLogic, IHealthStatus, IValidationResult } from "./base"
 import { Base64 } from "../utility"
 
 /**
@@ -39,7 +39,7 @@ export class AppLogic implements IAppLogic {
         return ok({ ok: true })
     }
 
-    public async generateDataToBeSigned(pdf: Base64, timestamp: Date): Promise<Result<Base64, Error>> {
+    public async generatePdfDigestToBeSigned(pdf: Base64, timestamp: Date): Promise<Result<Base64, Error>> {
         const getDataToSignRequest: Dss.IGetDataToSignRequest = {
             toSignDocument: {
                 bytes: pdf
@@ -68,12 +68,14 @@ export class AppLogic implements IAppLogic {
         return ok(digest)
     }
 
-    public async generateSignature(dataToBeSigned: Base64): Promise<Result<Base64, Error>> {
-        const request: Cs.IGenerateSignatureRequest = {
+    public async issueSignature(dataToBeSigned: Base64, issuerId: string, auditLog?: string): Promise<Result<Base64, Error>> {
+        const request: Cs.IIssueSignatureRequest = {
             hash: dataToBeSigned,
-            digestMethod: Cs.EDigestAlgorithm.SHA256
+            digestMethod: Cs.EDigestAlgorithm.SHA256,
+            issuerId: issuerId,
+            auditLog: auditLog
         }
-        const generateSignatureResponse = await this.csClient.generateSignature(request)
+        const generateSignatureResponse = await this.csClient.issueSignature(request)
         if (generateSignatureResponse.isErr()) {
             return err(generateSignatureResponse.error)
         }
@@ -113,8 +115,8 @@ export class AppLogic implements IAppLogic {
 
     public async validateSignedPdf(pdf: Base64): Promise<Result<IValidationResult, Error>> {
         /* Check PAdES conformance of signature using DSS. */
-        const padesConformance: IValidationResult["aspects"]["pades"] = {
-            status: EPadesConformanceStatus.OK
+        const documentValidity: IValidationResult["document"] = {
+            status: EDocumentValidityStatus.DOCUMENT_OK
         }
         const validateSignatureRequest: Dss.IValidateSignatureRequest = {
             signedDocument: {
@@ -133,13 +135,15 @@ export class AppLogic implements IAppLogic {
         const numSignatures = signatures == undefined ? 0 : signatures.length
         if (numSignatures !== 1) {
             if (numSignatures === 0) {
-                padesConformance.status = EPadesConformanceStatus.NO_SIGNATURE
+                documentValidity.status = EDocumentValidityStatus.DOCUMENT_INVALID
+                documentValidity.details = "no signature found"
             } else {
-                padesConformance.status = EPadesConformanceStatus.MULTIPLE_SIGNATURES
+                documentValidity.status = EDocumentValidityStatus.DOCUMENT_INVALID
+                documentValidity.details = "multiple signatures found"
             }
         } else if (signatures![0].Signature.Indication !== Dss.ESignatureValidationIndication.TOTAL_PASSED) {
-            padesConformance.status = EPadesConformanceStatus.INVALID_SIGNATURE
-            padesConformance.details = signatures![0].Signature.SubIndication
+            documentValidity.status = EDocumentValidityStatus.DOCUMENT_UNTRUSTED
+            documentValidity.details = signatures![0].Signature.SubIndication
         }
 
         /*
@@ -152,8 +156,8 @@ export class AppLogic implements IAppLogic {
          *       - from the DSS' validation result above, if it's contained
          *       - from the signed PDF itself (probably the most sane method)
          */
-        const revocationStatus: IValidationResult["aspects"]["revocation"] = {
-            status: ERevocationStatus.OK
+        const revocationStatus: IValidationResult["issuance"] = {
+            status: EIssuanceStatus.ISSUANCE_OK
         }
 
         /**
@@ -163,11 +167,9 @@ export class AppLogic implements IAppLogic {
          * TODO: Implement once CsClient is ready.
          */
         return ok({
-            valid: padesConformance.status == EPadesConformanceStatus.OK,
-            aspects: {
-                pades: padesConformance,
-                revocation: revocationStatus
-            }
+            valid: documentValidity.status == EDocumentValidityStatus.DOCUMENT_OK,
+            document: documentValidity,
+            issuance: revocationStatus
         })
     }
 

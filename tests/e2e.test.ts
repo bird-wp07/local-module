@@ -3,12 +3,14 @@ import chaiSubset from "chai-subset"
 import { describe, test } from "mocha"
 import * as fs from "fs"
 import * as Applogic from "../src/applogic"
+import * as Utility from "../src/utility"
 import { makeCsClient, makeDssClient } from "./testsHelper"
 import { Base64 } from "../src/utility"
 
 chai.use(chaiSubset)
 
 describe("End-to-end tests", () => {
+    const csIssuerId = (Utility.parseKeyValueFile(".env") as any).WP07_CS_ISSUER_ID as string
     let appImpl: Applogic.IAppLogic
     before("Init", async () => {
         const dssClient = await makeDssClient()
@@ -25,14 +27,14 @@ describe("End-to-end tests", () => {
             const pdf: Base64 = fs.readFileSync(pdfpath).toString("base64")
 
             /* Digest */
-            const resultDigest = await appImpl.generateDataToBeSigned(pdf, timestamp)
+            const resultDigest = await appImpl.generatePdfDigestToBeSigned(pdf, timestamp)
             expect(resultDigest.isErr()).to.be.false
             const dataToBeSigned: Base64 = resultDigest._unsafeUnwrap()
 
-            /* Sign */
-            const resultSign = await appImpl.generateSignature(dataToBeSigned)
-            expect(resultSign.isErr()).to.be.false
-            const cms: Base64 = resultSign._unsafeUnwrap()
+            /* Issue */
+            const resultIssue = await appImpl.issueSignature(dataToBeSigned, csIssuerId)
+            expect(resultIssue.isErr()).to.be.false
+            const cms: Base64 = resultIssue._unsafeUnwrap()
 
             /* Merge */
             const resultMerge = await appImpl.embedSignatureIntoPdf(pdf, timestamp, cms)

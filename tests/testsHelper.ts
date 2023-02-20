@@ -8,7 +8,7 @@ import * as Utility from "../src/utility"
  */
 export async function makeCsClient(): Promise<Cs.CsClient> {
     const cfg = Settings.parseApplicationSettings()._unsafeUnwrap()
-    const csClientMakeResult = Cs.CsClient.make(cfg.csBaseUrl, cfg.csIssuerId, cfg.csTokenUrl, cfg.csClientPfx, cfg.csClientPfxPassword, cfg.csCaPem)
+    const csClientMakeResult = Cs.CsClient.make(cfg.csBaseUrl, cfg.csTokenUrl, cfg.csClientPfx, cfg.csClientPfxPassword, cfg.csCaPem)
     if (csClientMakeResult.isErr()) {
         throw new Error("Can't create CS client: '", csClientMakeResult.error)
     }

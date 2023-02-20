@@ -18,24 +18,26 @@ export abstract class IAppLogic {
      *
      * @param pdf - base64 encoded PDF
      * @param timestamp - signing timestamp
-     * @returns base64 encoded digest
+     * @returns base64 encoded digest to be signed
      */
-    abstract generateDataToBeSigned(pdf: Base64, timestamp: Date): Promise<Result<Base64, Error>>
+    abstract generatePdfDigestToBeSigned(pdf: Base64, timestamp: Date): Promise<Result<Base64, Error>>
 
     /**
-     * Generates a signature.
+     * Issues a signature.
      *
-     * @param dataToBeSigned - base64 encoded data to be signed
+     * @param digestToBeSigned - base64 encoded digest to be signed as returned from generateDataToBeSigned()
+     * @param issuerId
+     * @param auditLog
      * @returns base64 encoded signature in CMS format
      */
-    abstract generateSignature(dataToBeSigned: Base64): Promise<Result<Base64, Error>>
+    abstract issueSignature(digestToBeSigned: Base64, issuerId: string, auditLog?: string): Promise<Result<Base64, Error>>
 
     /**
      * Produces a signed PDF by merging the original PDF with its signature.
      *
-     * @param pdf - base64 encoded original PDF used to generate the data to be signed
-     * @param timestamp - original signing timestamp used to generate the data to be signed
-     * @param cms - base64 encoded signature in CMS format
+     * @param pdf - base64 encoded original PDF used to generate the digest to be signed
+     * @param timestamp - original signing timestamp used to generate the digest to be signed
+     * @param cms - base64 encoded signature in CMS format as returned by issueSignature()
      * @returns base64 encoded signed PDF
      */
     abstract embedSignatureIntoPdf(pdf: Base64, timestamp: Date, cms: Base64): Promise<Result<Base64, Error>>
@@ -43,7 +45,7 @@ export abstract class IAppLogic {
     /**
      * Validates a signed PDF.
      *
-     * @param pdf - base64 encoded signed PDF
+     * @param pdf - base64 encoded signed PDF as returned by embedSignatureIntoPdf()
      */
     abstract validateSignedPdf(pdf: Base64): Promise<Result<IValidationResult, Error>>
 
@@ -75,35 +77,43 @@ export interface IValidationResult {
     valid: boolean
 
     /**
-     * Granular subaspects determining the validity of the signature.
+     * Aspects concerning the content of the document (bytes inside the pdf+signature container)
      */
-    aspects: {
-        /**
-         * PAdES conformance as checked by DSS.
-         */
-        pades: {
-            status: EPadesConformanceStatus
-            details?: any
-        }
+    document: {
+        status: EDocumentValidityStatus
+        details?: any
+    }
 
-        /**
-         * Revocation check performed by the CS.
-         */
-        revocation: {
-            status: ERevocationStatus
-            details?: any
-        }
+    /**
+     * Revocation check performed by the CS.
+     */
+    issuance: {
+        status: EIssuanceStatus
+        details?: any
     }
 }
 
-export enum EPadesConformanceStatus {
-    OK = "OK",
-    NO_SIGNATURE = "NO_SIGNATURE",
-    MULTIPLE_SIGNATURES = "MULTIPLE_SIGNATURES", // multi-signatures currently not implemented
-    INVALID_SIGNATURE = "INVALID_SIGNATURE"
+export enum EDocumentValidityStatus {
+    DOCUMENT_OK = "DOCUMENT_OK",
+
+    /**
+     * Certificate chain unknown
+     */
+    DOCUMENT_UNTRUSTED = "DOCUMENT_UNTRUSTED",
+
+    /**
+     * No signature, multisignature, crypto error
+     */
+    DOCUMENT_INVALID = "DOCUMENT_INVALID"
 }
 
-export enum ERevocationStatus {
-    OK = "OK",
-    REVOKED = "REVOKED"
+export enum EIssuanceStatus {
+    // Prüfung abgebrochen; Dokument invalide (s.o; keine Signature)
+    DOCUMENT_INVALID = "DOCUMENT_INVALID",
+
+    ISSUANCE_OK = "ISSUANCE_OK",
+    ISSUANCE_NOT_FOUND = "ISSUANCE_NOT_FOUND",
+
+    // TODO: Check if revoked can be distinguished from NOT_FOUND
+    ISSUANCE_REVOKED = "ISSUANCE_REVOKED"
 }

@@ -71,14 +71,6 @@ export const configParams = {
     },
 
     /*
-     * Central service issuer ID to be sent along with signature requests.
-     */
-    csIssuerId: {
-        envvar: "WP07_CS_ISSUER_ID",
-        schema: Joi.string().required()
-    },
-
-    /*
      * Central service's openid-connect auth token url.
      */
     csTokenUrl: {
@@ -142,7 +134,6 @@ export interface IApplicationSettings {
     lmBaseurl: string
     dssBaseurl: string
     csBaseUrl: string
-    csIssuerId: string
     csTokenUrl: string
     csClientPfx: string
     csClientPfxPassword: string

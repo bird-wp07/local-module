@@ -29,7 +29,7 @@ async function main() {
     logger.info("DSS responded. Starting HTTP server ... ")
 
     /* Initialize central service client. */
-    const csMakeResult = Cs.CsClient.make(cfg.csBaseUrl, cfg.csIssuerId, cfg.csTokenUrl, cfg.csClientPfx, cfg.csClientPfxPassword, cfg.csCaPem)
+    const csMakeResult = Cs.CsClient.make(cfg.csBaseUrl, cfg.csTokenUrl, cfg.csClientPfx, cfg.csClientPfxPassword, cfg.csCaPem)
     if (csMakeResult.isErr()) {
         logger.error("Couldn't create CsClient. Abort.", csMakeResult.error)
         process.exit(1)

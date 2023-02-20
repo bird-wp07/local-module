@@ -11,8 +11,14 @@ set -e
 # ######################
 # ADMINISTRATOR SETTINGS
 # ######################
-WP07_DSS_BASEURL="${WP07_DSS_BASEURL:-"http://127.0.0.1:8089"}"
-WP07_LOCAL_MODULE_BASEURL="${WP07_LOCAL_MODULE_BASEURL:-"http://127.0.0.1:2048"}"
+WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:2048"
+WP07_DSS_BASEURL="http://127.0.0.1:8089"
+WP07_CS_BASEURL="http://46.83.201.35.bc.googleusercontent.com"
+WP07_CS_ISSUER_ID="8d51fa75-b98e-4d8f-98f1-dee5d471a450"
+WP07_CS_TOKEN_URL="https://225.96.234.35.bc.googleusercontent.com/realms/bird-cs-dev/protocol/openid-connect/token"
+WP07_CS_CA_PEM="./cs-auth-mtls-server-cert.pem" # relative to this file
+WP07_CS_CLIENT_PFX="./cs-auth-mtls-client-certkey.p12" # relative to this file
+WP07_CS_CLIENT_PFX_PASSWORD="______" # to be filled in
 
 # Default installation path names
 # -------------------------------
@@ -121,8 +127,15 @@ start_lm() {
         cd "$LM_ROOT"
         [ -d "./node_modules" ] && nobuild=":nobuild"
         WP07_LOCAL_MODULE_BASEURL="$WP07_LOCAL_MODULE_BASEURL" \
-        WP07_DSS_BASEURL="$WP07_DSS_BASEURL" \
-        PATH="$(realpath "$NODE_ROOT")/bin:$PATH" npm run start"$nobuild"
+            WP07_DSS_BASEURL="$WP07_DSS_BASEURL" \
+            WP07_CS_BASEURL="$WP07_CS_BASEURL" \
+            WP07_CS_ISSUER_ID="$WP07_CS_ISSUER_ID" \
+            WP07_CS_TOKEN_URL="$WP07_CS_TOKEN_URL" \
+            WP07_CS_CA_PEM="$WP07_CS_CA_PEM" \
+            WP07_CS_CLIENT_PFX="$WP07_CS_CLIENT_PFX" \
+            WP07_CS_CLIENT_PFX_PASSWORD="$WP07_CS_CLIENT_PFX_PASSWORD" \
+            PATH="$(realpath "$NODE_ROOT")/bin:$PATH" \
+            npm run start"$nobuild"
     )
 }
 
@@ -168,9 +181,12 @@ serve_all() {
     # Ensure cleanup of DSS process.
     trap "stop_dss" EXIT
     
-    # Start DSS in the background and fire up the local module.
+    # Start DSS in the background.
     JAVA_HOME="$(realpath "$JDK_ROOT")" start_dss "$DSS_PID_FILE" >/dev/null
-    PATH="$(realpath "$NODE_ROOT")/bin:$PATH" start_lm
+    
+    # Start LM.
+    PATH="$(realpath "$NODE_ROOT")/bin:$PATH" \
+        start_lm
 }
 
 if [ -z "$1" ]; then
