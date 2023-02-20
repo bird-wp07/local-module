@@ -11,10 +11,12 @@ import * as Joi from "joi"
 
 export enum EHealthStatus {
     OK = "OK",
-    DSS_NO_REPLY = "DSS_NO_REPLY"
+    ERROR_DSS_NO_REPLY = "ERROR_DSS_NO_REPLY",
+    ERROR_CS_NO_REPLY = "ERROR_CS_NO_REPLY"
 }
 export interface IHealthResponse {
     status: EHealthStatus
+    details?: any
 }
 
 export interface IDigestPdfRequest {

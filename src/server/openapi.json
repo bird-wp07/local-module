@@ -200,6 +200,34 @@
           }
         }
       }
+    },
+    "/system/health": {
+      "get": {
+        "summary": "Performs cascading system health check",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "OK",
+                        "ERROR_DSS_NO_REPLY",
+                        "ERROR_CS_NO_REPLY"
+                      ],
+                      "description": "Status code"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
