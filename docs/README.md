@@ -70,32 +70,11 @@ Zum Starten des lokalen Moduls Rechtsklick auf 'start.ps1' und im Kontextmenü '
 
 Die Applikation kann durch wiederholte Eingabe der Tastenkombination Ctrl-C im Powershell Fenster unterbrochen werden. Hierbei werden auch alle Hintergrunddienste beendet.
 
-### 2.2.2 Ausführung durch Doppelklick der start.exe
+### 2.2.2 Ausführung der start.exe
 
-Das Windowsbundle des Lokalen Moduls liefert die gewöhnliche ausführbare Datei *start.exe* aus, welche alternativ zum Powershellskript verwendet werden kann. Das Vorgehen zur Konfiguration und Beendigung des Programms entspricht dem des Powershellskriptes. Meldungen des Windows Defender können auch hier ignoriert werden.
+Das Windowsbundle des Lokalen Moduls liefert die gewöhnliche ausführbare Datei *start.exe* aus, welche alternativ zum Powershellskript verwendet werden kann. Das Vorgehen zur Konfiguration und Beendigung des Programms entspricht dem des Powershellskriptes.
 
-Leider markiert der Windows Antivirus (und möglicherweise auch andere Antivirussoftware) die Datei fälschlicherweise als Malware und verweigert ihre Ausführung. Daher kann es erforderlich sein, die *start.exe* nach dem Entpacken des Archivs in die entsprechende Whitelist aufzunehmen. Der Ablauf hierfür ist nachfolgend beispielhaft für Windows 11 dargestellt:
-
-1. Entpacken des Archivs in ein beliebiges Verzeichnis
-2. Im Reiter *Viren- und Bedrohungsschutz* des Menüs *Windows-Sicherheit* auf *Einstellungen verwalten* klicken.
-
-    ![](./windows-av-whitelist0.png)
-
-3. *Ausschüsse hinzufügen oder entfernen* auswählen.
-
-    ![](./windows-av-whitelist1.png)
-
-4. Anschließend auf *Ausschluss hinzufügen* klicken und über den Reiter *Datei* durch den Explorer die zuvor entpackte *start.exe* auswählen. Die freigegebene Datei wird anschließend unter den Ausschlüssen gelistet.
-
-    ![](./windows-av-whitelist2.png)
-
-5. Doppelklick auf die *start.exe*. Trotz der Ausnahme erfordert Windows eine erneute Bestätigung. Hierfür im Warnfenster auf *Weitere Informationen* und anschließend auf *Trotzdem ausführen* klicken. Dies startet das Programm.
-
-    ![](./windows-av-whitelist3.png)
-
-    ![](./windows-av-whitelist4.png)
-    
-Dieser Vorgang muss nicht wiederholt werden. Zukünftig kann die Datei durch Doppelklick wie gewohnt gestartet werden.
+Derzeit gibt es noch keine signierte Version der start.exe, daher werden ggf. Warnmeldungen des Windows Defenders angezeigt. Eine Anleitung wir diese für einen Testbetrieb ausgeschaltet werden können, findet sich unter den [Testhinweisen](./README_Test.md)
 
 ## 2.3 Betrieb unter Linux
 
@@ -125,7 +104,7 @@ Dieser Vorgang muss nicht wiederholt werden. Zukünftig kann die Datei durch Dop
 
 Grundsätzlich ist das Lokale Modul als solches gedacht, das heißt es sollte vom selben Rechner aus zugegriffen werden. Der aufgespannte REST Service sollte dementsprechend so konfiguriert werden, dass nur der Rechner selbst (localhost bzw. 127.0.0.1) auf den Service Zugriff hat. Die Firewall des Systems sollte so konfiguriert sein, dass ein Zugriff auf die entsprechend konfigurierten Ports des Lokalen Moduls von außen nicht erlaubt ist. Dies sollte jedweden Angriffsvektor von außen auf ein Minimum reduzieren.
 
-Andererseits speichert das Lokale Modul keine Daten und besitzt keinen nennenswerten Zugriff auf entsprechende lokale Ressourcen. Ein unautorisierter Zugriff von außerhalb auf das REST API des Lokalen Moduls sollte insofern zum jetzigen Zeitpunkt keine relevante Angriffsfläche bieten.
+Andererseits speichert das Lokale Modul derzeit keine Daten und besitzt keinen nennenswerten Zugriff auf entsprechende lokale Ressourcen. Ein unautorisierter Zugriff von außerhalb auf das REST API des Lokalen Moduls sollte insofern zum jetzigen Zeitpunkt keine relevante Angriffsfläche bieten.
 
 
 # 3. PDFs mit dem Lokalen Modul digital signieren
@@ -231,22 +210,23 @@ Response Body:
 
 # 4. Work-in-Progress: Digital signierte PDFs mit dem Lokalen Modul validieren
 
-Um die Validität einer digital signierten PDF zu überprüfen, sollte ebenfalls das Lokale Modul benutzt werden. Hierbei werden verschiedenste Merkmale der PDF und dessen Signatur überprüft, äquivalent zu den meisten PDF Anzeigeprogrammen bzw. dem PAdES Standard:
+Um die Validität einer digital signierten PDF zu überprüfen, sollte ebenfalls das Lokale Modul benutzt werden. Hierbei werden verschiedenste Merkmale der PDF und dessen Signatur überprüft, äquivalent zu den meisten PDF Anzeigeprogrammen bzw. dem PAdES Standard, der auch für die eIDAS Verordnung benutzt werden muss:
 
 Kryptografisch:
 - Die Integrität des Dokumentes: Wurde das Dokument nach der digitalen Signatur ggf. verändert?
-- Die Integrität der digitalen Signatur: Stimmt die digitale Signatur mit dem entsprechenden öffentlichen Signierzertifikat (öffentlicher Schlüssel des Signierers) überin?
+- Die Integrität der digitalen Signatur: Stimmt die digitale Signatur mit dem entsprechenden öffentlichen Signierzertifikat (öffentlicher Schlüssel des Signierers) überein?
 - Die Integrität der Zertifikatskette: Stimmen die digitalen Signaturen der gesamten Vertrauenskette mit den jeweiligen Ausstellerzertifikaten überein?
 
 Zeitlich:
 - Ist das Dokument innerhalb der Gültigkeit des Signierzertifikats unterschrieben worden?
-- Sind alle Zertifikate der Zertifikatskette noch gültig ODER besitzt das Dokument einen Vertrauenswürdigen Zeitstempel, der besagt, dass alle Zertifikate zum Zeitpunkt des Signierens gültig waren?
+- Sind alle Zertifikate der Zertifikatskette noch gültig ODER besitzt das Dokument einen vertrauenswürdigen Zeitstempel, der besagt, dass alle Zertifikate zum Zeitpunkt des Signierens gültig waren? (Long-Term Validation von PDF Dokumenten, damit auch nachdem digitale Zertifikate abgelaufen sind, ein Dokument seine Gültigkeit nicht verliert)
 
 Organisatorisch:
+- Wurde ein Zertifikat der Zertifikatskette zurückgezogen?
 - Die Vertrauensstellung zur Zertifikatskette: Gibt es eine Vertrauensanker zum Herausgeber bzw. den Herausgebern der Zertifikatskette?
 
 
-Zusätzlich zum PAdES Standard werden weitere Merkmale des Dokumentes überprüft. Hierbei handelt es sich um einen proprietären Zusatz, der folgende Sachverhalte ermöglichen kann:
+Zusätzlich zum PAdES Standard werden weitere Merkmale des Dokumentes überprüft. Hierbei handelt es sich um einen proprietären Zusatz, der folgende Sachverhalte ermöglicht:
 
 - Zurückziehen von einzelnen Signaturen (und nicht nur der Zertifikate)
 - Validierung von Autorisierungen einer Einrichtung bzgl. des vorliegenden Dokumententyps (z.B. darf eine Schule kein Master-Zeugnis ausstellen)
