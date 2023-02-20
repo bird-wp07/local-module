@@ -38,7 +38,7 @@ describe("Dss", () => {
                     signatureId: null
                 }
                 const have = (await dssClient.validateSignature(request))._unsafeUnwrap()
-                const want: Dss.IValidateSignatureResponse = {
+                const want = {
                     SimpleReport: {
                         signatureOrTimestamp: [
                             {
@@ -49,6 +49,7 @@ describe("Dss", () => {
                             }
                         ]
                     }
+                    // TODO: check diagnostic data field
                 }
                 expect(have).to.containSubset(want)
             })

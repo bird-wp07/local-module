@@ -3,6 +3,9 @@ import util from "util"
 import { ok, err, Result } from "neverthrow"
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios"
 import axios from "axios"
+import * as ASN1CMS from "@peculiar/asn1-cms"
+import * as ASN1Schema from "@peculiar/asn1-schema"
+import ASN1 from "@lapo/asn1js"
 
 /* eslint-disable */ // disable eslint to use &{} Hack; See https://github.com/microsoft/TypeScript/issues/31940.
 
@@ -34,6 +37,23 @@ export async function httpReq(config: AxiosRequestConfig): Promise<Result<AxiosR
 
 export async function sleepms(ms: number) {
     return util.promisify(setTimeout)(ms)
+}
+
+/**
+ * Extract the signature value from a CMS.
+ *
+ * No validation of input is performed.
+ */
+export function extractSignatureValueFromCms(cms: Buffer): Result<Buffer, Error> {
+    try {
+        const asn1 = ASN1.decode(cms)
+        const signedData: ASN1 = asn1.sub![1].sub![0]
+        const signedDataStruct = ASN1Schema.AsnParser.parse(Buffer.from(signedData.toB64String(), "base64"), ASN1CMS.SignedData)
+        const signatureValue = Buffer.from(signedDataStruct.signerInfos[0].signature.buffer)
+        return ok(signatureValue)
+    } catch (error: unknown) {
+        return err(new Error(JSON.stringify(error)))
+    }
 }
 
 /**

@@ -42,12 +42,13 @@ Dev setup for UNIX systems (Windows/WSL, Linux, Mac).
 ├── node_modules/                   - customary node modules direcory
 ├── scripts/                        - assorted scripts and helpers; see the files' header comments
 ├── src/                            - source code
-│   ├── cs/                         - central service related sources
-│   ├── dss/                        - DSS related sources
+│   ├── applogic/                   - application logic abstraction layer
+│   ├── cs/                         - central service mini SDK
+│   ├── dss/                        - DSS related mini SDK
 │   ├── server/                     - HTTP API and server related sources
 │   ├── settings/                   - runtime configuration
 │   ├── utility/                    - utils and helpers
-│   └── main.ts
+│   └── main.ts                     - main entrypoint of application
 ├── tests/                          - Tests source code
 ├── .env                            - config file to set or override envvars
 ├── cs-auth-mtls-client-certkey.p12 - mTLS client certificate and private key file

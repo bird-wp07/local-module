@@ -143,11 +143,29 @@ export interface IValidateSignatureResponse {
 
                       /* A 'null' subindication is returned iff the indication is TOTAL_PASSED. */
                       SubIndication: ESignatureValidationSubIndication | null
+
+                      BestSignatureTime: string // "best"
+                      SigningTime: string // Claimed signing time
+
+                      SignedBy: string
                   }
               }[]
             | null
     }
+    DiagnosticData: {
+        Signature: {
+            ClaimedSigningTime: string
+            SignatureValue: Base64
+            SignatureFormat: string // TODO: enum
+            SignerInfo: {
+                IssuerName: string
+                SerialNumber: number
+            }[]
+        }[]
+    }
 }
+
+// TODO: Joi schema
 
 /** Helper interface */
 interface IDssCert {

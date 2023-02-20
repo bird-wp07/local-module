@@ -46,7 +46,7 @@ async function main() {
     const port = Number(split[1])
     const hostname = split[0]
     http.createServer(Server.makeApp()).listen(port, hostname, () => {
-        logger.info(`Listening on ${cfg.lmBaseurl}. See '/swagger'.`)
+        logger.info(`Listening on ${cfg.lmBaseurl}. See '${Server.swaggerUiPath}'.`)
 
         /* Send USR1 signal to process waiting for local module to start up.
          * Used for automated testing. */

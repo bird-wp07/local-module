@@ -5,7 +5,7 @@ import * as Utility from "../src/utility"
 import { makeCsClient } from "./testsHelper"
 
 describe("Central Service", () => {
-    const csIssuerId = (Utility.parseKeyValueFile(".env") as any).WP07_CS_ISSUER_ID as string
+    const csIssuerId = (Utility.parseKeyValueFile(".env") as any)._unsafeUnwrap().WP07_CS_ISSUER_ID as string
     describe("API Sanity Checks", () => {
         let csClient: Cs.CsClient
         before("Init", async () => {
@@ -17,7 +17,7 @@ describe("Central Service", () => {
             expect(tokenResponse.isErr()).to.be.false
         })
 
-        test("CsClient#generateSignature(), #isValid", async () => {
+        test("CsClient#generateSignature()", async () => {
             const request: Cs.IIssueSignatureRequest = {
                 hash: "qGGJNxM84aPD3Cj5zX4ef7Pe5NV8zHCMchoZUkZfXX8=",
                 digestMethod: Cs.EDigestAlgorithm.SHA256,

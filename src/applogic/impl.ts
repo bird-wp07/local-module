@@ -4,6 +4,7 @@ import { Result, ok, err } from "neverthrow"
 import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
 import * as Cs from "../cs"
+import * as crypto from "crypto"
 import { EDocumentValidityStatus, EIssuanceStatus, IAppLogic, IHealthStatus, IValidationResult } from "./base"
 import { Base64 } from "../utility"
 
@@ -145,6 +146,8 @@ export class AppLogic implements IAppLogic {
             documentValidity.status = EDocumentValidityStatus.DOCUMENT_UNTRUSTED
             documentValidity.details = signatures![0].Signature.SubIndication
         }
+        const signatureValue: Base64 = validateSignatureResponse.value.DiagnosticData.Signature[0].SignatureValue
+        // TODO: abort if dss rejects signature
 
         /*
          * Check revocation status via the CS.
@@ -156,8 +159,17 @@ export class AppLogic implements IAppLogic {
          *       - from the DSS' validation result above, if it's contained
          *       - from the signed PDF itself (probably the most sane method)
          */
-        const revocationStatus: IValidationResult["issuance"] = {
+        const issuanceStatus: IValidationResult["issuance"] = {
             status: EIssuanceStatus.ISSUANCE_OK
+        }
+        const hash = crypto.createHash("sha256").update(Buffer.from(signatureValue, "base64")).digest("base64")
+        const csValidationResult = await this.csClient.verifySignature({ digest: hash })
+        if (csValidationResult.isErr()) {
+            return err(csValidationResult.error)
+        }
+        if (!csValidationResult.value.valid) {
+            issuanceStatus.status = EIssuanceStatus.ISSUANCE_NOT_FOUND
+            issuanceStatus.details = csValidationResult.value.results
         }
 
         /**
@@ -169,7 +181,7 @@ export class AppLogic implements IAppLogic {
         return ok({
             valid: documentValidity.status == EDocumentValidityStatus.DOCUMENT_OK,
             document: documentValidity,
-            issuance: revocationStatus
+            issuance: issuanceStatus
         })
     }
 

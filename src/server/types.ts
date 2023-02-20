@@ -68,12 +68,12 @@ export interface IIssueResponse {
 
 export interface IMergePdfRequest {
     /**
-     * Base64 encoded original PDF used to generate the data to be signed
+     * Base64 encoded original PDF used to generate the digest to be signed
      */
     bytes: Base64
 
     /**
-     * Original signing timestamp used to generate the data to be signed
+     * Original signing timestamp used to generate the digest to be signed
      */
     signingTimestamp: UnixTimeMs
 

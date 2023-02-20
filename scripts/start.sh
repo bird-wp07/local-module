@@ -11,26 +11,34 @@ set -e
 # ######################
 # ADMINISTRATOR SETTINGS
 # ######################
-WP07_LOCAL_MODULE_BASEURL="http://127.0.0.1:2048"
-WP07_DSS_BASEURL="http://127.0.0.1:8089"
-WP07_CS_BASEURL="http://46.83.201.35.bc.googleusercontent.com"
-WP07_CS_ISSUER_ID="8d51fa75-b98e-4d8f-98f1-dee5d471a450"
-WP07_CS_TOKEN_URL="https://225.96.234.35.bc.googleusercontent.com/realms/bird-cs-dev/protocol/openid-connect/token"
-WP07_CS_CA_PEM="./cs-auth-mtls-server-cert.pem" # relative to this file
-WP07_CS_CLIENT_PFX="./cs-auth-mtls-client-certkey.p12" # relative to this file
-WP07_CS_CLIENT_PFX_PASSWORD="______" # to be filled in
+LOCAL_MODULE_BASEURL="http://127.0.0.1:2048"
+DSS_BASEURL="http://127.0.0.1:8089"
+CS_BASEURL="http://46.83.201.35.bc.googleusercontent.com"
+CS_TOKEN_URL="https://225.96.234.35.bc.googleusercontent.com/realms/bird-cs-dev/protocol/openid-connect/token"
+CS_CA_PEM="./cs-auth-mtls-server-cert.pem" # path relative to this file or absolute
+CS_CLIENT_PFX="./cs-auth-mtls-client-certkey.p12" # path relative to this file or absolute
+CS_CLIENT_PFX_PASSWORD="______" # to be filled in
 
 # Default installation path names
-# -------------------------------
 JDK_ROOT="${JDK_ROOT:-jdk}"
 DSS_ROOT="${DSS_ROOT:-dss}"
 NODE_ROOT="${NODE_ROOT:-node}"
 LM_ROOT="${LM_ROOT:-local-module}"
 
-# Miscellaneous parameters
-# ------------------------
+# Runtime parameters derived from administrator settings, if not already set
+# via the environment
+WP07_LOCAL_MODULE_BASEURL="${WP07_LOCAL_MODULE_BASEURL:-"$LOCAL_MODULE_BASEURL"}"
+WP07_DSS_BASEURL="${WP07_DSS_BASEURL:-"$DSS_BASEURL"}"
+WP07_CS_BASEURL="${WP07_CS_BASEURL:-"$CS_BASEURL"}"
+WP07_CS_TOKEN_URL="${WP07_CS_TOKEN_URL:-"$CS_TOKEN_URL"}"
+if [ -z "$WP07_CS_CA_PEM" ]; then
+    WP07_CS_CA_PEM="$(realpath "$CS_CA_PEM")"
+fi
+if [ -z "$WP07_CS_CLIENT_PFX" ]; then
+    WP07_CS_CLIENT_PFX="$(realpath "$CS_CLIENT_PFX")"
+fi
+WP07_CS_CLIENT_PFX_PASSWORD="${WP07_CS_CLIENT_PFX_PASSWORD:-"$CS_CLIENT_PFX_PASSWORD"}"
 DSS_PID_FILE=".dss.pid"
-DSS_PORT="$(printf -- "$WP07_DSS_BASEURL" | cut -d: -f3-)"
 
 # Configure logging. Depending on whether we're running inside a terminal use
 # colors or don't.
@@ -129,7 +137,6 @@ start_lm() {
         WP07_LOCAL_MODULE_BASEURL="$WP07_LOCAL_MODULE_BASEURL" \
             WP07_DSS_BASEURL="$WP07_DSS_BASEURL" \
             WP07_CS_BASEURL="$WP07_CS_BASEURL" \
-            WP07_CS_ISSUER_ID="$WP07_CS_ISSUER_ID" \
             WP07_CS_TOKEN_URL="$WP07_CS_TOKEN_URL" \
             WP07_CS_CA_PEM="$WP07_CS_CA_PEM" \
             WP07_CS_CLIENT_PFX="$WP07_CS_CLIENT_PFX" \
@@ -150,7 +157,8 @@ start_dss() {
     #       Unfortunately, there is no easier method as we're not in control of
     #       the server's configuration.
     cfg_xml="$DSS_ROOT/apache-tomcat-8.5.82/conf/server.xml"
-    sed -i -E 's|(<Connector port=")([^"]+)(" protocol="HTTP/1.1")|\1'"$DSS_PORT"'\3|g' "$cfg_xml"
+    dss_port="$(printf -- "$WP07_DSS_BASEURL" | cut -d: -f3-)"
+    sed -i -E 's|(<Connector port=")([^"]+)(" protocol="HTTP/1.1")|\1'"$dss_port"'\3|g' "$cfg_xml"
     
     if [ -z "$1" ]; then
         bash "$DSS_ROOT/apache-tomcat-8.5.82/bin/catalina.sh" run 2>&1

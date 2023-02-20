@@ -1,4 +1,6 @@
 import * as Express from "express"
+import swaggerExpress from "swagger-ui-express"
+import swaggerDocument from "./openapi.json"
 import * as Joi from "joi"
 import {
     IDigestPdfRequest,
@@ -25,6 +27,7 @@ import { Container } from "typescript-ioc"
 import { Base64 } from "../utility"
 
 export const HTTP_MAX_REQUEST_BODY_SIZE_BYTES = 8000000
+export const swaggerUiPath = "/swagger"
 
 function makeHealthController(impl: IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
@@ -209,14 +212,13 @@ export function makeApp(): Express.Express {
     const app = Express.default()
     // _expressApp.use(Express.urlencoded({ extended: true })) TODO: Do we need this?
     app.use(Express.json({ limit: HTTP_MAX_REQUEST_BODY_SIZE_BYTES }))
+    app.use(swaggerUiPath, swaggerExpress.serve, swaggerExpress.setup(swaggerDocument))
 
     app.get("/system/health", makeHealthController(impl))
     app.post("/digest/pdf", makeDigestController(impl))
     app.post("/issue", makeIssueController(impl))
     app.post("/merge/pdf", makeMergeController(impl))
     app.post("/validate/pdf", makeValidationController(impl))
-
-    // TODO;
     app.post("/sign/pdf", makeSignController(impl))
 
     app.use(errorHandler)
