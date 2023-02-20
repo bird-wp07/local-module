@@ -79,7 +79,7 @@ export const configParams = {
     },
 
     /*
-     * Central service' openid-connect auth token url.
+     * Central service's openid-connect auth token url.
      */
     csTokenUrl: {
         envvar: "WP07_CS_TOKEN_URL",
