@@ -16,7 +16,7 @@ jobs:
           args: "--standalone --embed-resources --output ./README.html ./docs/README.md"
       - run: |
           mkdir ./zip
-          cp ./postman.json ./README.html ./scripts/start.sh ./zip
+          cp ./src/server/openapi.json ./README.html ./scripts/start.sh ./zip
           echo "$GITHUB_REF_NAME" >./zip/VERSION
           cd ./zip && tar -cJf "$archiveName" *
 

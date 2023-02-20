@@ -10,7 +10,7 @@ import { Base64 } from "../src/utility"
 chai.use(chaiSubset)
 
 describe("End-to-end tests", () => {
-    const csIssuerId = (Utility.parseKeyValueFile(".env") as any)._unsafeUnwrap().WP07_CS_ISSUER_ID as string
+    const csIssuerId = (Utility.parseKeyValueFile(".env")._unsafeUnwrap() as any).WP07_CS_ISSUER_ID as string
     let appImpl: Applogic.IAppLogic
     before("Init", async () => {
         const dssClient = await makeDssClient()

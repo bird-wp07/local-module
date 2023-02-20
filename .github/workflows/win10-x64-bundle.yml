@@ -14,7 +14,7 @@ jobs:
 
       - run: |
           New-Item -Path . -Name ".\zip\" -ItemType "directory"
-          Copy-Item @(".\bundle\win10-x64\*", ".\postman.json") -Destination ".\zip\"
+          Copy-Item @(".\bundle\win10-x64\*", ".\src\server\openapi.json") -Destination ".\zip\"
           Set-Content -Path .\zip\VERSION -Value $env:GITHUB_REF_NAME
           choco install --yes pandoc
           pandoc --standalone --embed-resources --output=./zip/README.html ./docs/README.md

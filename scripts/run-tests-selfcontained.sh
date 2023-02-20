@@ -30,7 +30,6 @@ run_container() {
         -v "$(realpath ./.mocharc.yml)":/root/.mocharc.yml \
         -v "$(realpath ./package.json)":/root/package.json \
         -v "$(realpath ./package-lock.json)":/root/package-lock.json \
-        -v "$(realpath ./postman.json)":/root/postman.json \
         -v "$(realpath ./prettierrc)":/root/prettierrc \
         -v "$(realpath ./README.md)":/root/README.md \
         -v "$(realpath ./scripts)":/root/scripts \
