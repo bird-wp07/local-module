@@ -315,7 +315,7 @@ Response Body:
     * `DOCUMENT_OK`: Das Dokument an sich ist valide, ein PDF Reader würde dem Dokument nach eIDAS Richtlinien und Vertrauensketten vertrauen. Der zentrale Service wird hierbei dennoch angefragt, das Dokument kann bei diesem Status VALIDE oder INVALIDE sein.
     * `DOCUMENT_UNTRUSTED`: Das Dokument an sich ist valide, jedoch würde ein PDF Reader dem Dokument aufgrund einer fehlenden Vertrauenskette misstrauen und entsprechende Warnungen anzeigen. Der zentrale Service wird hierbei dennoch angefragt, das Dokument kann bei diesem Status VALIDE oder INVALIDE sein.
     * `DOCUMENT_INVALID`: Das Dokument an sich ist nicht valide. Dies bedeutet, dass es entweder keine Signatur beinhaltet, eine der enthaltenen Signaturen nicht überprüft werden konnte oder eine der enthaltenen Signaturen fehlerhaft ist. Sofern dieser Status auftritt, wird die Überprüfung abgebrochen und auch nicht mehr der zentrale Service angefragt. Der Status des Dokuments ist somit INVALIDE.
-  * details: Optional werden Details des Überprüfungsschritts zurückgegeben
+  * `details`: Optional werden Details des Überprüfungsschritts zurückgegeben
 * `issuance`: Information über ein Vorhandensein einer zentralen Information über das Dokument
   * `status`: Die Validität des Dokuments anhand der Information des zentralen Service
     * `DOCUMENT_INVALID`: Die Prüfung durch den zentralen Service wurde nicht angestrengt, da das Dokument keine oder mindestens eine fehlerhafte Signatur besitzt. Siehe oben.
