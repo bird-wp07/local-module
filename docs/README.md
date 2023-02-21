@@ -123,6 +123,10 @@ Um PDF Dokumente signieren zu können, sind folgende Schritte erforderlich. Meis
 3. Hash mit entsprechendem privaten Schlüssel und dazugehöriger Zertifikatskette signieren -> Signatur
 4. Die zur Verfügung gestellte Signatur mit dem unsignierten Dokument und dem Zeitstempel verschmelzen -> Signiertes Dokument
 
+Die entsprechenden REST APIs können über eine Swagger UI angesprochen, das vom Lokalen Modul aufgespannt wird. Dafür kann einfach die URL `/swagger` aufgerufen werden.
+
+Es existiert ebenfalls eine OpenAPI Spezifikation des REST APIs in der Datei `openapi.json`. Diese ist direkt im Release Bundle des Lokalen Moduls verfügbar. Es existiert ebenfalls eine [OpenAPI Spezifikation](./../src/server/openapi.json) im Github Repository.
+
 
 ## 3.2 Zeitstempel der Signatur erzeugen
 
@@ -149,13 +153,11 @@ Accept: application/json
 Request Body:
 ```
 {
-    "digestAlgorithm": "SHA256",
     "bytes": "<Base64 Repräsentation der unsignierten PDF Bytes>",
     "signingTimestamp": 1672531200000
 }
 ```
 
-* `digestAlgorithm`: Der verwendete Hash Algorithmus. Hier wird vorerst SHA256 empfohlen.
 * `bytes`: Die Base64 Repräsentation aller Bytes der unsignierten PDF
 * `signingTimestamp`: Der [Unix-Zeitstempel](https://de.wikipedia.org/wiki/Unixzeit) in Millisekunden, das heißt die Anzahl von Millisekunden seit dem 01.01.1970 00:00:00 UTC. Dieser Zeitstempel muss später mit dem Zeitstempel des Verschmelzen Aufrufs übereinstimmen.
 
@@ -168,7 +170,7 @@ Response Body:
 }
 ```
 
-## 3.4 Dokument über den Hash ausstellen lassen
+## 3.4 Signatur über den Hash ausstellen lassen
 
 Der vom Lokalen Modul erzeugte Hash kann nun von einem Fernsignaturdienst signiert werden. Hierbei sollte ein vertrauenswürdiges Zertifikat zum Signieren benutzt werden, damit die Vertrauenskette beim Öffnen des signierten PDFs entsprechend gefunden und validiert werden kann.
 
@@ -225,13 +227,13 @@ Request Body:
 ```
 {
     "bytes": "<Base64 Repräsentation der unsignierten PDF Bytes>",
-    "signatureAsCMS": "<Base64 Repräsentation der vom Sigierservice empfangenen CMS>",
+    "cms": "<Base64 Repräsentation der vom Sigierservice empfangenen CMS>",
     "signingTimestamp": 1672531200000
 }
 ```
 
 * `bytes`: Die Base64 Repräsentation aller Bytes der unsignierten PDF
-* `signatureAsCMS`: Die Base64 Repräsentation der vom Sigierservice empfangenen CMS
+* `cms`: Die Base64 Repräsentation der vom Sigierservice empfangenen CMS
 * `signingTimestamp`: Der [Unix-Zeitstempel](https://de.wikipedia.org/wiki/Unixzeit) in Millisekunden, das heißt die Anzahl von Millisekunden seit dem 01.01.1970 00:00:00 UTC. Dieser Zeitstempel muss mit dem Zeitstempel des vorherigen Hash Aufrufs der PDF übereinstimmen.
 
 Sofern das Lokale Modul das unsignierte PDF mit dem Zeitstempel und der digitalen Signatur verschmelzen konnte, wird das signierte PDF als Base64 Repräsentation zurückgegeben.
