@@ -104,7 +104,9 @@ Derzeit gibt es noch keine signierte Version der start.exe, daher werden ggf. Wa
 
 Grundsätzlich ist das Lokale Modul als solches gedacht, das heißt es sollte vom selben Rechner aus zugegriffen werden. Der aufgespannte REST Service sollte dementsprechend so konfiguriert werden, dass nur der Rechner selbst (localhost bzw. 127.0.0.1) auf den Service Zugriff hat. Die Firewall des Systems sollte so konfiguriert sein, dass ein Zugriff auf die entsprechend konfigurierten Ports des Lokalen Moduls von außen nicht erlaubt ist. Dies sollte jedweden Angriffsvektor von außen auf ein Minimum reduzieren.
 
-Andererseits speichert das Lokale Modul derzeit keine Daten und besitzt keinen nennenswerten Zugriff auf entsprechende lokale Ressourcen. Ein unautorisierter Zugriff von außerhalb auf das REST API des Lokalen Moduls sollte insofern zum jetzigen Zeitpunkt keine relevante Angriffsfläche bieten.
+Das Lokale Modul speichert derzeit keine Daten und besitzt keinen nennenswerten Zugriff auf entsprechende lokale Ressourcen. Ein unautorisierter Zugriff von außerhalb auf das REST API des Lokalen Moduls sollte insofern zum jetzigen Zeitpunkt keine relevante Angriffsfläche für den Rechner, auf dem das Lokale Modul läuft, bilden.
+
+Sofern jedoch das Lokale Modul mit entsprechenden Zertifikaten und Authentifizierungsmerkmalen für einen Fernsignaturdienst, z.B. dem zentralen Service, ausgestattet ist, müssen weitere Sicherheitsvorkehrungen in Betracht gezogen werden. 
 
 
 # 3. PDFs mit dem Lokalen Modul digital signieren
@@ -120,6 +122,10 @@ Um PDF Dokumente signieren zu können, sind folgende Schritte erforderlich. Meis
 2. Hash über das unsignierte PDF Dokument inkl. Timestamp bilden -> Hash
 3. Hash mit entsprechendem privaten Schlüssel und dazugehöriger Zertifikatskette signieren -> Signatur
 4. Die zur Verfügung gestellte Signatur mit dem unsignierten Dokument und dem Zeitstempel verschmelzen -> Signiertes Dokument
+
+Die entsprechenden REST APIs können über eine Swagger UI angesprochen, das vom Lokalen Modul aufgespannt wird. Dafür kann einfach die URL `/swagger` aufgerufen werden.
+
+Es existiert ebenfalls eine OpenAPI Spezifikation des REST APIs in der Datei `openapi.json`. Diese ist direkt im Release Bundle des Lokalen Moduls verfügbar. Es existiert ebenfalls eine [OpenAPI Spezifikation](./../src/server/openapi.json) im Github Repository.
 
 
 ## 3.2 Zeitstempel der Signatur erzeugen
@@ -147,15 +153,13 @@ Accept: application/json
 Request Body:
 ```
 {
-    "digestAlgorithm": "SHA256",
     "bytes": "<Base64 Repräsentation der unsignierten PDF Bytes>",
     "signingTimestamp": 1672531200000
 }
 ```
 
-* digestAlgorithm: Der verwendete Hash Algorithmus. Hier wird vorerst SHA256 empfohlen.
-* bytes: Die Base64 Repräsentation aller Bytes der unsignierten PDF
-* signingTimestamp: Der [Unix-Zeitstempel](https://de.wikipedia.org/wiki/Unixzeit) in Millisekunden, das heißt die Anzahl von Millisekunden seit dem 01.01.1970 00:00:00 UTC. Dieser Zeitstempel muss später mit dem Zeitstempel des Verschmelzen Aufrufs übereinstimmen.
+* `bytes`: Die Base64 Repräsentation aller Bytes der unsignierten PDF
+* `signingTimestamp`: Der [Unix-Zeitstempel](https://de.wikipedia.org/wiki/Unixzeit) in Millisekunden, das heißt die Anzahl von Millisekunden seit dem 01.01.1970 00:00:00 UTC. Dieser Zeitstempel muss später mit dem Zeitstempel des Verschmelzen Aufrufs übereinstimmen.
 
 Sofern das Lokale Modul einen Hash bestimmten konnte, wird dieser als Base64 Repräsentation zurückgegeben:
 
@@ -166,17 +170,50 @@ Response Body:
 }
 ```
 
-## 3.4 Hash Signieren
+## 3.4 Signatur über den Hash ausstellen lassen
 
 Der vom Lokalen Modul erzeugte Hash kann nun von einem Fernsignaturdienst signiert werden. Hierbei sollte ein vertrauenswürdiges Zertifikat zum Signieren benutzt werden, damit die Vertrauenskette beim Öffnen des signierten PDFs entsprechend gefunden und validiert werden kann.
 
-Das Lokale Modul kann diesen Teil nicht übernehmen, da entsprechende private Schlüssel von vertrauenswürdigen Zertifikaten vonnöten sind. Die Architektur basiert hier auf einer Fernsignatur, die eine sichere Schlüsselverwaltung eines vertrauenswürdigen Anbieters bevorzugt.
+Der Rückgabewert des Signaturaufrufs ist meist eine sogenannte CMS (Cryptographic Message Syntax), die in unserem Fall per String im Base64 Format übergeben wird. Innerhalb der CMS befindet sich die digitale Signatur selbst, das benutzte Signaturzertifikat und auch die entsprechende Zertifikatskette.
 
-Der Aufruf des Signierens ist anbieterspezifisch und muss ebenfalls authentifiziert und autorisiert werden. Der Rückgabewert des Signaturaufrufs ist meist eine sogenannte CMS (Cryptographic Message Syntax), die in unserem Fall per String im Base64 Format übergeben wird. Innerhalb der CMS befindet sich die digitale Signatur selbst, das benutzte Signaturzertifikat und auch die entsprechende Zertifikatskette.
+Das Lokale Modul kann diesen Teil über den zentralen Service insoweit übernehmen, falls entsprechende mutual-TLS Zertifikate zum zentralen Service verfügbar sind und die Organisation diesbzgl. authentifiziert und autorisiert wurde.
+
+Es kann aber ebenfalls ein vertrauenswürdiger Intermediär, z.B. ein landesweites Bildungsportal, diesen Schritt übernehmen und für die Organisationen das Dokument ausstellen lassen.
+
+HTTP Aufruf: POST /issue
+
+Header:
+```
+Accept: application/json
+```
+
+
+Request Body:
+```
+{
+    "bytes": "<Base64 Repräsentation des Hashes>",
+    "issuerId": "<UUIDv4 des entsprechenden Issuers auf dem zentralen Service>",
+    "auditLog?": "<Ein optionaler Audit-Eintrag für den zentralen Service>"
+}
+```
+
+* `bytes`: Die Base64 Repräsentation des Hashes, also z.B. der Response Wert vom /digest/pdf Aufruf
+* `issuerId`: Die ID des zu benutzenden Signierzertifikats der Bildungseinrichtung
+* `auditLog?`: Ein optionaler Audit-Eintrag für den zentralen Service. Dieser Eintrag kann benutzt werden um ggf. Missbrauch von Signaturen aufzudecken. Hierbei sollte es um einen anonymen oder pseudonymen Wert handeln, der auf der Seite des Lokalen Moduls ggf. zu entsprechenden Nutzern oder Rollen aufgeschlüsselt werden kann.
+
+Sofern das Lokale Modul den Hash über den zentralen Service ausstellen konnte, wird die Signatur als CMS-Format (Cryptographic Message Syntax) zurückgegeben.
+
+Response Body:
+```
+{
+    "cms": "<Base64 Repräsentation der ausgestellten Signatur im CMS Format>",
+}
+```
+
 
 ## 3.5 Dokument und digitale Signatur verschmelzen
 
-Das Verschmelzen der unsignierten PDF mit der digitalen Signatur wird nun wieder vom Lokalen Modul übernommen. Hierbei wird wieder das unsignierte PDF im Base64 Format, derselbe Zeitstempel und die CMS an das Lokale Modul übergeben.
+Das Verschmelzen der unsignierten PDF mit der digitalen Signatur wird nun wieder vom Lokalen Modul übernommen. Hierbei wird das unsignierte PDF im Base64 Format, derselbe Zeitstempel und die CMS an das Lokale Modul übergeben.
 
 HTTP Aufruf: POST /merge/pdf
 
@@ -190,14 +227,14 @@ Request Body:
 ```
 {
     "bytes": "<Base64 Repräsentation der unsignierten PDF Bytes>",
-    "signatureAsCMS": "<Base64 Repräsentation der vom Sigierservice empfangenen CMS>",
+    "cms": "<Base64 Repräsentation der vom Signierservice empfangenen CMS>",
     "signingTimestamp": 1672531200000
 }
 ```
 
-* bytes: Die Base64 Repräsentation aller Bytes der unsignierten PDF
-* signatureAsCMS: Die Base64 Repräsentation der vom Sigierservice empfangenen CMS
-* signingTimestamp: Der [Unix-Zeitstempel](https://de.wikipedia.org/wiki/Unixzeit) in Millisekunden, das heißt die Anzahl von Millisekunden seit dem 01.01.1970 00:00:00 UTC. Dieser Zeitstempel muss mit dem Zeitstempel des vorherigen Hash Aufrufs der PDF übereinstimmen.
+* `bytes`: Die Base64 Repräsentation aller Bytes der unsignierten PDF
+* `cms`: Die Base64 Repräsentation der vom Signierservice empfangenen CMS
+* `signingTimestamp`: Der [Unix-Zeitstempel](https://de.wikipedia.org/wiki/Unixzeit) in Millisekunden, das heißt die Anzahl von Millisekunden seit dem 01.01.1970 00:00:00 UTC. Dieser Zeitstempel muss mit dem Zeitstempel des vorherigen Hash Aufrufs der PDF übereinstimmen.
 
 Sofern das Lokale Modul das unsignierte PDF mit dem Zeitstempel und der digitalen Signatur verschmelzen konnte, wird das signierte PDF als Base64 Repräsentation zurückgegeben.
 
@@ -208,7 +245,7 @@ Response Body:
 }
 ```
 
-# 4. Work-in-Progress: Digital signierte PDFs mit dem Lokalen Modul validieren
+# 4. Digital signierte PDFs mit dem Lokalen Modul validieren
 
 Um die Validität einer digital signierten PDF zu überprüfen, sollte ebenfalls das Lokale Modul benutzt werden. Hierbei werden verschiedenste Merkmale der PDF und dessen Signatur überprüft, äquivalent zu den meisten PDF Anzeigeprogrammen bzw. dem PAdES Standard, der auch für die eIDAS Verordnung benutzt werden muss:
 
@@ -229,8 +266,8 @@ Organisatorisch:
 Zusätzlich zum PAdES Standard werden weitere Merkmale des Dokumentes überprüft. Hierbei handelt es sich um einen proprietären Zusatz, der folgende Sachverhalte ermöglicht:
 
 - Zurückziehen von einzelnen Signaturen (und nicht nur der Zertifikate)
-- Validierung von Autorisierungen einer Einrichtung bzgl. des vorliegenden Dokumententyps (z.B. darf eine Schule kein Master-Zeugnis ausstellen)
-- Abgleich von Daten des PDFs zu den Daten die sich ggf. innerhalb einer Struktur innerhalb des PDFs befinden (z.B. Name des PDFs gleicht dem Namen des XSchule Formats innerhalb der PDF)
+- Mögliche Validierung von Autorisierungen einer Einrichtung bzgl. des vorliegenden Dokumententyps (z.B. darf eine Schule kein Master-Zeugnis ausstellen)
+- Möglicher Abgleich von Daten des PDFs zu den Daten die sich ggf. innerhalb einer Struktur innerhalb des PDFs befinden (z.B. Name des PDFs gleicht dem Namen des XSchule Formats innerhalb der PDF)
 
 HTTP Aufruf: POST /validate/pdf
 
@@ -243,18 +280,81 @@ Accept: application/json
 Request Body:
 ```
 {
-    "bytes": "<Base64 Repräsentation der signierten PDF Bytes>",
+    "bytes": "<Base64 Repräsentation des signierten PDFs>",
 }
 ```
 
-* bytes: Die Base64 Repräsentation aller Bytes der signierten PDF
+* `bytes`: Die Base64 Repräsentation des signierten PDFs
 
-Sofern das Lokale Modul das signierte PDF einlesen konnte, wird das signierte PDF überprüft und ein entsprechender Validierungswert zurückgeliefert.
+Sofern das Lokale Modul das signierte PDF einlesen konnte, wird das signierte PDF überprüft und ein entsprechender Validierungswert zurückgeliefert. Der Validierungswert des Lokalen Moduls ist tatsächlich binär, das heißt das Lokale Modul interpretiert das entsprechend eingelesene PDF nach vordefinierten Regeln und gibt die Validität in WAHR oder FALSCH zurück. Eine entsprechende detaillierte Unterscheidung kann in den jeweiligen Properties `document` und `issuance` eingesehen werden.
 
 Response Body:
 ```
 {
-    "result": "TOTAL_FAILED" | "FAILED" | "INDETERMINATE" | "PASSED" | "TOTAL_PASSED",
-    "reason": "NO_SIGNATURE_FOUND" | "FORMAT_FAILURE" | "HASH_FAILURE" | "SIG_CRYPTO_FAILURE" | "REVOKED" | "EXPIRED" | "NOT_YET_VALID" | "SIG_CONSTRAINTS_FAILURE" | "CHAIN_CONSTRAINTS_FAILURE" | "CERTIFICATE_CHAIN_GENERAL_FAILURE" | "CRYPTO_CONSTRAINTS_FAILURE" | "POLICY_PROCESSING_ERROR" | "SIGNATURE_POLICY_NOT_AVAILABLE" | "TIMESTAMP_ORDER_FAILURE" | "NO_SIGNING_CERTIFICATE_FOUND" | "NO_CERTIFICATE_CHAIN_FOUND" | "REVOKED_NO_POE" | "REVOKED_CA_NO_POE" | "OUT_OF_BOUNDS_NOT_REVOKED" | "OUT_OF_BOUNDS_NO_POE" | "REVOCATION_OUT_OF_BOUNDS_NO_POE" | "CRYPTO_CONSTRAINTS_FAILURE_NO_POE" | "NO_POE" | "TRY_LATER" | "SIGNED_DATA_NOT_FOUND"
+    "valid": true | false,
+    "document": {
+        "status": "DOCUMENT_OK" | "DOCUMENT_UNTRUSTED" | "DOCUMENT_INVALID",
+        "details?": any
+    },
+    "issuance": {
+        "status": "ISSUANCE_OK" | "ISSUANCE_NOT_FOUND" | "ISSUANCE_REVOKED" | "DOCUMENT_INVALID",
+        "details?": any
+    }
 }
 ```
+
+* `valid`: Ein Boolean-Wert über den Status des Dokumentes, der primär benutzt werden sollte. Das Dokument ist entweder valide oder nicht, es gibt hier keine Grauzone.
+* `document`: Information über das Dokument selbst
+  * `status`: Die Validität des Dokuments an sich. Hierbei wird die entsprechende Signatur des Dokumentes kryptografisch überprüft und auch das eIDAS Vertrauenslevel spielt eine Rolle
+    * `DOCUMENT_OK`: Das Dokument an sich ist valide, ein PDF Reader würde dem Dokument nach eIDAS Richtlinien und Vertrauensketten vertrauen. Der zentrale Service wird hierbei dennoch angefragt, das Dokument kann bei diesem Status VALIDE oder INVALIDE sein.
+    * `DOCUMENT_UNTRUSTED`: Das Dokument an sich ist valide, jedoch würde ein PDF Reader dem Dokument aufgrund einer fehlenden Vertrauenskette misstrauen und entsprechende Warnungen anzeigen. Der zentrale Service wird hierbei dennoch angefragt, das Dokument kann bei diesem Status VALIDE oder INVALIDE sein.
+    * `DOCUMENT_INVALID`: Das Dokument an sich ist nicht valide. Dies bedeutet, dass es entweder keine Signatur beinhaltet, eine der enthaltenen Signaturen nicht überprüft werden konnte oder eine der enthaltenen Signaturen fehlerhaft ist. Sofern dieser Status auftritt, wird die Überprüfung abgebrochen und auch nicht mehr der zentrale Service angefragt. Der Status des Dokuments ist somit INVALIDE.
+  * details: Optional werden Details des Überprüfungsschritts zurückgegeben
+* `issuance`: Information über ein Vorhandensein einer zentralen Information über das Dokument
+  * `status`: Die Validität des Dokuments anhand der Information des zentralen Service
+    * `DOCUMENT_INVALID`: Die Prüfung durch den zentralen Service wurde nicht angestrengt, da das Dokument keine oder mindestens eine fehlerhafte Signatur besitzt. Siehe oben.
+    * `ISSUANCE_OK`: Die Prüfung des zentralen Service verlief positiv, das Dokument ist bekannt und wurde bisher nicht zurückgezogen. Der Status des Dokuments ist somit VALIDE.
+    * `ISSUANCE_NOT_FOUND`: Der zentrale Service konnte die entsprechende Signatur des Dokuments nicht finden. Dies bedeutet, dass das Dokument nicht über den zentralen Service ausgestellt wurde, und somit in unserem Ökosystem INVALIDE ist. Vorsicht: Das Dokument als solches, kann trotzdem ein valide signiertes Dokument sein, das eIDAS Richtlinien befolgt und nach diesen durchgehend vertrauenswürdig wäre. 
+    * `ISSUANCE_REVOKED`: Der zentrale Service konnte die entsprechende Signatur des Dokuments finden, sie wurde aber in der Zwischenzeit zurückgezogen. Das Dokument ist daher INVALIDE. Vorsicht: Das Dokument als solches, kann trotzdem ein valide signiertes Dokument sein, das eIDAS Richtlinien befolgt und nach diesen durchgehend vertrauenswürdig wäre, da das Signierzertifikat ggf. nicht zurückgezogen wurde.
+  * `details`: Optional werden Details des Überprüfungsschritts zurückgegeben
+
+
+# 5. Offene Punkte
+
+Verschiedene Diskussionspunkte, Implementierungsdetails und organisatorische Sachverhalte sind derzeit noch offen, die entsprechende Funktionen verzögern bzw. blockieren.
+
+## 5.1 Multisignaturen
+
+Multisignaturen - wie sie im PAdES Standard existieren - werden noch nicht unterstützt. Hierbei ist ebenfalls noch offen, ob nur eine Signatur aller Signaturen des Dokuments über den zentralen Service ausgestellt werden müsste. Zudem ist offen, wie viele Signaturen (und welche) grundsätzlich benötigt werden, um die Gültigkeit des Dokumentes zu beweisen, bzw. im Umkehrschluss, welche Signatur es ausreicht zurückzuziehen, um die Gültigkeit des Dokumentes zu invalidieren.
+
+## 5.2 Vertrauenswürdige Zertifikate im zentralen Service
+
+Der zentrale Service besitzt derzeit noch keine vertrauenswürigen Signaturzertifikate. Daher werden im PDF Reader entsprechende Zertifiakte als nicht-vertrauenswürdig eingestuft. Dies ist ein organisatorischen Problem, an dem gerade gearbeitet wird.
+
+## 5.3 Vertraueswürdige Zeitstempel
+
+Der zentrale Service stellt derzeit noch keine Vertrauenswürdigen Zeitstempel aus bzw. bezieht noch keine Zeitstempel von einem vertrauenswürdigen Zeitstempeldienst (TSA, Time Stamping Authority), daher kann das System noch keine PAdES Baseline T.
+
+## 5.4 Long-Term-Validation bzw. Long-Term-Archival von Signaturen
+
+Der Begriff Long-Term-Validation bzw. Long-Term-Archival bedeutet, dass Signaturen auch nach Jahren bzw. Jahrzehnten als vertrauenswürdig angesehen werden können, obwohl entsprechende Signaturzertifikate schon längst abgelaufen sind, sofern entsprechende Rahmenbedingungen bei der Signatur beachtet worden sind.
+
+Hierbei zählt primär das Einbetten einer Bestätigung eines vertrauenswürdigen Dritten in das PDF Dokument selbst, dass alle benutzten Zertifikate zum Zeitpunkt des Signierens gültig gewesen sind. Diese sogenannten VRI (Verification Related Information) bestehen z.B. aus allen Antworten von allen Certificate Authorities ob die Zertifikate der Zertifikatskette noch gültig sind.
+
+Die Abfolge wie die Hashes und Signaturen derzeit erstellt werden, erlaubt (noch) keine PAdES Baseline LTA. 
+
+Mehr Information hierzu gibt es z.B. auf folgenden Seiten:
+- https://ec.europa.eu/digital-building-blocks/wikis/display/DIGITAL/Standards+and+specifications
+- https://www.cryptomathic.com/news-events/blog/pades-and-long-term-archival-lta
+
+## 5.5 Fortgeschrittene vs. qualifizierte elektronische Siegel
+
+Derzeit werden fortgeschrittene elektronische Siegel im Sinne der eIDAS Veordnung erzeugt.
+
+Das System kann derzeit keine qualifizierten elektronischen Siegel ausstellen, da die entsprechenden vertrauenswürdigen Hardware Security Module nicht im zentralen Service vorhanden sind. Diese HSM sind für qualifizierte Signaturen bzw. Siegel zwingend erforderlich.
+
+Es werden ebenfalls externe und vertrauenswürdige Fernsignatur- bzw. Fernsiegeldienste im Sinne von eIDAS evaluiert.
+
+## 5.6 Zurückziehen von Signaturen
+
+Sofern der zentrale Service vom Lokalen Modul direkt angesprochen wird, fehlt die Funktion des Zurückziehens von Dokumenten.

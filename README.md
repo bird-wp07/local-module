@@ -1,6 +1,11 @@
-# Dev Setup
 
-Dev setup for UNIX systems (Windows/WSL, Linux, Mac).
+# Integration Documentation
+This page is only the developer's documentation of the Local Module. If you are looking for the documentation about integrating and using the Local Module, please switch to [Integration Documentation](docs/README.md).
+
+
+# Developer Setup
+
+Developer setup for UNIX systems (Windows/WSL, Linux, Mac).
 
 1. Clone repository, `npm i`
 2. Set up secrets
@@ -61,7 +66,9 @@ Dev setup for UNIX systems (Windows/WSL, Linux, Mac).
 
 # Resources
 
+- [Latest Local Module Integration Documentation](https://github.com/bird-wp07/local-module/tree/main/docs)
 - [EN 319 142-1](https://www.etsi.org/deliver/etsi_en/319100_319199/31914201/01.01.01_60/en_31914201v010101p.pdf) - PAdES Standard Part 1
 - [EN 319 142-2](https://www.etsi.org/deliver/etsi_en/319100_319199/31914202/01.01.01_60/en_31914202v010101p.pdf) - PAdES Standard Part 2
 - [EN 319 12201](https://www.etsi.org/deliver/etsi_en/319100_319199/31912201/01.01.05_20/en_31912201v010105a.pdf) - CAdES Standard
 - [DSS Documentation](https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/doc/dss-documentation.html)
+- [Hosted DSS Webapp](https://ec.europa.eu/digital-building-blocks/DSS/webapp-demo/)

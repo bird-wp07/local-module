@@ -2,3 +2,7 @@ node_modules/
 dist/
 *.env
 generated/
+certs/
+*.p12
+*.pem
+*.key
