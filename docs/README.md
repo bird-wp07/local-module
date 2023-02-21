@@ -96,7 +96,7 @@ Derzeit gibt es noch keine signierte Version der start.exe, daher werden ggf. Wa
 
 3. Die Konfiguration des Lokalen Moduls wird auf Linuxsystemen über die Kopfzeilen der *start.sh* Datei durchgeführt. Im Abschnitt *ADMINISTRATOR SETTINGS* befinden sich Schlüssel-Wert Paare in Form gewöhnlicher Variablendeklarationen welche der Konfiguration dienen.
 
-    Eine detaillierte Auflistung und Erklärung der Konfigurationsparameter ist im entsprechenden Windows-relevanten Abschnitt. Die Konfiguration unterscheidet sich zwischen den Betriebssystemen nicht.
+    Eine detaillierte Auflistung und Erklärung der Konfigurationsparameter ist im entsprechenden Windowsabschnitt vorzufinden. Die Konfiguration unterscheidet sich zwischen den Betriebssystemen nicht.
 
 4. Starten des Lokalen Moduls durch Ausführen des Startupskripts. Hierbei werden alle benötigen Hintergrunddienste gestartet. Zum Betrieb werden neben den Linux Standardapplikationen `tar`, `curl`, `xz-utils`, `gzip` und `jq` benötigt. Bei einem Fehler während der Initialisierung aufgrund fehlender Programme empfehlen wir den gesamten Prozess in einem leeren Verzeichnis erneut durchzuführen.
 
