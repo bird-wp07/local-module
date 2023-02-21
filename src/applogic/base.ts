@@ -80,7 +80,7 @@ export interface IValidationResult {
      * Aspects concerning the content of the document (bytes inside the pdf+signature container)
      */
     document: {
-        status: EDocumentValidityStatus
+        status: EDocumentValidity
         details?: any
     }
 
@@ -88,32 +88,52 @@ export interface IValidationResult {
      * Revocation check performed by the CS.
      */
     issuance: {
-        status: EIssuanceStatus
+        status: EIssuanceValidity
         details?: any
     }
 }
 
-export enum EDocumentValidityStatus {
+export enum EDocumentValidity {
+    /**
+     * All good.
+     */
     DOCUMENT_OK = "DOCUMENT_OK",
 
     /**
-     * Certificate chain unknown
+     * E.g. certificate chain unknown
      */
-    DOCUMENT_UNTRUSTED = "DOCUMENT_UNTRUSTED",
+    ERROR_DOCUMENT_UNTRUSTED = "ERROR_DOCUMENT_UNTRUSTED",
 
     /**
      * No signature, multisignature, crypto error
      */
-    DOCUMENT_INVALID = "DOCUMENT_INVALID"
+    ERROR_DOCUMENT_INVALID = "ERROR_DOCUMENT_INVALID"
 }
 
-export enum EIssuanceStatus {
-    // Prüfung abgebrochen; Dokument invalide (s.o; keine Signature)
-    DOCUMENT_INVALID = "DOCUMENT_INVALID",
-
+export enum EIssuanceValidity {
+    /**
+     * All good.
+     */
     ISSUANCE_OK = "ISSUANCE_OK",
-    ISSUANCE_NOT_FOUND = "ISSUANCE_NOT_FOUND",
 
-    // TODO: Check if revoked can be distinguished from NOT_FOUND
-    ISSUANCE_REVOKED = "ISSUANCE_REVOKED"
+    /**
+     * Return if document validation failed in which case no issuance
+     * validation is performed.
+     */
+    ERROR_DOCUMENT_INVALID = "ERROR_DOCUMENT_INVALID",
+
+    /**
+     * No signature has been issuance.
+     */
+    ERROR_ISSUANCE_NOT_FOUND = "ERROR_ISSUANCE_NOT_FOUND",
+
+    /**
+     * A signature was issued but has been revoked since.
+     */
+    ERROR_ISSUANCE_REVOKED = "ERROR_ISSUANCE_REVOKED",
+
+    /**
+     * The issuer is unauthorized.
+     */
+    ERROR_ISSUER_UNAUTHORIZED = "ERROR_ISSUER_UNAUTHORIZED"
 }

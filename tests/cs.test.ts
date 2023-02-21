@@ -18,29 +18,25 @@ describe("Central Service", () => {
             expect(resFetchAuthToken.isErr()).to.be.false
         })
 
-        test("issueSignature(), verifySignature(),", async () => {
-            const request: Cs.IIssueSignatureRequest = {
-                hash: "qGGJNxM84aPD3Cj5zX4ef7Pe5NV8zHCMchoZUkZfXX8=",
-                digestMethod: Cs.EDigestAlgorithm.SHA256,
-                issuerId: csIssuerId
-            }
-            const resIssueSignature = await csClient.issueSignature(request)
-            expect(resIssueSignature.isErr()).to.be.false
-            const cms: Base64 = resIssueSignature._unsafeUnwrap().cms
+        test("issueSignature(), validateIssuance(),", async () => {
+            const digestToBeSigned = "qGGJNxM84aPD3Cj5zX4ef7Pe5NV8zHCMchoZUkZfXX8="
+            const digestMethod = Cs.EDigestAlgorithm.SHA256
+            const issuerId = csIssuerId
+            const rsltIssueSignature = await csClient.issueSignature(digestToBeSigned, digestMethod, issuerId)
+            expect(rsltIssueSignature.isErr()).to.be.false
+            const cms: Base64 = rsltIssueSignature._unsafeUnwrap().cms
 
-            const resExtract = Utility.extractSignatureValueFromCms(Buffer.from(cms, "base64"))
-            expect(resExtract.isErr()).to.be.false
-            const signature: Buffer = resExtract._unsafeUnwrap()
+            const rsltExtractSignature = Utility.extractSignatureValueFromCms(Buffer.from(cms, "base64"))
+            expect(rsltExtractSignature.isErr()).to.be.false
+            const signatureValue: Buffer = rsltExtractSignature._unsafeUnwrap()
+            const signatureValueDigest: Base64 = Utility.sha256sum(signatureValue).toString("base64")
 
-            const resVerifySignature = await csClient.verifySignature({ digest: signature.toString("base64") })
-            expect(resVerifySignature.isErr()).to.be.false
-            const verifySignatureResult = resVerifySignature._unsafeUnwrap()
-
-            // TODO: should be true; fix once CS validation API is adjusted
-            expect(verifySignatureResult.valid).to.be.false
+            const rsltValidateIssuance = await csClient.validateIssuance(signatureValueDigest)
+            expect(rsltValidateIssuance.isErr()).to.be.false
+            const verifySignatureResult = rsltValidateIssuance._unsafeUnwrap()
+            expect(verifySignatureResult.valid).to.be.true
         })
 
-        test.skip("CsClient#verifySignature")
         test.skip("CsClient#revokeSignature")
     })
 })

@@ -4,8 +4,8 @@ import { Result, ok, err } from "neverthrow"
 import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
 import * as Cs from "../cs"
-import * as crypto from "crypto"
-import { EDocumentValidityStatus, EIssuanceStatus, IAppLogic, IHealthStatus, IValidationResult } from "./base"
+import * as Utility from "../utility"
+import { EDocumentValidity, EIssuanceValidity, IAppLogic, IHealthStatus, IValidationResult } from "./base"
 import { Base64 } from "../utility"
 
 /**
@@ -69,14 +69,9 @@ export class AppLogic implements IAppLogic {
         return ok(digest)
     }
 
-    public async issueSignature(dataToBeSigned: Base64, issuerId: string, auditLog?: string): Promise<Result<Base64, Error>> {
-        const request: Cs.IIssueSignatureRequest = {
-            hash: dataToBeSigned,
-            digestMethod: Cs.EDigestAlgorithm.SHA256,
-            issuerId: issuerId,
-            auditLog: auditLog
-        }
-        const generateSignatureResponse = await this.csClient.issueSignature(request)
+    public async issueSignature(digestToBeSigned: Base64, issuerId: string, auditLog?: string): Promise<Result<Base64, Error>> {
+        const digestMethod = Cs.EDigestAlgorithm.SHA256
+        const generateSignatureResponse = await this.csClient.issueSignature(digestToBeSigned, digestMethod, issuerId, auditLog)
         if (generateSignatureResponse.isErr()) {
             return err(generateSignatureResponse.error)
         }
@@ -115,10 +110,20 @@ export class AppLogic implements IAppLogic {
     }
 
     public async validateSignedPdf(pdf: Base64): Promise<Result<IValidationResult, Error>> {
-        /* Check PAdES conformance of signature using DSS. */
-        const documentValidity: IValidationResult["document"] = {
-            status: EDocumentValidityStatus.DOCUMENT_OK
+        const validationResult: IValidationResult = {
+            valid: true,
+            document: {
+                status: EDocumentValidity.DOCUMENT_OK
+            },
+            issuance: {
+                status: EIssuanceValidity.ISSUANCE_OK
+            }
         }
+
+        /*
+         * 1. Check PAdES conformance of signed PDF using DSS.
+         *
+         * Retrieve validation result for signed document from DSS. */
         const validateSignatureRequest: Dss.IValidateSignatureRequest = {
             signedDocument: {
                 bytes: pdf,
@@ -128,61 +133,78 @@ export class AppLogic implements IAppLogic {
             policy: null,
             signatureId: null
         }
-        const validateSignatureResponse = await this.dssClient.validateSignature(validateSignatureRequest)
-        if (validateSignatureResponse.isErr()) {
-            return err(validateSignatureResponse.error)
+        const rsltValidateSignature = await this.dssClient.validateSignature(validateSignatureRequest)
+        if (rsltValidateSignature.isErr()) {
+            return err(rsltValidateSignature.error)
         }
-        const signatures = validateSignatureResponse.value.SimpleReport.signatureOrTimestamp
+        const dssValidateSignatureResult = rsltValidateSignature.value
+
+        /* Assert that the document has exactly one signature. */
+        const signatures = dssValidateSignatureResult.SimpleReport.signatureOrTimestamp
         const numSignatures = signatures == undefined ? 0 : signatures.length
         if (numSignatures !== 1) {
+            validationResult.valid = false
             if (numSignatures === 0) {
-                documentValidity.status = EDocumentValidityStatus.DOCUMENT_INVALID
-                documentValidity.details = "no signature found"
+                validationResult.document.status = EDocumentValidity.ERROR_DOCUMENT_INVALID
+                validationResult.document.details = "no signature found"
             } else {
-                documentValidity.status = EDocumentValidityStatus.DOCUMENT_INVALID
-                documentValidity.details = "multiple signatures found"
+                validationResult.document.status = EDocumentValidity.ERROR_DOCUMENT_INVALID
+                validationResult.document.details = "multiple signatures found"
             }
         } else if (signatures![0].Signature.Indication !== Dss.ESignatureValidationIndication.TOTAL_PASSED) {
-            documentValidity.status = EDocumentValidityStatus.DOCUMENT_UNTRUSTED
-            documentValidity.details = signatures![0].Signature.SubIndication
+            validationResult.valid = false
+            validationResult.document.status = EDocumentValidity.ERROR_DOCUMENT_UNTRUSTED
+            validationResult.document.details = dssValidateSignatureResult
         }
-        const signatureValue: Base64 = validateSignatureResponse.value.DiagnosticData.Signature[0].SignatureValue
-        // TODO: abort if dss rejects signature
+
+        /* If the document content (TODO: reword; too vague) itself is invalid
+         * we skip the validation of the signature issuance and return
+         * immediately. In case of an unsigned or multi-signature document
+         * there is no issuance to check in the first place. */
+        if (validationResult.document.status === EDocumentValidity.ERROR_DOCUMENT_INVALID) {
+            validationResult.issuance.status = EIssuanceValidity.ERROR_DOCUMENT_INVALID
+            return ok(validationResult)
+        }
 
         /*
-         * Check revocation status via the CS.
+         * 2. Validate issuance via CS.
          *
-         * TODO: Implement once the CS API is understood.
-         *       The CS requires the digest of the dbts. However, we "only" have the signed PDF.
-         *       Thus we must acquire the digest of the dbts
-         *       - from the signature, if the CMS does contain it
-         *       - from the DSS' validation result above, if it's contained
-         *       - from the signed PDF itself (probably the most sane method)
-         */
-        const issuanceStatus: IValidationResult["issuance"] = {
-            status: EIssuanceStatus.ISSUANCE_OK
+         * Retrieve base64 encoded signature value from the DSS' validation
+         * report, convert to binary, compute its SHA256 digest and encode as base64. */
+        const signatureValue: Base64 = dssValidateSignatureResult.DiagnosticData.Signature[0].SignatureValue
+        const signatureValueDigest: Base64 = Utility.sha256sum(Buffer.from(signatureValue, "base64")).toString("base64")
+
+        /* Retrieve issuance validation result from CS. */
+        const rsltValidateIssuance = await this.csClient.validateIssuance(signatureValueDigest)
+        if (rsltValidateIssuance.isErr()) {
+            return err(rsltValidateIssuance.error)
         }
-        const hash = crypto.createHash("sha256").update(Buffer.from(signatureValue, "base64")).digest("base64")
-        const csValidationResult = await this.csClient.verifySignature({ digest: hash })
-        if (csValidationResult.isErr()) {
-            return err(csValidationResult.error)
-        }
-        if (!csValidationResult.value.valid) {
-            issuanceStatus.status = EIssuanceStatus.ISSUANCE_NOT_FOUND
-            issuanceStatus.details = csValidationResult.value.results
+        const csValidateIssuanceResult = rsltValidateIssuance.value
+        validationResult.issuance.details = csValidateIssuanceResult.results
+
+        if (!csValidateIssuanceResult.valid) {
+            validationResult.valid = false
+
+            /* Expose an issuance status code. We iterate over the policy array
+             * and return the first offender we find. */
+            for (const p of csValidateIssuanceResult.results) {
+                if (!p.passed) {
+                    switch (p.policyId) {
+                        case Cs.EIssuanceValidationPolicy.ISSUANCE_EXISTS:
+                            validationResult.issuance.status = EIssuanceValidity.ERROR_ISSUANCE_NOT_FOUND
+                            break
+                        case Cs.EIssuanceValidationPolicy.ISSUANCE_NOT_REVOKED:
+                            validationResult.issuance.status = EIssuanceValidity.ERROR_ISSUANCE_REVOKED
+                            break
+                        case Cs.EIssuanceValidationPolicy.ISSUER_NOT_REVOKED:
+                            validationResult.issuance.status = EIssuanceValidity.ERROR_ISSUER_UNAUTHORIZED
+                            break
+                    }
+                }
+            }
         }
 
-        /**
-         * Verify the validity of the signature via the public CS API. The
-         * signature in question is identified via the data that was signed.
-         *
-         * TODO: Implement once CsClient is ready.
-         */
-        return ok({
-            valid: documentValidity.status == EDocumentValidityStatus.DOCUMENT_OK,
-            document: documentValidity,
-            issuance: issuanceStatus
-        })
+        return ok(validationResult)
     }
 
     /**

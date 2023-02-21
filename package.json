@@ -1,6 +1,6 @@
 {
     "name": "@bird-wp07/local-module",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "license": "",
     "files": [
         "dist/src/",

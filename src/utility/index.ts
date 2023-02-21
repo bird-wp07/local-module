@@ -6,6 +6,7 @@ import axios from "axios"
 import * as ASN1CMS from "@peculiar/asn1-cms"
 import * as ASN1Schema from "@peculiar/asn1-schema"
 import ASN1 from "@lapo/asn1js"
+import * as crypto from "crypto"
 
 /* eslint-disable */ // disable eslint to use &{} Hack; See https://github.com/microsoft/TypeScript/issues/31940.
 
@@ -37,6 +38,13 @@ export async function httpReq(config: AxiosRequestConfig): Promise<Result<AxiosR
 
 export async function sleepms(ms: number) {
     return util.promisify(setTimeout)(ms)
+}
+
+/**
+ * Computes a SHA256 digest.
+ */
+export function sha256sum(buf: Buffer): Buffer {
+    return crypto.createHash("sha256").update(buf).digest()
 }
 
 /**

@@ -24,43 +24,49 @@ export const Schema_IIssueSignatureResponse = Joi.object().keys({
     cms: Joi.string().base64().required()
 })
 
-export interface IVerifySignatureRequest {
-    digest: Base64
+/* Signature / issuance validity checking */
+/* -------------------------------------- */
+
+export enum EIssuanceValidationPolicy {
+    ISSUANCE_EXISTS = "IssuanceExists",
+    ISSUANCE_NOT_REVOKED = "IssuanceNotRevoked",
+    ISSUER_NOT_REVOKED = "IssuerNotRevoked"
 }
 
-/**
- * Returned only for happy path (signature exists). See implementation for
- * details.
- *
- * TODO: Implement once CS api is cleared up.
- */
-export interface IVerifySignatureResponse {
+export interface IValidateIssuanceResponse {
+    /**
+     * Overall result. True if and only if all policy checks are successful
+     */
     valid: boolean
-    results?: [
+    results: [
         {
-            policyId: string
+            policyId: EIssuanceValidationPolicy.ISSUANCE_EXISTS
             policyDescription: string
             passed: boolean
+        },
+        {
+            policyId: EIssuanceValidationPolicy.ISSUANCE_NOT_REVOKED
+            policyDescription: string
+            passed: boolean | null
+        },
+        {
+            policyId: EIssuanceValidationPolicy.ISSUER_NOT_REVOKED
+            policyDescription: string
+            passed: boolean | null
         }
     ]
 }
 
-export const Schema_IVerifySignatureResponse = Joi.object().keys({
+export const Schema_IValidateIssuanceResponse = Joi.object().keys({
     valid: Joi.boolean().required(),
     results: Joi.array().items(
-        Joi.object().keys({
-            policyId: Joi.string().required(),
+        Joi.object({
+            policyId: Joi.string().valid(...Object.values(EIssuanceValidationPolicy)),
             policyDescription: Joi.string().required(),
-            passed: Joi.boolean().required()
-        })
+            passed: Joi.boolean().allow(null).required()
+        }).required()
     )
 })
-
-export interface IRevokeSignatureRequest {
-    hash: Base64
-    revocationReason: string
-    auditLog?: string
-}
 
 /**
  * Returned only for happy path (signature was successfully revoked). Failure

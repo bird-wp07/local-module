@@ -3,7 +3,7 @@
   "info": {
     "title": "WP07 Local Module - OpenAPI 3.0",
     "description": "",
-    "version": "0.2.0"
+    "version": "0.2.1"
   },
   "paths": {
     "/digest/pdf": {
@@ -198,6 +198,40 @@
                     "valid": {
                       "type": "boolean",
                       "description": "Overall validation result. Returns true if and only if all aspects of the validation are successful."
+                    },
+                    "document": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "DOCUMENT_OK",
+                            "ERROR_DOCUMENT_UNTRUSTED",
+                            "ERROR_DOCUMENT_INVALID"
+                          ]
+                        },
+                        "details": {
+                          "$ref": "#/components/schemas/AnyValue"
+                        }
+                      }
+                    },
+                    "issuance": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ISSUANCE_OK",
+                            "ERROR_DOCUMENT_INVALID",
+                            "ERROR_ISSUANCE_NOT_FOUND",
+                            "ERROR_ISSUANCE_REVOKED",
+                            "ERROR_ISSUER_UNAUTHORIZED"
+                          ]
+                        },
+                        "details": {
+                          "$ref": "#/components/schemas/AnyValue"
+                        }
+                      }
                     }
                   }
                 }
@@ -299,6 +333,9 @@
         "example": {
           "$ref": "#/x-constants/examples/issuerIdDefault"
         }
+      },
+      "AnyValue": {
+        "description": "Can be anything: string, number, array, object, etc., including `null`"
       }
     }
   },

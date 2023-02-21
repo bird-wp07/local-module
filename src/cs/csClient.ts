@@ -1,25 +1,25 @@
+import { Base64 } from "../utility"
 import { AxiosRequestConfig } from "axios"
 import { ok, err, Result } from "neverthrow"
 import {
     IIssueSignatureResponse,
-    IIssueSignatureRequest,
     Schema_IFetchAuthToken,
     IFetchAuthTokenResponse,
-    IVerifySignatureRequest,
-    IVerifySignatureResponse,
-    IRevokeSignatureRequest,
-    IRevokeSignatureResponse
+    IValidateIssuanceResponse,
+    IRevokeSignatureResponse,
+    Schema_IValidateIssuanceResponse
 } from "./types"
 import * as qs from "qs"
 import * as Utility from "../utility"
 import * as https from "https"
 import * as fs from "fs"
+import { EDigestAlgorithm } from "../dss"
 
 export abstract class ICsClient {
     abstract isOnline(): Promise<boolean>
-    abstract issueSignature(request: IIssueSignatureRequest): Promise<Result<IIssueSignatureResponse, Error>>
-    abstract verifySignature(request: IVerifySignatureRequest): Promise<Result<IVerifySignatureResponse, Error>>
-    abstract revokeSignature(request: IRevokeSignatureRequest): Promise<Result<IRevokeSignatureResponse, Error>>
+    abstract issueSignature(digestToBeSigned: Base64, digestMethod: EDigestAlgorithm, issuerId: string, auditLog?: string): Promise<Result<IIssueSignatureResponse, Error>>
+    abstract validateIssuance(signatureValueDigest: Base64): Promise<Result<IValidateIssuanceResponse, Error>>
+    abstract revokeSignature(signatureValueDigest: Base64, revocationReason: string, auditLog?: string): Promise<Result<IRevokeSignatureResponse, Error>>
 }
 
 export class CsClient implements ICsClient {
@@ -72,7 +72,7 @@ export class CsClient implements ICsClient {
      *
      * See EN 319 122-1.
      */
-    async issueSignature(request: IIssueSignatureRequest): Promise<Result<IIssueSignatureResponse, Error>> {
+    async issueSignature(digestToBeSigned: Base64, digestMethod: EDigestAlgorithm, issuerId: string, auditLog?: string): Promise<Result<IIssueSignatureResponse, Error>> {
         const fetchAuthTokenResult = await this.fetchAuthToken()
         if (fetchAuthTokenResult.isErr()) {
             return err(fetchAuthTokenResult.error)
@@ -85,10 +85,10 @@ export class CsClient implements ICsClient {
             baseURL: this.baseurl,
             headers: { Authorization: `Bearer ${tokenContainer.access_token}` },
             data: {
-                hash: request.hash,
-                issuerId: request.issuerId,
-                auditLog: request.auditLog,
-                digestMethod: request.digestMethod
+                hash: digestToBeSigned,
+                digestMethod: digestMethod,
+                issuerId: issuerId,
+                auditLog: auditLog
             }
         }
         const response = await Utility.httpReq(config)
@@ -98,33 +98,41 @@ export class CsClient implements ICsClient {
         return ok(response.value.data)
     }
 
-    // TODO: Central Service: Refactor endpoint
-    //       - Don't use 404 to designate unknown signatures
-    //       - Return consistent payload for known valid, known revoked and unknown signatures.
-    //       - Use POST request for consistency (HTTP vs REST)
-    //       - Clarify 'hash of a signature'
-    //
-    //       Afterwards: write sanity checks and tests
-    async verifySignature(request: IVerifySignatureRequest): Promise<Result<IVerifySignatureResponse, Error>> {
+    /**
+     * Checks the validity of an issued signature. Checks whether a signature
+     * has been issued in the first place, whether it has been revoked and
+     * whether the issuer is legitimate. Issuances are identified by the SHA256
+     * digest of their signature' CMS's signature value.
+     *
+     * @param signatureValueDigest: SHA256 digest of the signature value
+     */
+    async validateIssuance(signatureValueDigest: Base64): Promise<Result<IValidateIssuanceResponse, Error>> {
         const config: AxiosRequestConfig = {
             method: "GET",
             url: "/api/v1/verifier/verifications",
             baseURL: this.baseurl,
             params: {
-                hash: request.digest,
+                hash: signatureValueDigest,
                 hashType: "SIGNATURE_HASH"
             },
             paramsSerializer: { serialize: (params) => qs.stringify(params) }
         }
         const response = await Utility.httpReq(config)
         if (response.isErr()) {
-            return ok({ valid: false })
+            return err(response.error)
         }
+
+        /* Validate response */
+        const validationResponse = Schema_IValidateIssuanceResponse.validate(response.value.data)
+        if (validationResponse.error !== undefined) {
+            return err(validationResponse.error)
+        }
+
         return ok(response.value.data)
     }
 
     // TODO: implement
-    async revokeSignature(request: IRevokeSignatureRequest): Promise<Result<IRevokeSignatureResponse, Error>> {
+    async revokeSignature(signatureValueDigest: Base64, revocationReason: string, auditLog?: string): Promise<Result<IRevokeSignatureResponse, Error>> {
         const fetchAuthTokenResult = await this.fetchAuthToken()
         if (fetchAuthTokenResult.isErr()) {
             return err(fetchAuthTokenResult.error)
@@ -137,10 +145,10 @@ export class CsClient implements ICsClient {
             baseURL: this.baseurl,
             headers: { Authorization: `Bearer ${tokenContainer.access_token}` },
             data: {
-                hash: request.hash,
-                revocationReason: request.revocationReason,
+                hash: signatureValueDigest,
+                revocationReason: revocationReason,
                 hashType: "SIGNATURE_HASH",
-                auditLog: request.auditLog
+                auditLog: auditLog
             }
         }
         const response = await Utility.httpReq(config)
