@@ -227,13 +227,13 @@ Request Body:
 ```
 {
     "bytes": "<Base64 Repräsentation der unsignierten PDF Bytes>",
-    "cms": "<Base64 Repräsentation der vom Sigierservice empfangenen CMS>",
+    "cms": "<Base64 Repräsentation der vom Signierservice empfangenen CMS>",
     "signingTimestamp": 1672531200000
 }
 ```
 
 * `bytes`: Die Base64 Repräsentation aller Bytes der unsignierten PDF
-* `cms`: Die Base64 Repräsentation der vom Sigierservice empfangenen CMS
+* `cms`: Die Base64 Repräsentation der vom Signierservice empfangenen CMS
 * `signingTimestamp`: Der [Unix-Zeitstempel](https://de.wikipedia.org/wiki/Unixzeit) in Millisekunden, das heißt die Anzahl von Millisekunden seit dem 01.01.1970 00:00:00 UTC. Dieser Zeitstempel muss mit dem Zeitstempel des vorherigen Hash Aufrufs der PDF übereinstimmen.
 
 Sofern das Lokale Modul das unsignierte PDF mit dem Zeitstempel und der digitalen Signatur verschmelzen konnte, wird das signierte PDF als Base64 Repräsentation zurückgegeben.
@@ -280,11 +280,11 @@ Accept: application/json
 Request Body:
 ```
 {
-    "bytes": "<Base64 Repräsentation der signierten PDF Bytes>",
+    "bytes": "<Base64 Repräsentation des signierten PDFs>",
 }
 ```
 
-* `bytes`: Die Base64 Repräsentation aller Bytes der signierten PDF
+* `bytes`: Die Base64 Repräsentation des signierten PDFs
 
 Sofern das Lokale Modul das signierte PDF einlesen konnte, wird das signierte PDF überprüft und ein entsprechender Validierungswert zurückgeliefert. Der Validierungswert des Lokalen Moduls ist tatsächlich binär, das heißt das Lokale Modul interpretiert das entsprechend eingelesene PDF nach vordefinierten Regeln und gibt die Validität in WAHR oder FALSCH zurück. Eine entsprechende detaillierte Unterscheidung kann in den jeweiligen Properties `document` und `issuance` eingesehen werden.
 
