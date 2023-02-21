@@ -66,7 +66,6 @@ export interface IHealthStatus {
 
 /**
  * Validation result encompassing all aspects of interest of a validation.
- * TODO: wip
  */
 export interface IValidationResult {
     /**

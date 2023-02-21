@@ -256,8 +256,7 @@
                       "type": "string",
                       "enum": [
                         "OK",
-                        "ERROR_DSS_NO_REPLY",
-                        "ERROR_CS_NO_REPLY"
+                        "ERROR"
                       ],
                       "description": "Status code"
                     }

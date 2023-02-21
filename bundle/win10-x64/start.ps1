@@ -20,11 +20,12 @@ if ($null -eq $env:WP07_CS_BASEURL) {
 if ($null -eq $env:WP07_CS_TOKEN_URL) {
     $env:WP07_CS_TOKEN_URL = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_CS_TOKEN_URL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 }
-if ($null -eq $env:WP07_CA_PEM) {
-    $env:WP07_CA_PEM = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_CA_PEM=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+if ($null -eq $env:WP07_CS_CA_PEM) {
+    $env:WP07_CS_CA_PEM = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_CS_CA_PEM=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 }
-if ($null -eq $env:WP07_CLIENT_PFX) {
-    $env:WP07_CLIENT_PFX = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_CLIENT_PFX=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+# TODO: Absolutpfad
+if ($null -eq $env:WP07_CS_CLIENT_PFX) {
+    $env:WP07_CS_CLIENT_PFX = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_CS_CLIENT_PFX=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 }
 if ($null -eq $env:WP07_CS_CLIENT_PFX_PASSWORD) {
     $env:WP07_CS_CLIENT_PFX_PASSWORD = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_CS_CLIENT_PFX_PASSWORD=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}

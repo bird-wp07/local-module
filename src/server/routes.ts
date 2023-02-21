@@ -20,8 +20,11 @@ import {
     IIssueResponse,
     Schema_ISignPdfRequest,
     ISignPdfRequest,
-    ISignPdfResponse
+    ISignPdfResponse,
+    IHealthResponse,
+    EHealthStatus
 } from "./types"
+import * as Applogic from "../applogic"
 import { IAppLogic } from "../applogic/base"
 import { Container } from "typescript-ioc"
 import { Base64 } from "../utility"
@@ -31,11 +34,17 @@ export const swaggerUiPath = "/swagger"
 
 function makeHealthController(impl: IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
-        const response = await impl.health()
-        if (response.isErr()) {
-            return next(response.error)
+        const rsltHealth = await impl.health()
+        if (rsltHealth.isErr()) {
+            return next(rsltHealth.error)
         }
-        return res.status(200).json(response.value)
+        const health: Applogic.IHealthStatus = rsltHealth.value
+
+        const response: IHealthResponse = {
+            status: health.ok ? EHealthStatus.OK : EHealthStatus.ERROR,
+            details: health.details as unknown
+        }
+        return res.status(200).json(response)
     }
     return fn as Express.RequestHandler
 }

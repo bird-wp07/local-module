@@ -11,8 +11,7 @@ import * as Joi from "joi"
 
 export enum EHealthStatus {
     OK = "OK",
-    ERROR_DSS_NO_REPLY = "ERROR_DSS_NO_REPLY",
-    ERROR_CS_NO_REPLY = "ERROR_CS_NO_REPLY"
+    ERROR = "ERROR"
 }
 export interface IHealthResponse {
     status: EHealthStatus
