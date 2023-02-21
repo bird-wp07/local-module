@@ -44,29 +44,33 @@ Die jeweils neueste Version des Lokalen Moduls kann über die Releases des GitHu
 
 Nachdem das Archiv vom GitHub Repository heruntergeladen wurde, das Archiv mit einem Archivprogramm (WinZip oder https://www.7-zip.org/) in ein beliebiges Verzeichnis entpacken. Das Lokale Modul besitzt keinen Installer und ist portabel.
 
-#### 2.2.1.2 Einmalige Einrichtung des Betriebssystems
+#### 2.2.1.2 Konfiguration
 
-Um die Ausführung beliebiger Powershell Skripte zu erlauben, muss in einer Administrator Powershell (Windows-Taste drücken, "Powershell" eingeben, Rechtsklick auf den Powershell Eintrag und "Als Administrator ausführen" auswählen.
+Die beiliegende Datei *CONFIG* dient der Konfiguration des Lokalen Moduls. Folgende Parameter, welche teilweise bereits mit sinnvollen Standardwerten versehen sind, müssen hier definiert werden:
 
-`Set-ExecutionPolicy unrestricted`
+- `LOCAL_MODULE_BASEURL`: Die Basis-URL des Lokalen Moduls in ausführlicher `SCHEMA://HOST:PORT` Schreibweise. Statt *localhost* muss explizit die Loopbackadresse *127.0.0.1* angegeben werden.
+    - Beispiel: `http://127.0.0.1:2048`
+- `DSS_BASEURL`: Die Basis-URL des DSS Hintergrunddienstes in ausführlicher `SCHEMA://HOST:PORT` Schreibweise, wobei das Schema bzw. der Host auf *http* bzw. *127.0.0.1* festgelegt sind und nicht geändert werden können. Der Port kann frei gewählt werden.
+    - Beispiel: `http://127.0.0.1:8089`
+- `CS_BASEURL`: Die Basis-URL des API des Zentralen Dienstes.
+- `CS_TOKEN_URL`: Die URL des Open-ID Connect Endpunkts des Zentralen Dienstes zur Ausstellung von JWTs.
+- `CS_CA_PEM`: PEM-Datei mit Serverzertifikat für mTLS Verbindung zum Zentralen Dienst. Diese Datei muss sich im selben Verzeichnis wie die aus dem Archiv entpackten Dateien befinden. Alternativ kann ein beliebiger absoluter Pfad angegeben werden.
 
-ausgeführt werden. Für weitere Informationen über die Freigabe der Ausführung von Powershell Skripten siehe https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy
+    Diese Datei wird nicht mit dem Bundle ausgeliefert.
+- `CS_CLIENT_PFX`: PKCS#12-Datei mit Clientzertifikat und privatem Schlüssel für die mTLS Verbindung zum Zentralen Dienst. Diese Datei muss sich im selben Verzeichnis wie die aus dem Archiv entpackten Dateien befinden. Alternativ kann ein beliebiger absoluter Pfad angegeben werden.
 
-Möglicherweise muss auch die Ausführung des Skripts manuell erlaubt werden. Hierfür muss in einer Powershell der Befehl
+    Diese Datei wird nicht mit dem Bundle ausgeliefert.
+- `CS_CLIENT_PFX_PASSWORD`: Passwort zum Entschlüsseln des privaten Clientschlüssels im Klartext.
 
-`Unblock-File -Path .\<BASIS_PFAD>\start.ps1`
+    Das Password wird nicht mit dem Bundle ausgeliefert.
 
-abgesetzt werden, wobei <BASIS_PFAD> den Pfad zur 'start.ps1' Datei vom Arbeitsverzeichnis der Powershell darstellt. Abhängig von den Nutzerberechtigungen kann hierfür eine Administrator Powershell notwendig sein.
+Alternativ können all genannten Werte über Umgebungsvariablen konfiguriert werden, deren Namen sich nur durch ein `WP07_` Präfix gegenüber ihren jeweiligen Konfigurationsparameter unterscheiden (z.B. wird der Wert des `DSS_BASEURL` Parameters aus der `WP07_DSS_BASEURL` Umgebungsvariablen übernommen, sofern diese existiert).
 
-#### 2.2.1.3 Konfiguration
-
-Die Base-URLs des lokalen Moduls, sowie des im Hintergrund laufenden DSS Servers können über die beiligende Datei *CONFIG* konfiguriert werden. Die Base-URLs müssen in der ausführlichen Form `SCHEMA://HOST:PORT` vorliegen und sollten statt `localhost` explit die Loopbackadresse 127.0.0.1 verwenden.
-
-#### 2.2.1.4 Start
+#### 2.2.1.3 Start
 
 Zum Starten des lokalen Moduls Rechtsklick auf 'start.ps1' und im Kontextmenü 'Mit PowerShell ausführen' wählen. Etwaige Meldungen des Windows Defender können ignoriert werden ("Abbrechen" klicken oder Fenster schließen). Eine Portfreigabe ist bei einem Zugriff vom selben Rechner aus nicht vonnöten.
 
-#### 2.2.1.5 Beenden
+#### 2.2.1.4 Beenden
 
 Die Applikation kann durch wiederholte Eingabe der Tastenkombination Ctrl-C im Powershell Fenster unterbrochen werden. Hierbei werden auch alle Hintergrunddienste beendet.
 
@@ -74,7 +78,7 @@ Die Applikation kann durch wiederholte Eingabe der Tastenkombination Ctrl-C im P
 
 Das Windowsbundle des Lokalen Moduls liefert die gewöhnliche ausführbare Datei *start.exe* aus, welche alternativ zum Powershellskript verwendet werden kann. Das Vorgehen zur Konfiguration und Beendigung des Programms entspricht dem des Powershellskriptes.
 
-Derzeit gibt es noch keine signierte Version der start.exe, daher werden ggf. Warnmeldungen des Windows Defenders angezeigt. Eine Anleitung wir diese für einen Testbetrieb ausgeschaltet werden können, findet sich unter den [Testhinweisen](./README_Test.md)
+Derzeit gibt es noch keine signierte Version der start.exe, daher werden ggf. Warnmeldungen des Windows Defenders angezeigt. Eine Anleitung wie diese für einen Testbetrieb ausgeschaltet werden können, findet sich unter den [windowsspezifischen Hinweisen](./windows.md)
 
 ## 2.3 Betrieb unter Linux
 
@@ -90,7 +94,9 @@ Derzeit gibt es noch keine signierte Version der start.exe, daher werden ggf. Wa
    tar -xvf "local-module.tar.xz"
    ```
 
-3. Die Base-URLs für das lokale Modul und den DSS Hintergrunddienst können über die Umgebungsvariablen *WP07_LOCAL_MODULE_BASEURL* und *WP07_DSS_BASEURL* konfiguriert werden. Alternativ kann direkt in den Kopfzeilen der *start.sh* Datei im Abschnitt *ADMINISTRATOR SETTINGS* konfiguriert werden. Die Base-URLs müssen in der ausgeschriebenen Form `SCHEMA://HOST:PORT` vorliegen. Desweiteren sollte statt `localhost` zu verwenden explizit die Loopbackadresse 127.0.0.1 angegeben werden.
+3. Die Konfiguration des Lokalen Moduls wird auf Linuxsystemen über die Kopfzeilen der *start.sh* Datei durchgeführt. Im Abschnitt *ADMINISTRATOR SETTINGS* befinden sich Schlüssel-Wert Paare in Form gewöhnlicher Variablendeklarationen welche der Konfiguration dienen.
+
+    Eine detaillierte Auflistung und Erklärung der Konfigurationsparameter ist im entsprechenden Windows-relevanten Abschnitt. Die Konfiguration unterscheidet sich zwischen den Betriebssystemen nicht.
 
 4. Starten des Lokalen Moduls durch Ausführen des Startupskripts. Hierbei werden alle benötigen Hintergrunddienste gestartet. Zum Betrieb werden neben den Linux Standardapplikationen `tar`, `curl`, `xz-utils`, `gzip` und `jq` benötigt. Bei einem Fehler während der Initialisierung aufgrund fehlender Programme empfehlen wir den gesamten Prozess in einem leeren Verzeichnis erneut durchzuführen.
 
