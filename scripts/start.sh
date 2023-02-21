@@ -13,9 +13,9 @@ LOCAL_MODULE_BASEURL="http://127.0.0.1:2048"
 DSS_BASEURL="http://127.0.0.1:8089"
 CS_BASEURL="http://46.83.201.35.bc.googleusercontent.com"
 CS_TOKEN_URL="https://225.96.234.35.bc.googleusercontent.com/realms/bird-cs-dev/protocol/openid-connect/token"
-CS_CA_PEM="./cs-auth-mtls-server-cert.pem" # path relative to this file or absolute
-CS_CLIENT_PFX="./cs-auth-mtls-client-certkey.p12" # path relative to this file or absolute
-CS_CLIENT_PFX_PASSWORD="______" # to be filled in
+CS_CA_PEM="cs-auth-mtls-server-cert.pem"
+CS_CLIENT_PFX="cs-auth-mtls-client-certkey.p12"
+CS_CLIENT_PFX_PASSWORD=
 
 set -e
 

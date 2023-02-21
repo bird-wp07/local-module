@@ -9,26 +9,26 @@ Write-Host "Starting script at '$scriptDir'."
 
 # If not defined via the environment, set baseurls from config file.
 if ($null -eq $env:WP07_LOCAL_MODULE_BASEURL) {
-    $env:WP07_LOCAL_MODULE_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_LOCAL_MODULE_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    $env:WP07_LOCAL_MODULE_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^LOCAL_MODULE_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 }
 if ($null -eq $env:WP07_DSS_BASEURL) {
-    $env:WP07_DSS_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_DSS_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    $env:WP07_DSS_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^DSS_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 }
 if ($null -eq $env:WP07_CS_BASEURL) {
-    $env:WP07_CS_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_CS_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    $env:WP07_CS_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^CS_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 }
 if ($null -eq $env:WP07_CS_TOKEN_URL) {
-    $env:WP07_CS_TOKEN_URL = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_CS_TOKEN_URL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    $env:WP07_CS_TOKEN_URL = Get-Content "$scriptDir\CONFIG" | Select-String "^CS_TOKEN_URL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 }
 if ($null -eq $env:WP07_CS_CA_PEM) {
-    $env:WP07_CS_CA_PEM = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_CS_CA_PEM=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value} | Resolve-Path
+    $env:WP07_CS_CA_PEM = Get-Content "$scriptDir\CONFIG" | Select-String "^CS_CA_PEM=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value} | Resolve-Path
 }
 # TODO: Absolutpfad
 if ($null -eq $env:WP07_CS_CLIENT_PFX) {
-    $env:WP07_CS_CLIENT_PFX = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_CS_CLIENT_PFX=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value} | Resolve-Path
+    $env:WP07_CS_CLIENT_PFX = Get-Content "$scriptDir\CONFIG" | Select-String "^CS_CLIENT_PFX=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value} | Resolve-Path
 }
 if ($null -eq $env:WP07_CS_CLIENT_PFX_PASSWORD) {
-    $env:WP07_CS_CLIENT_PFX_PASSWORD = Get-Content "$scriptDir\CONFIG" | Select-String "^WP07_CS_CLIENT_PFX_PASSWORD=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    $env:WP07_CS_CLIENT_PFX_PASSWORD = Get-Content "$scriptDir\CONFIG" | Select-String "^CS_CLIENT_PFX_PASSWORD=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 }
 
 # Installation paths

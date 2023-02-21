@@ -1,7 +1,7 @@
-WP07_LOCAL_MODULE_BASEURL=http://127.0.0.1:2048
-WP07_DSS_BASEURL=http://127.0.0.1:8089
-WP07_CS_BASEURL=http://46.83.201.35.bc.googleusercontent.com
-WP07_CS_TOKEN_URL=https://225.96.234.35.bc.googleusercontent.com/realms/bird-cs-dev/protocol/openid-connect/token
-WP07_CS_CA_PEM=cs-auth-mtls-server-cert.pem
-WP07_CS_CLIENT_PFX=cs-auth-mtls-client-certkey.p12
-WP07_CS_CLIENT_PFX_PASSWORD=
+LOCAL_MODULE_BASEURL=http://127.0.0.1:2048
+DSS_BASEURL=http://127.0.0.1:8089
+CS_BASEURL=http://46.83.201.35.bc.googleusercontent.com
+CS_TOKEN_URL=https://225.96.234.35.bc.googleusercontent.com/realms/bird-cs-dev/protocol/openid-connect/token
+CS_CA_PEM=cs-auth-mtls-server-cert.pem
+CS_CLIENT_PFX=cs-auth-mtls-client-certkey.p12
+CS_CLIENT_PFX_PASSWORD=
