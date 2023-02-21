@@ -26,6 +26,7 @@ jobs:
           Install-Module ps2exe
           Invoke-ps2exe -inputFile .\start.ps1 -iconFile ..\bundle\win10-x64\bird.ico -outputFile .\start.exe
 
+        # FIXME: Remove bird.ico from archive
       - name: Build archive
         working-directory: zip
         run: |
