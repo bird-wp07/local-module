@@ -16,7 +16,7 @@ describe("Dss", () => {
         })
 
         describe("DssClient#getDataToSign()", () => {
-            test.skip("TODO; generate SHA256 digest of a combined PDF/timestamp", () => {
+            test.skip("TODO; generate digest to be signed from a pdf and timestamp", () => {
                 return
             })
         })

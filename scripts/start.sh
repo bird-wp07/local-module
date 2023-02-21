@@ -6,8 +6,6 @@
 # 'start.sh' in the linux bundles and is used to build the dev docker image.
 # There is no reason to run this script manually during development.
 
-set -e
-
 # ######################
 # ADMINISTRATOR SETTINGS
 # ######################
@@ -18,6 +16,8 @@ CS_TOKEN_URL="https://225.96.234.35.bc.googleusercontent.com/realms/bird-cs-dev/
 CS_CA_PEM="./cs-auth-mtls-server-cert.pem" # path relative to this file or absolute
 CS_CLIENT_PFX="./cs-auth-mtls-client-certkey.p12" # path relative to this file or absolute
 CS_CLIENT_PFX_PASSWORD="______" # to be filled in
+
+set -e
 
 # Default installation path names
 JDK_ROOT="${JDK_ROOT:-jdk}"
