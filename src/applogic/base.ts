@@ -26,11 +26,20 @@ export abstract class IAppLogic {
      * Issues a signature.
      *
      * @param digestToBeSigned - base64 encoded digest to be signed as returned from generateDataToBeSigned()
-     * @param issuerId
-     * @param auditLog
+     * @param issuerId - unique ID to identify the issuer
+     * @param auditLog - optional audit log
      * @returns base64 encoded signature in CMS format
      */
     abstract issueSignature(digestToBeSigned: Base64, issuerId: string, auditLog?: string): Promise<Result<Base64, Error>>
+
+    /**
+     * Revoke an issuance.
+     *
+     * @param signatureValueDigest - base64 encoded signature value of the issuance to be revoked
+     * @param reason - reason for the revocation
+     * @param auditLig - optional audit log
+     */
+    abstract revokeSignature(signatureValueDigest: Base64, reason: string, auditLog?: string): Promise<Result<IRevocationResponse, Error>>
 
     /**
      * Produces a signed PDF by merging the original PDF with its signature.
@@ -62,6 +71,27 @@ export abstract class IAppLogic {
 export interface IHealthStatus {
     ok: boolean
     details?: any
+}
+
+/* Signature / issuance revocation */
+/* ------------------------------- */
+
+export enum ERevocationStatus {
+    ISSUANCE_REVOKED = "ISSUANCE_REVOKED",
+    ISSUANCE_ALREADY_REVOKED = "ISSUANCE_ALREADY_REVOKED",
+    ISSUANCE_NOT_FOUND = "ISSUANCE_NOT_FOUND"
+}
+
+export interface IRevocationResponse {
+    /**
+     * Status code
+     */
+    status: ERevocationStatus
+
+    /**
+     * Revocation date in case of revoked, or already revoked issuance.
+     */
+    revocationDate?: Date
 }
 
 /**

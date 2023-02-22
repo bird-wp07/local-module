@@ -22,17 +22,19 @@ import {
     ISignPdfRequest,
     ISignPdfResponse,
     IHealthResponse,
-    EHealthStatus
+    EHealthStatus,
+    IRevocationRequest,
+    Schema_IRevocationRequest,
+    IRevocationResponse
 } from "./types"
 import * as Applogic from "../applogic"
-import { IAppLogic } from "../applogic/base"
 import { Container } from "typescript-ioc"
 import { Base64 } from "../utility"
 
 export const HTTP_MAX_REQUEST_BODY_SIZE_BYTES = 8000000
 export const swaggerUiPath = "/swagger"
 
-function makeHealthController(impl: IAppLogic): Express.RequestHandler {
+function makeHealthController(impl: Applogic.IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         const rsltHealth = await impl.health()
         if (rsltHealth.isErr()) {
@@ -49,7 +51,7 @@ function makeHealthController(impl: IAppLogic): Express.RequestHandler {
     return fn as Express.RequestHandler
 }
 
-function makeDigestController(impl: IAppLogic): Express.RequestHandler {
+function makeDigestController(impl: Applogic.IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         /* Validate incoming request. */
         const validationResponse = Schema_IDigestPdfRequest.validate(req.body)
@@ -73,7 +75,7 @@ function makeDigestController(impl: IAppLogic): Express.RequestHandler {
     return fn as Express.RequestHandler
 }
 
-function makeIssueController(impl: IAppLogic): Express.RequestHandler {
+function makeIssueController(impl: Applogic.IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         /* Validate incoming request. */
         const validationResponse = Schema_IIssueRequest.validate(req.body)
@@ -98,7 +100,7 @@ function makeIssueController(impl: IAppLogic): Express.RequestHandler {
     return fn as Express.RequestHandler
 }
 
-function makeMergeController(impl: IAppLogic): Express.RequestHandler {
+function makeMergeController(impl: Applogic.IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         /* Validate incoming request. */
         const validationResponse = Schema_IMergePdfRequest.validate(req.body)
@@ -123,7 +125,7 @@ function makeMergeController(impl: IAppLogic): Express.RequestHandler {
     return fn as Express.RequestHandler
 }
 
-function makeValidationController(impl: IAppLogic): Express.RequestHandler {
+function makeValidationController(impl: Applogic.IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         /* Validate incoming request. */
         const validationResponse = Schema_IValidateSignedPdfRequest.validate(req.body)
@@ -144,7 +146,29 @@ function makeValidationController(impl: IAppLogic): Express.RequestHandler {
     return fn as Express.RequestHandler
 }
 
-function makeSignController(impl: IAppLogic): Express.RequestHandler {
+function makeRevokeController(impl: Applogic.IAppLogic): Express.RequestHandler {
+    const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
+        /* Validate incoming request. */
+        const validationResponse = Schema_IRevocationRequest.validate(req.body)
+        if (validationResponse.error !== undefined) {
+            return next(validationResponse.error)
+        }
+        const body = req.body as IRevocationRequest
+
+        /* Call implementation. */
+        const signatureValueDigest = body.signatureValueDigest
+        const reason = body.reason
+        const rsltRevokeSignature = await impl.revokeSignature(signatureValueDigest, reason)
+        if (rsltRevokeSignature.isErr()) {
+            return next(rsltRevokeSignature.error)
+        }
+        const responseBody: IRevocationResponse = rsltRevokeSignature.value
+        return res.status(200).json(responseBody)
+    }
+    return fn as Express.RequestHandler
+}
+
+function makeSignController(impl: Applogic.IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         /* Validate incoming request. */
         const validationResponse = Schema_ISignPdfRequest.validate(req.body)
@@ -216,7 +240,7 @@ const errorHandler: Express.ErrorRequestHandler = (err: Error, _: Express.Reques
 }
 
 export function makeApp(): Express.Express {
-    const impl = Container.get(IAppLogic)
+    const impl = Container.get(Applogic.IAppLogic)
 
     const app = Express.default()
     // _expressApp.use(Express.urlencoded({ extended: true })) TODO: Do we need this?
@@ -228,6 +252,7 @@ export function makeApp(): Express.Express {
     app.post("/issue", makeIssueController(impl))
     app.post("/merge/pdf", makeMergeController(impl))
     app.post("/validate/pdf", makeValidationController(impl))
+    app.post("/revoke", makeRevokeController(impl))
     app.post("/sign/pdf", makeSignController(impl))
 
     app.use(errorHandler)

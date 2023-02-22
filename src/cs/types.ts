@@ -74,7 +74,7 @@ export const Schema_IValidateIssuanceResponse = Joi.object().keys({
 export enum EIssuanceRevocationStatus {
     ISSUANCE_REVOKED = "ISSUANCE_REVOKED",
     ISSUANCE_ALREADY_REVOKED = "ISSUANCE_ALREADY_REVOKED",
-    ISSUANCE_UNKNOWN = "ISSUANCE_UNKNOWN"
+    ISSUANCE_NOT_FOUND = "ISSUANCE_NOT_FOUND"
 }
 
 export interface IRevokeIssuanceResponse {
@@ -91,6 +91,7 @@ export interface IRevokeIssuanceResponse {
 
 /* Authentication */
 /* -------------- */
+
 export interface IFetchAuthTokenResponse {
     access_token: Base64
     expires_in: number

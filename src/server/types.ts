@@ -110,6 +110,26 @@ export const Schema_IValidateSignedPdfRequest = Joi.object().keys({
 
 export type IValidateSignedPdfResponse = Applogic.IValidationResult
 
+export interface IRevocationRequest {
+    /**
+     * Base64 encoded SHA256 Digest of the signature value, whose issuance is
+     * to be revoked.
+     */
+    signatureValueDigest: Base64
+
+    /**
+     * Reason for the revocation.
+     */
+    reason: string
+}
+
+export const Schema_IRevocationRequest = Joi.object().keys({
+    signatureValueDigest: Joi.string().base64().required(),
+    reason: Joi.string()
+})
+
+export type IRevocationResponse = Applogic.IRevocationResponse
+
 export interface ISignPdfRequest {
     /**
      * Base64 encoded PDF

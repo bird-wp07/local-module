@@ -54,7 +54,7 @@ describe("Central Service", () => {
             const rsltRevokeIssuanceNew = await csClient.revokeIssuance(signatureValueDigestNew, "Gutenberg")
             expect(rsltRevokeIssuanceNew.isErr()).to.be.false
             const revokeIssuanceResultNew = rsltRevokeIssuanceNew._unsafeUnwrap()
-            expect(revokeIssuanceResultNew.status).to.be.equal(Cs.EIssuanceRevocationStatus.ISSUANCE_UNKNOWN)
+            expect(revokeIssuanceResultNew.status).to.be.equal(Cs.EIssuanceRevocationStatus.ISSUANCE_NOT_FOUND)
         })
 
         test.skip("CsClient#revokeSignature")

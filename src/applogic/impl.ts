@@ -5,7 +5,7 @@ import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
 import * as Cs from "../cs"
 import * as Utility from "../utility"
-import { EDocumentValidity, EIssuanceValidity, IAppLogic, IHealthStatus, IValidationResult } from "./base"
+import { EDocumentValidity, EIssuanceValidity, IAppLogic, IHealthStatus, IValidationResult, IRevocationResponse, ERevocationStatus } from "./base"
 import { Base64 } from "../utility"
 
 /**
@@ -76,6 +76,28 @@ export class AppLogic implements IAppLogic {
             return err(rsltIssueSignature.error)
         }
         return ok(rsltIssueSignature.value.cms)
+    }
+
+    public async revokeSignature(signatureValueDigest: Base64, reason: string, auditLog?: string): Promise<Result<IRevocationResponse, Error>> {
+        const rsltRevokeSignature = await this.csClient.revokeIssuance(signatureValueDigest, reason, auditLog)
+        if (rsltRevokeSignature.isErr()) {
+            return err(rsltRevokeSignature.error)
+        }
+        const revocationResult: Cs.IRevokeIssuanceResponse = rsltRevokeSignature.value
+
+        let status: ERevocationStatus
+        switch (revocationResult.status) {
+            case Cs.EIssuanceRevocationStatus.ISSUANCE_REVOKED:
+                status = ERevocationStatus.ISSUANCE_REVOKED
+                break
+            case Cs.EIssuanceRevocationStatus.ISSUANCE_NOT_FOUND:
+                status = ERevocationStatus.ISSUANCE_NOT_FOUND
+                break
+            case Cs.EIssuanceRevocationStatus.ISSUANCE_ALREADY_REVOKED:
+                status = ERevocationStatus.ISSUANCE_ALREADY_REVOKED
+                break
+        }
+        return ok({ status: status, revocationDate: revocationResult.revocationDate })
     }
 
     public async embedSignatureIntoPdf(pdf: Base64, timestamp: Date, cms: Base64): Promise<Result<Base64, Error>> {

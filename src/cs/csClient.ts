@@ -132,7 +132,6 @@ export class CsClient implements ICsClient {
         return ok(rsltHttpReq.value.data)
     }
 
-    // TODO: implement
     async revokeIssuance(signatureValueDigest: Base64, revocationReason: string, auditLog?: string): Promise<Result<IRevokeIssuanceResponse, Error>> {
         const rsltFetchAuthToken = await this.fetchAuthToken()
         if (rsltFetchAuthToken.isErr()) {
@@ -165,7 +164,7 @@ export class CsClient implements ICsClient {
                 }
                 if (statuscode === 404) {
                     return ok({
-                        status: EIssuanceRevocationStatus.ISSUANCE_UNKNOWN
+                        status: EIssuanceRevocationStatus.ISSUANCE_NOT_FOUND
                     })
                 }
             }
