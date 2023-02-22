@@ -1,13 +1,14 @@
 import { Base64 } from "../utility"
-import { AxiosRequestConfig } from "axios"
+import { AxiosError, AxiosRequestConfig } from "axios"
 import { ok, err, Result } from "neverthrow"
 import {
     IIssueSignatureResponse,
     Schema_IFetchAuthToken,
     IFetchAuthTokenResponse,
     IValidateIssuanceResponse,
-    IRevokeSignatureResponse,
-    Schema_IValidateIssuanceResponse
+    IRevokeIssuanceResponse,
+    Schema_IValidateIssuanceResponse,
+    EIssuanceRevocationStatus
 } from "./types"
 import * as qs from "qs"
 import * as Utility from "../utility"
@@ -19,7 +20,7 @@ export abstract class ICsClient {
     abstract isOnline(): Promise<boolean>
     abstract issueSignature(digestToBeSigned: Base64, digestMethod: EDigestAlgorithm, issuerId: string, auditLog?: string): Promise<Result<IIssueSignatureResponse, Error>>
     abstract validateIssuance(signatureValueDigest: Base64): Promise<Result<IValidateIssuanceResponse, Error>>
-    abstract revokeSignature(signatureValueDigest: Base64, revocationReason: string, auditLog?: string): Promise<Result<IRevokeSignatureResponse, Error>>
+    abstract revokeIssuance(signatureValueDigest: Base64, revocationReason: string, auditLog?: string): Promise<Result<IRevokeIssuanceResponse, Error>>
 }
 
 export class CsClient implements ICsClient {
@@ -132,7 +133,7 @@ export class CsClient implements ICsClient {
     }
 
     // TODO: implement
-    async revokeSignature(signatureValueDigest: Base64, revocationReason: string, auditLog?: string): Promise<Result<IRevokeSignatureResponse, Error>> {
+    async revokeIssuance(signatureValueDigest: Base64, revocationReason: string, auditLog?: string): Promise<Result<IRevokeIssuanceResponse, Error>> {
         const rsltFetchAuthToken = await this.fetchAuthToken()
         if (rsltFetchAuthToken.isErr()) {
             return err(rsltFetchAuthToken.error)
@@ -152,10 +153,28 @@ export class CsClient implements ICsClient {
             }
         }
         const rsltHttpReq = await Utility.httpReq(config)
+
+        // TODO: Write validation
         if (rsltHttpReq.isErr()) {
-            return ok({ revoked: false })
+            if (rsltHttpReq.error instanceof AxiosError) {
+                const statuscode = rsltHttpReq.error.response?.status
+                if (statuscode === 409) {
+                    return ok({
+                        status: EIssuanceRevocationStatus.ISSUANCE_ALREADY_REVOKED
+                    })
+                }
+                if (statuscode === 404) {
+                    return ok({
+                        status: EIssuanceRevocationStatus.ISSUANCE_UNKNOWN
+                    })
+                }
+            }
+            return err(rsltHttpReq.error)
         }
-        return ok(rsltHttpReq.value.data)
+        return ok({
+            status: EIssuanceRevocationStatus.ISSUANCE_REVOKED,
+            revocationDate: new Date(rsltHttpReq.value.data.revocationDate as string)
+        })
     }
 
     /**

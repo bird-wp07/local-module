@@ -68,16 +68,29 @@ export const Schema_IValidateIssuanceResponse = Joi.object().keys({
     )
 })
 
-/**
- * Returned only for happy path (signature was successfully revoked). Failure
- * results in a 4xx code and a different payload. See implementation for
- * details.
- */
-export interface IRevokeSignatureResponse {
-    revocationDate?: string
-    revoked: boolean
+/* Signature / issuance revocation */
+/* ------------------------------- */
+
+export enum EIssuanceRevocationStatus {
+    ISSUANCE_REVOKED = "ISSUANCE_REVOKED",
+    ISSUANCE_ALREADY_REVOKED = "ISSUANCE_ALREADY_REVOKED",
+    ISSUANCE_UNKNOWN = "ISSUANCE_UNKNOWN"
 }
 
+export interface IRevokeIssuanceResponse {
+    /**
+     * Status code
+     */
+    status: EIssuanceRevocationStatus
+
+    /**
+     * Revocation date in case of revoked, or already revoked issuance.
+     */
+    revocationDate?: Date
+}
+
+/* Authentication */
+/* -------------- */
 export interface IFetchAuthTokenResponse {
     access_token: Base64
     expires_in: number

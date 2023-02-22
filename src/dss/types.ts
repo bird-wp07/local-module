@@ -259,7 +259,7 @@ export class UnexpectedInput extends DssError {
 
 /**
  * Error produced when attemting to digest a signed document.
- * ???: Why does this produce an error? Multiple signatures are
+ * ???: Why do multisignature produce an error?
  */
 export class DocumentCannotBeModified extends DssError {
     public constructor() {
