@@ -133,6 +133,8 @@ export enum EIssuanceValidity {
 
     /**
      * The issuer is unauthorized.
+     *
+     * ???: What does this even mean?
      */
     ERROR_ISSUER_UNAUTHORIZED = "ERROR_ISSUER_UNAUTHORIZED"
 }
