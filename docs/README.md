@@ -299,11 +299,11 @@ Response Body:
 {
     "valid": true | false,
     "document": {
-        "status": "DOCUMENT_OK" | "DOCUMENT_UNTRUSTED" | "DOCUMENT_INVALID",
+        "status": "DOCUMENT_OK" | "ERROR_DOCUMENT_UNTRUSTED" | "ERROR_DOCUMENT_INVALID",
         "details?": any
     },
     "issuance": {
-        "status": "ISSUANCE_OK" | "ISSUANCE_NOT_FOUND" | "ISSUANCE_REVOKED" | "DOCUMENT_INVALID",
+        "status": "ISSUANCE_OK" | "ERROR_ISSUANCE_NOT_FOUND" | "ERROR_ISSUANCE_REVOKED" | "ERROR_ISSUER_REVOKED" | "ERROR_DOCUMENT_INVALID",
         "details?": any
     }
 }
@@ -313,15 +313,9 @@ Response Body:
 * `document`: Information über das Dokument selbst
   * `status`: Die Validität des Dokuments an sich. Hierbei wird die entsprechende Signatur des Dokumentes kryptografisch überprüft und auch das eIDAS Vertrauenslevel spielt eine Rolle
     * `DOCUMENT_OK`: Das Dokument an sich ist valide, ein PDF Reader würde dem Dokument nach eIDAS Richtlinien und Vertrauensketten vertrauen. Der zentrale Service wird hierbei dennoch angefragt, das Dokument kann bei diesem Status VALIDE oder INVALIDE sein.
-<<<<<<< HEAD
     * `ERROR_DOCUMENT_UNTRUSTED`: Das Dokument an sich ist valide, jedoch würde ein PDF Reader dem Dokument aufgrund einer fehlenden Vertrauenskette misstrauen und entsprechende Warnungen anzeigen. Der zentrale Service wird hierbei dennoch angefragt, das Dokument kann bei diesem Status VALIDE oder INVALIDE sein.
     * `ERROR_DOCUMENT_INVALID`: Das Dokument an sich ist nicht valide. Dies bedeutet, dass es entweder keine Signatur beinhaltet, eine der enthaltenen Signaturen nicht überprüft werden konnte oder eine der enthaltenen Signaturen fehlerhaft ist. Sofern dieser Status auftritt, wird die Überprüfung abgebrochen und auch nicht mehr der zentrale Service angefragt. Der Status des Dokuments ist somit INVALIDE.
   * details: Optional werden Details des Überprüfungsschritts zurückgegeben
-=======
-    * `DOCUMENT_UNTRUSTED`: Das Dokument an sich ist valide, jedoch würde ein PDF Reader dem Dokument aufgrund einer fehlenden Vertrauenskette misstrauen und entsprechende Warnungen anzeigen. Der zentrale Service wird hierbei dennoch angefragt, das Dokument kann bei diesem Status VALIDE oder INVALIDE sein.
-    * `DOCUMENT_INVALID`: Das Dokument an sich ist nicht valide. Dies bedeutet, dass es entweder keine Signatur beinhaltet, eine der enthaltenen Signaturen nicht überprüft werden konnte oder eine der enthaltenen Signaturen fehlerhaft ist. Sofern dieser Status auftritt, wird die Überprüfung abgebrochen und auch nicht mehr der zentrale Service angefragt. Der Status des Dokuments ist somit INVALIDE.
-  * `details`: Optional werden Details des Überprüfungsschritts zurückgegeben
->>>>>>> 9584389f0d9ebb4ecfddfddd2c8096239adefcbe
 * `issuance`: Information über ein Vorhandensein einer zentralen Information über das Dokument
   * `status`: Die Validität des Dokuments anhand der Information des zentralen Service
     * `ERROR_DOCUMENT_INVALID`: Die Prüfung durch den zentralen Service wurde nicht angestrengt, da das Dokument keine oder mindestens eine fehlerhafte Signatur besitzt. Siehe oben.
