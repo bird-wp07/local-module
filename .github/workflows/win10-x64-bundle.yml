@@ -8,7 +8,7 @@ jobs:
   release-win-x64-bundle:
     runs-on: windows-latest
     env:
-      archiveName: ${{ format('wp07-local-module-windows-x64-v{0}.zip', github.ref_name) }}
+      archiveName: ${{ format('wp07-local-module-windows-x64-{0}.zip', github.ref_name) }}
     steps:
       - uses: actions/checkout@v3
 

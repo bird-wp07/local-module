@@ -8,7 +8,7 @@ jobs:
   release-linux-x64-bundle:
     runs-on: ubuntu-latest
     env:
-      archiveName: ${{ format('wp07-local-module-linux-x64-v{0}.tar.xz', github.ref_name) }}
+      archiveName: ${{ format('wp07-local-module-linux-x64-{0}.tar.xz', github.ref_name) }}
     steps:
       - uses: actions/checkout@v3
       - uses: docker://pandoc/core:2.19
