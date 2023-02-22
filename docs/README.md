@@ -78,7 +78,7 @@ Die Applikation kann durch wiederholte Eingabe der Tastenkombination Ctrl-C im P
 
 Das Windowsbundle des Lokalen Moduls liefert die gewöhnliche ausführbare Datei *start.exe* aus, welche alternativ zum Powershellskript verwendet werden kann. Das Vorgehen zur Konfiguration und Beendigung des Programms entspricht dem des Powershellskriptes.
 
-Derzeit gibt es noch keine signierte Version der start.exe, daher werden ggf. Warnmeldungen des Windows Defenders angezeigt. Eine Anleitung wie diese für einen Testbetrieb ausgeschaltet werden können, findet sich unter den [windowsspezifischen Hinweisen](./windows.md)
+Derzeit gibt es noch keine signierte Version der start.exe, daher werden ggf. Warnmeldungen des Windows Defenders angezeigt. Eine Anleitung wie diese für einen Testbetrieb ausgeschaltet werden können, findet sich unter den [windowsspezifischen Hinweisen](https://github.com/bird-wp07/local-module/blob/main/docs/windows.md)
 
 ## 2.3 Betrieb unter Linux
 
