@@ -61,12 +61,12 @@ function makeDigestController(impl: IAppLogic): Express.RequestHandler {
         /* Call implementation. */
         const pdf = body.bytes
         const timestamp = new Date(body.signingTimestamp)
-        const response = await impl.generatePdfDigestToBeSigned(pdf, timestamp)
-        if (response.isErr()) {
-            return next(response.error)
+        const rsltGenerateDtbs = await impl.generatePdfDigestToBeSigned(pdf, timestamp)
+        if (rsltGenerateDtbs.isErr()) {
+            return next(rsltGenerateDtbs.error)
         }
         const responseBody: IDigestPdfResponse = {
-            bytes: response.value
+            bytes: rsltGenerateDtbs.value
         }
         return res.status(200).json(responseBody)
     }
@@ -86,12 +86,12 @@ function makeIssueController(impl: IAppLogic): Express.RequestHandler {
         const digestToBeSigned = body.bytes
         const issuerId = body.issuerId
         const auditLog = body.auditLog
-        const response = await impl.issueSignature(digestToBeSigned, issuerId, auditLog)
-        if (response.isErr()) {
-            return next(response.error)
+        const rsltIssueSignature = await impl.issueSignature(digestToBeSigned, issuerId, auditLog)
+        if (rsltIssueSignature.isErr()) {
+            return next(rsltIssueSignature.error)
         }
         const responseBody: IIssueResponse = {
-            cms: response.value
+            cms: rsltIssueSignature.value
         }
         return res.status(200).json(responseBody)
     }
@@ -111,12 +111,12 @@ function makeMergeController(impl: IAppLogic): Express.RequestHandler {
         const pdf = body.bytes
         const timestamp = new Date(body.signingTimestamp)
         const cms = body.cms
-        const response = await impl.embedSignatureIntoPdf(pdf, timestamp, cms)
-        if (response.isErr()) {
-            return next(response.error)
+        const rsltEmbedSignatureIntoPdf = await impl.embedSignatureIntoPdf(pdf, timestamp, cms)
+        if (rsltEmbedSignatureIntoPdf.isErr()) {
+            return next(rsltEmbedSignatureIntoPdf.error)
         }
         const responseBody: IMergePdfResponse = {
-            bytes: response.value
+            bytes: rsltEmbedSignatureIntoPdf.value
         }
         return res.status(200).json(responseBody)
     }
@@ -134,11 +134,11 @@ function makeValidationController(impl: IAppLogic): Express.RequestHandler {
 
         /* Call implementation. */
         const pdf = body.bytes
-        const response = await impl.validateSignedPdf(pdf)
-        if (response.isErr()) {
-            return next(response.error)
+        const rsltValidateSignedPdf = await impl.validateSignedPdf(pdf)
+        if (rsltValidateSignedPdf.isErr()) {
+            return next(rsltValidateSignedPdf.error)
         }
-        const responseBody: IValidateSignedPdfResponse = response.value
+        const responseBody: IValidateSignedPdfResponse = rsltValidateSignedPdf.value
         return res.status(200).json(responseBody)
     }
     return fn as Express.RequestHandler
@@ -157,25 +157,25 @@ function makeSignController(impl: IAppLogic): Express.RequestHandler {
         const timestamp = new Date()
 
         /* Digest */
-        const resultDigest = await impl.generatePdfDigestToBeSigned(pdf, timestamp)
-        if (resultDigest.isErr()) {
-            return next(resultDigest.error)
+        const rsltGenerateDbts = await impl.generatePdfDigestToBeSigned(pdf, timestamp)
+        if (rsltGenerateDbts.isErr()) {
+            return next(rsltGenerateDbts.error)
         }
-        const digestToBeSigned: Base64 = resultDigest.value
+        const digestToBeSigned: Base64 = rsltGenerateDbts.value
 
         /* Issue */
-        const resultIssue = await impl.issueSignature(digestToBeSigned, issuerId)
-        if (resultIssue.isErr()) {
-            return next(resultIssue.error)
+        const rsltIssueSignature = await impl.issueSignature(digestToBeSigned, issuerId)
+        if (rsltIssueSignature.isErr()) {
+            return next(rsltIssueSignature.error)
         }
-        const cms: Base64 = resultIssue.value
+        const cms: Base64 = rsltIssueSignature.value
 
         /* Merge */
-        const resultMerge = await impl.embedSignatureIntoPdf(pdf, timestamp, cms)
-        if (resultMerge.isErr()) {
-            return next(resultMerge.error)
+        const rsltEmbedSignature = await impl.embedSignatureIntoPdf(pdf, timestamp, cms)
+        if (rsltEmbedSignature.isErr()) {
+            return next(rsltEmbedSignature.error)
         }
-        const signedPdf: Base64 = resultMerge.value
+        const signedPdf: Base64 = rsltEmbedSignature.value
 
         const responseBody: ISignPdfResponse = {
             bytes: signedPdf

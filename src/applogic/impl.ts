@@ -57,25 +57,25 @@ export class AppLogic implements IAppLogic {
                 }
             }
         }
-        const response = await this.dssClient.getDataToSign(getDataToSignRequest)
-        if (response.isErr()) {
-            return err(response.error)
+        const rsltGetDataToSign = await this.dssClient.getDataToSign(getDataToSignRequest)
+        if (rsltGetDataToSign.isErr()) {
+            return err(rsltGetDataToSign.error)
         }
 
         // ???: Which data structure does DSS#getDataToSign() return here?
         //      See question below.
-        const asn1blob = Buffer.from(response.value.bytes, "base64")
+        const asn1blob = Buffer.from(rsltGetDataToSign.value.bytes, "base64")
         const digest = AppLogic.extractDigestFromDigestPdfResponse(asn1blob)
         return ok(digest)
     }
 
     public async issueSignature(digestToBeSigned: Base64, issuerId: string, auditLog?: string): Promise<Result<Base64, Error>> {
         const digestMethod = Cs.EDigestAlgorithm.SHA256
-        const generateSignatureResponse = await this.csClient.issueSignature(digestToBeSigned, digestMethod, issuerId, auditLog)
-        if (generateSignatureResponse.isErr()) {
-            return err(generateSignatureResponse.error)
+        const rsltIssueSignature = await this.csClient.issueSignature(digestToBeSigned, digestMethod, issuerId, auditLog)
+        if (rsltIssueSignature.isErr()) {
+            return err(rsltIssueSignature.error)
         }
-        return ok(generateSignatureResponse.value.cms)
+        return ok(rsltIssueSignature.value.cms)
     }
 
     public async embedSignatureIntoPdf(pdf: Base64, timestamp: Date, cms: Base64): Promise<Result<Base64, Error>> {
@@ -102,11 +102,11 @@ export class AppLogic implements IAppLogic {
                 bytes: pdf
             }
         }
-        const signDocumentRes = await this.dssClient.signDocument(signDocumentReq)
-        if (signDocumentRes.isErr()) {
-            return err(signDocumentRes.error)
+        const rsltSignDocument = await this.dssClient.signDocument(signDocumentReq)
+        if (rsltSignDocument.isErr()) {
+            return err(rsltSignDocument.error)
         }
-        return ok(signDocumentRes.value.bytes)
+        return ok(rsltSignDocument.value.bytes)
     }
 
     public async validateSignedPdf(pdf: Base64): Promise<Result<IValidationResult, Error>> {

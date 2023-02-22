@@ -153,11 +153,11 @@ export function parseApplicationSettings(env = process.env): Result<IApplication
     const envFile = process.env[configParams.lmEnvfilePath.envvar] ?? configParams.lmEnvfilePath.default
     if (fs.existsSync(envFile)) {
         logger.debug(`Parsing env file '${envFile}'`)
-        const parseRes = Utility.parseKeyValueFile(".env")
-        if (parseRes.isErr()) {
-            return err(parseRes.error)
+        const rsltParse = Utility.parseKeyValueFile(".env")
+        if (rsltParse.isErr()) {
+            return err(rsltParse.error)
         }
-        env = { ...parseRes.value, ...env }
+        env = { ...rsltParse.value, ...env }
     }
 
     /* For every configuration setting validate its value. */

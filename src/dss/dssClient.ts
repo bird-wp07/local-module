@@ -61,11 +61,11 @@ export class DssClient implements IDssClient {
             baseURL: this.baseurl,
             data: request
         }
-        const response = await Utility.httpReq(config)
-        if (response.isErr()) {
-            return err(DssClient.parseError(response.error))
+        const rsltHttpReq = await Utility.httpReq(config)
+        if (rsltHttpReq.isErr()) {
+            return err(DssClient.parseError(rsltHttpReq.error))
         }
-        return ok(response.value.data)
+        return ok(rsltHttpReq.value.data)
     }
 
     public async signDocument(request: Dss.ISignDocumentRequest): Promise<Result<ISignDocumentResponse, Error>> {
@@ -75,11 +75,11 @@ export class DssClient implements IDssClient {
             baseURL: this.baseurl,
             data: request
         }
-        const response = await Utility.httpReq(config)
-        if (response.isErr()) {
-            return err(DssClient.parseError(response.error))
+        const rsltHttpReq = await Utility.httpReq(config)
+        if (rsltHttpReq.isErr()) {
+            return err(DssClient.parseError(rsltHttpReq.error))
         }
-        return ok(response.value.data)
+        return ok(rsltHttpReq.value.data)
     }
 
     public async validateSignature(request: IValidateSignatureRequest): Promise<Result<IValidateSignatureResponse, Error>> {
@@ -89,11 +89,11 @@ export class DssClient implements IDssClient {
             baseURL: this.baseurl,
             data: request
         }
-        const response = await Utility.httpReq(config)
-        if (response.isErr()) {
-            return err(DssClient.parseError(response.error))
+        const rsltHttpReq = await Utility.httpReq(config)
+        if (rsltHttpReq.isErr()) {
+            return err(DssClient.parseError(rsltHttpReq.error))
         }
-        return ok(response.value.data)
+        return ok(rsltHttpReq.value.data)
     }
 
     /**

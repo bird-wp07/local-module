@@ -14,8 +14,8 @@ describe("Central Service", () => {
         })
 
         test("fetchToken()", async () => {
-            const resFetchAuthToken = await csClient.fetchAuthToken()
-            expect(resFetchAuthToken.isErr()).to.be.false
+            const rsltFetchAuthToken = await csClient.fetchAuthToken()
+            expect(rsltFetchAuthToken.isErr()).to.be.false
         })
 
         test("issueSignature(), validateIssuance(),", async () => {

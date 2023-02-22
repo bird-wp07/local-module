@@ -8,11 +8,11 @@ import * as Utility from "../src/utility"
  */
 export async function makeCsClient(): Promise<Cs.CsClient> {
     const cfg = Settings.parseApplicationSettings()._unsafeUnwrap()
-    const csClientMakeResult = Cs.CsClient.make(cfg.csBaseUrl, cfg.csTokenUrl, cfg.csClientPfx, cfg.csClientPfxPassword, cfg.csCaPem)
-    if (csClientMakeResult.isErr()) {
-        throw new Error("Can't create CS client: '", csClientMakeResult.error)
+    const rsltMakeCsClient = Cs.CsClient.make(cfg.csBaseUrl, cfg.csTokenUrl, cfg.csClientPfx, cfg.csClientPfxPassword, cfg.csCaPem)
+    if (rsltMakeCsClient.isErr()) {
+        throw new Error("Can't create CS client: '", rsltMakeCsClient.error)
     }
-    const csClient = csClientMakeResult.value
+    const csClient = rsltMakeCsClient.value
 
     const isOnline = await csClient.isOnline()
     if (!isOnline) {
@@ -39,12 +39,12 @@ export async function makeDssClient(): Promise<Dss.DssClient> {
  */
 export async function findLm(): Promise<string> {
     const cfg = Settings.parseApplicationSettings()._unsafeUnwrap()
-    const res = await Utility.httpReq({
+    const rsltHttpReq = await Utility.httpReq({
         method: "GET",
         baseURL: cfg.lmBaseurl,
         url: "/system/health"
     })
-    if (res.isErr()) {
+    if (rsltHttpReq.isErr()) {
         throw new Error(`Local Module cannot be reached at '${cfg.lmBaseurl}'.`)
     }
     return cfg.lmBaseurl

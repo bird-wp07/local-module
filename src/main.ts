@@ -9,12 +9,12 @@ import http from "http"
 
 async function main() {
     /* Parse application settings. */
-    const parseResult = Settings.parseApplicationSettings()
-    if (parseResult.isErr()) {
-        console.error(parseResult.error.message)
+    const rsltParseApplicationSettings = Settings.parseApplicationSettings()
+    if (rsltParseApplicationSettings.isErr()) {
+        console.error(rsltParseApplicationSettings.error.message)
         process.exit(1)
     }
-    const cfg = parseResult.value
+    const cfg = rsltParseApplicationSettings.value
 
     /* Initialize DSS client. */
     // TODO: Use a DSS factory for consistency with Cs.CsClient
@@ -29,12 +29,12 @@ async function main() {
     logger.info("DSS responded. Starting HTTP server ... ")
 
     /* Initialize central service client. */
-    const csMakeResult = Cs.CsClient.make(cfg.csBaseUrl, cfg.csTokenUrl, cfg.csClientPfx, cfg.csClientPfxPassword, cfg.csCaPem)
-    if (csMakeResult.isErr()) {
-        logger.error("Couldn't create CsClient. Abort.", csMakeResult.error)
+    const rsltMake = Cs.CsClient.make(cfg.csBaseUrl, cfg.csTokenUrl, cfg.csClientPfx, cfg.csClientPfxPassword, cfg.csCaPem)
+    if (rsltMake.isErr()) {
+        logger.error("Couldn't create CsClient. Abort.", rsltMake.error)
         process.exit(1)
     }
-    const csClient = csMakeResult.value
+    const csClient = rsltMake.value
 
     /* Ioc container setup. */
     Ioc.Container.bind(Dss.IDssClient).factory(() => dssClient)

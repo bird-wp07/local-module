@@ -24,6 +24,7 @@ run_container() {
     docker run -it --rm \
         -v "$(realpath ./assets)":/root/assets \
         -v "$(realpath ./bundle)":/root/bundle \
+        -v "$(realpath ./docs)":/root/docs \
         -v "$(realpath ./.eslintrc)":/root/.eslintrc \
         -v "$(realpath ./.github)":/root/.github \
         -v "$(realpath ./.gitignore)":/root/.gitignore \
@@ -36,7 +37,6 @@ run_container() {
         -v "$(realpath ./src)":/root/src \
         -v "$(realpath ./tests)":/root/tests \
         -v "$(realpath ./tsconfig.json)":/root/tsconfig.json \
-        -v "$(realpath ./tsoa.json)":/root/tsoa.json \
         -v "$(realpath ./.env)":/root/.env \
         -v "$(realpath ./cs-auth-mtls-client-certkey.p12)":/root/cs-auth-mtls-client-certkey.p12 \
         -v "$(realpath ./cs-auth-mtls-server-cert.pem)":/root/cs-auth-mtls-server-cert.pem \

@@ -27,24 +27,24 @@ describe("End-to-end tests", () => {
             const pdf: Base64 = fs.readFileSync(pdfpath).toString("base64")
 
             /* Digest */
-            const resultDigest = await appImpl.generatePdfDigestToBeSigned(pdf, timestamp)
-            expect(resultDigest.isErr()).to.be.false
-            const dataToBeSigned: Base64 = resultDigest._unsafeUnwrap()
+            const rsltGenerateDbts = await appImpl.generatePdfDigestToBeSigned(pdf, timestamp)
+            expect(rsltGenerateDbts.isErr()).to.be.false
+            const dataToBeSigned: Base64 = rsltGenerateDbts._unsafeUnwrap()
 
             /* Issue */
-            const resultIssue = await appImpl.issueSignature(dataToBeSigned, csIssuerId)
-            expect(resultIssue.isErr()).to.be.false
-            const cms: Base64 = resultIssue._unsafeUnwrap()
+            const rsltIssueSignature = await appImpl.issueSignature(dataToBeSigned, csIssuerId)
+            expect(rsltIssueSignature.isErr()).to.be.false
+            const cms: Base64 = rsltIssueSignature._unsafeUnwrap()
 
             /* Merge */
-            const resultMerge = await appImpl.embedSignatureIntoPdf(pdf, timestamp, cms)
-            expect(resultMerge.isErr()).to.be.false
-            const signedPdf: Base64 = resultMerge._unsafeUnwrap()
+            const rsltEmbedSignature = await appImpl.embedSignatureIntoPdf(pdf, timestamp, cms)
+            expect(rsltEmbedSignature.isErr()).to.be.false
+            const signedPdf: Base64 = rsltEmbedSignature._unsafeUnwrap()
 
             /* Verify */
-            const resultVerify = await appImpl.validateSignedPdf(signedPdf)
-            expect(resultVerify.isErr()).to.be.false
-            const validationResult = resultVerify._unsafeUnwrap()
+            const rsltValidate = await appImpl.validateSignedPdf(signedPdf)
+            expect(rsltValidate.isErr()).to.be.false
+            const validationResult = rsltValidate._unsafeUnwrap()
             expect(validationResult.valid).to.be.false // COMBACK: Change once we have a trusted certificate
         })
     })

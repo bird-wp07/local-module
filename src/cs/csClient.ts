@@ -60,8 +60,8 @@ export class CsClient implements ICsClient {
             url: "/swagger-ui/index.html",
             baseURL: this.baseurl
         }
-        const response = await Utility.httpReq(config)
-        if (response.isErr()) {
+        const rsltHttpReq = await Utility.httpReq(config)
+        if (rsltHttpReq.isErr()) {
             return false
         }
         return true
@@ -73,11 +73,11 @@ export class CsClient implements ICsClient {
      * See EN 319 122-1.
      */
     async issueSignature(digestToBeSigned: Base64, digestMethod: EDigestAlgorithm, issuerId: string, auditLog?: string): Promise<Result<IIssueSignatureResponse, Error>> {
-        const fetchAuthTokenResult = await this.fetchAuthToken()
-        if (fetchAuthTokenResult.isErr()) {
-            return err(fetchAuthTokenResult.error)
+        const rsltFetchAuthToken = await this.fetchAuthToken()
+        if (rsltFetchAuthToken.isErr()) {
+            return err(rsltFetchAuthToken.error)
         }
-        const tokenContainer = fetchAuthTokenResult.value
+        const tokenContainer = rsltFetchAuthToken.value
 
         const config: AxiosRequestConfig = {
             method: "POST",
@@ -91,11 +91,11 @@ export class CsClient implements ICsClient {
                 auditLog: auditLog
             }
         }
-        const response = await Utility.httpReq(config)
-        if (response.isErr()) {
-            return err(response.error)
+        const rsltHttpReq = await Utility.httpReq(config)
+        if (rsltHttpReq.isErr()) {
+            return err(rsltHttpReq.error)
         }
-        return ok(response.value.data)
+        return ok(rsltHttpReq.value.data)
     }
 
     /**
@@ -117,27 +117,27 @@ export class CsClient implements ICsClient {
             },
             paramsSerializer: { serialize: (params) => qs.stringify(params) }
         }
-        const response = await Utility.httpReq(config)
-        if (response.isErr()) {
-            return err(response.error)
+        const rsltHttpReq = await Utility.httpReq(config)
+        if (rsltHttpReq.isErr()) {
+            return err(rsltHttpReq.error)
         }
 
         /* Validate response */
-        const validationResponse = Schema_IValidateIssuanceResponse.validate(response.value.data)
+        const validationResponse = Schema_IValidateIssuanceResponse.validate(rsltHttpReq.value.data)
         if (validationResponse.error !== undefined) {
             return err(validationResponse.error)
         }
 
-        return ok(response.value.data)
+        return ok(rsltHttpReq.value.data)
     }
 
     // TODO: implement
     async revokeSignature(signatureValueDigest: Base64, revocationReason: string, auditLog?: string): Promise<Result<IRevokeSignatureResponse, Error>> {
-        const fetchAuthTokenResult = await this.fetchAuthToken()
-        if (fetchAuthTokenResult.isErr()) {
-            return err(fetchAuthTokenResult.error)
+        const rsltFetchAuthToken = await this.fetchAuthToken()
+        if (rsltFetchAuthToken.isErr()) {
+            return err(rsltFetchAuthToken.error)
         }
-        const tokenContainer = fetchAuthTokenResult.value
+        const tokenContainer = rsltFetchAuthToken.value
 
         const config: AxiosRequestConfig = {
             method: "POST",
@@ -151,11 +151,11 @@ export class CsClient implements ICsClient {
                 auditLog: auditLog
             }
         }
-        const response = await Utility.httpReq(config)
-        if (response.isErr()) {
+        const rsltHttpReq = await Utility.httpReq(config)
+        if (rsltHttpReq.isErr()) {
             return ok({ revoked: false })
         }
-        return ok(response.value.data)
+        return ok(rsltHttpReq.value.data)
     }
 
     /**
@@ -175,17 +175,17 @@ export class CsClient implements ICsClient {
             },
             httpsAgent: this.authHttpsAgent
         }
-        const response = await Utility.httpReq(config)
-        if (response.isErr()) {
-            return err(response.error)
+        const rsltHttpReq = await Utility.httpReq(config)
+        if (rsltHttpReq.isErr()) {
+            return err(rsltHttpReq.error)
         }
 
         /* Validate response */
-        const validationResponse = Schema_IFetchAuthToken.validate(response.value.data)
+        const validationResponse = Schema_IFetchAuthToken.validate(rsltHttpReq.value.data)
         if (validationResponse.error !== undefined) {
             return err(validationResponse.error)
         }
 
-        return ok(response.value.data)
+        return ok(rsltHttpReq.value.data)
     }
 }
