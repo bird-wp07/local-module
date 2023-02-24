@@ -10,6 +10,7 @@
 # ADMINISTRATOR SETTINGS
 # ######################
 LOCAL_MODULE_BASEURL="http://127.0.0.1:2048"
+LOCAL_MODULE_LOGDIR=.
 DSS_BASEURL="http://127.0.0.1:8089"
 CS_BASEURL="http://46.83.201.35.bc.googleusercontent.com"
 CS_TOKEN_URL="https://225.96.234.35.bc.googleusercontent.com/realms/bird-cs-dev/protocol/openid-connect/token"

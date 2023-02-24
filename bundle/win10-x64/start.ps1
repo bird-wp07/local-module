@@ -11,6 +11,9 @@ Write-Host "Starting script at '$scriptDir'."
 if ($null -eq $env:WP07_LOCAL_MODULE_BASEURL) {
     $env:WP07_LOCAL_MODULE_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^LOCAL_MODULE_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 }
+if ($null -eq $env:WP07_LOCAL_MODULE_LOGDIR) {
+    $env:WP07_LOCAL_MODULE_LOGDIR = Get-Content "$scriptDir\CONFIG" | Select-String "^LOCAL_MODULE_LOGDIR=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+}
 if ($null -eq $env:WP07_DSS_BASEURL) {
     $env:WP07_DSS_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^DSS_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 }

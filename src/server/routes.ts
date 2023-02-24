@@ -30,6 +30,7 @@ import {
 import * as Applogic from "../applogic"
 import { Container } from "typescript-ioc"
 import { Base64 } from "../utility"
+import { logger } from "../settings"
 
 export const HTTP_MAX_REQUEST_BODY_SIZE_BYTES = 8000000
 export const swaggerUiPath = "/swagger"
@@ -215,6 +216,8 @@ function makeSignController(impl: Applogic.IAppLogic): Express.RequestHandler {
  */
 // eslint-disable-next-line -- HACK: don't delete the 'next' arg, or express will make a RequestHandler() out of this.
 const errorHandler: Express.ErrorRequestHandler = (err: Error, _: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+    logger.debug(JSON.stringify(err))
+
     /* Process validation errors due to joi schema mismatch of valid json bodies. */
     if (err instanceof Joi.ValidationError) {
         return res.status(400).json(new RequestValidationError(err.details))

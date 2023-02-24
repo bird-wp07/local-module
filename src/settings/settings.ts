@@ -35,7 +35,7 @@ export const configParams = {
      */
     lmLogLevel: {
         envvar: "WP07_LOCAL_MODULE_LOGLEVEL",
-        schema: Joi.string().optional().valid("debug", "info").default("info")
+        schema: Joi.string().optional().valid("debug", "info").default("debug")
     },
 
     /*
@@ -44,7 +44,7 @@ export const configParams = {
      */
     lmLogDir: {
         envvar: "WP07_LOCAL_MODULE_LOGDIR",
-        schema: Joi.string().optional().default("")
+        schema: Joi.string().optional().allow("").default("")
     },
 
     /*

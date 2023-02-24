@@ -14,6 +14,8 @@ Developer setup for UNIX systems (Windows/WSL, Linux, Mac).
     - Create a file named ***.env*** with the following contents and fill in the passphrase.
         ```
         WP07_LOCAL_MODULE_BASEURL=http://127.0.0.1:2048
+        WP07_LOCAL_MODULE_LOGLEVEL=debug
+        WP07_LOCAL_MODULE_LOGDIR=/tmp/wp07-local-module
         WP07_DSS_BASEURL=http://127.0.0.1:8080
         WP07_CS_BASEURL=http://46.83.201.35.bc.googleusercontent.com
         WP07_CS_ISSUER_ID=8d51fa75-b98e-4d8f-98f1-dee5d471a450
