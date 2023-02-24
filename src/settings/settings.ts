@@ -1,14 +1,22 @@
 import fs from "fs"
 import { ok, err, Result } from "neverthrow"
 import * as Utility from "../utility"
-import { createLogger, transports, format } from "winston"
 import * as Joi from "joi"
+import * as path from "path"
 import { InvalidEnvvarValue } from "./errors"
+import * as winston from "winston"
+import DailyRotateFile from "winston-daily-rotate-file"
+import { StrictOmit } from "ts-essentials"
+
+/**
+ * Winston logger to be used everywhere. Is properly initialized below.
+ */
+export let logger = winston.createLogger()
 
 /**
  * Dict of all runtime configuration parameters, the name of the envvar from
- * which their values are derived, the values' defaults and their joi validation
- * schemas.
+ * which their values are derived and their joi validation schemas, where
+ * applicable with defaults.
  *
  * All parameters are configured via environment variables first and foremost.
  * Optionally, an additional UTF-8 encoded file named '.env' containing lines
@@ -17,24 +25,26 @@ import { InvalidEnvvarValue } from "./errors"
  * .env file's default path can be changed via the $WP07_LOCAL_MODULE_ENVFILE
  * envvar.
  */
+export const envfile = {
+    envvar: "WP07_LOCAL_MODULE_ENVFILE",
+    default: ".env"
+}
 export const configParams = {
-    /*
-     * Specify alternative path of .env file, used to configure settings in
-     * addition to the environment.
-     */
-    lmEnvfilePath: {
-        envvar: "WP07_LOCAL_MODULE_ENVFILE",
-        default: ".env",
-        schema: Joi.string()
-    },
-
     /*
      * Winston log level.
      */
     lmLogLevel: {
         envvar: "WP07_LOCAL_MODULE_LOGLEVEL",
-        default: "info",
-        schema: Joi.string().valid("debug", "info")
+        schema: Joi.string().optional().valid("debug", "info").default("info")
+    },
+
+    /*
+     * Directory to store log files in. If left empty no log files will be
+     * created. Directory will be created, if necessary.
+     */
+    lmLogDir: {
+        envvar: "WP07_LOCAL_MODULE_LOGDIR",
+        schema: Joi.string().optional().default("")
     },
 
     /*
@@ -45,8 +55,7 @@ export const configParams = {
      */
     lmBaseurl: {
         envvar: "WP07_LOCAL_MODULE_BASEURL",
-        default: "http://127.0.0.1:2048",
-        schema: Joi.string(/* TODO: enforce long form SCHEME://HOSTNAME:PORT */).required()
+        schema: Joi.string(/* TODO: enforce long form SCHEME://HOSTNAME:PORT */).required().default("http://127.0.0.1:2048")
     },
 
     /*
@@ -58,8 +67,7 @@ export const configParams = {
      */
     dssBaseurl: {
         envvar: "WP07_DSS_BASEURL",
-        default: "http://127.0.0.1:8080",
-        schema: Joi.string(/* TODO: enforce IP == 127.0.0.1 and usage of long form: SCHEME://127.0.0.1:PORT */).required()
+        schema: Joi.string(/* TODO: enforce IP == 127.0.0.1 and usage of long form: SCHEME://127.0.0.1:PORT */).required().default("http://127.0.0.1:8080")
     },
 
     /*
@@ -105,54 +113,29 @@ export const configParams = {
     }
 }
 
-/*
- * Initialize project-wide logger. Log level is configured via envvar.
+/**
+ * Helper to parse envvars, to validate their values and to set the defaults.
  */
-export const logger = createLogger({
-    transports: [new transports.Console()],
-    level: process.env[configParams.lmLogLevel.envvar] ?? configParams.lmLogLevel.default,
-    format: format.combine(
-        format.timestamp(),
-        format.colorize({
-            level: true,
-            colors: {
-                info: "bold green",
-                error: "bold red",
-                warn: "bold yellow",
-                debug: "bold gray"
-            }
-        }),
-        format.printf(({ level, message }) => {
-            return `[local-module] ${level}: ${message as string}`
-        })
-    )
-})
-
-// TODO: Infer types from return values of schema field
-// TODO: Refer to keys in configParams; DRY
-export interface IApplicationSettings {
-    lmBaseurl: string
-    dssBaseurl: string
-    csBaseUrl: string
-    csTokenUrl: string
-    csClientPfx: string
-    csClientPfxPassword: string
-    csCaPem: string
+function parseParam(param: keyof typeof configParams, env = process.env): Result<string, InvalidEnvvarValue> {
+    const valFromEnv = env[configParams[param].envvar]
+    const valRes = configParams[param].schema.validate(valFromEnv)
+    if (valRes.error != undefined) {
+        return err(new InvalidEnvvarValue(configParams[param].envvar, valFromEnv, valRes.error.details))
+    }
+    return ok(valRes.value)
 }
 
 /**
- *
- * We allow to pick another dict instead of process.env to allow this function
- * to be tested.
- *
- * FIXME: Use proper types in implementation
+ * Returns subset of settings required by the server implementation. Excludes
+ * the parameters pertaining to logging, which are only needed here to configure
+ * the logger.
  */
+export type IApplicationSettings = StrictOmit<Record<keyof typeof configParams, string>, "lmLogLevel" | "lmLogDir">
 export function parseApplicationSettings(env = process.env): Result<IApplicationSettings, Error> {
-    /* Merge environment with .env file, if provided. Existing envvars are
-     * not overwritten by the contents of the .env file. */
-    const envFile = process.env[configParams.lmEnvfilePath.envvar] ?? configParams.lmEnvfilePath.default
-    if (fs.existsSync(envFile)) {
-        logger.debug(`Parsing env file '${envFile}'`)
+    /* Merge environment with envfile, if provided. Existing envvars are not
+     * overwritten by the contents of the .env file. */
+    const envfilePath = process.env[envfile.envvar] ?? envfile.default
+    if (fs.existsSync(envfilePath)) {
         const rsltParse = Utility.parseKeyValueFile(".env")
         if (rsltParse.isErr()) {
             return err(rsltParse.error)
@@ -160,16 +143,71 @@ export function parseApplicationSettings(env = process.env): Result<IApplication
         env = { ...rsltParse.value, ...env }
     }
 
+    /*
+     * Initialize logger.
+     *
+     * Parse logfile path and log level from environment. */
+    const rsltParseLogdir = parseParam("lmLogDir", env)
+    if (rsltParseLogdir.isErr()) {
+        return err(rsltParseLogdir.error)
+    }
+    const logdir = rsltParseLogdir.value
+
+    const rsltParseLoglevel = parseParam("lmLogLevel", env)
+    if (rsltParseLoglevel.isErr()) {
+        return err(rsltParseLoglevel.error)
+    }
+    const loglvl = rsltParseLoglevel.value
+
+    /* Configure terminal logger. */
+    const transports = [
+        new winston.transports.Console({
+            format: winston.format.combine(
+                winston.format.timestamp(),
+                winston.format.colorize({
+                    level: true,
+                    colors: {
+                        info: "bold green",
+                        error: "bold red",
+                        warn: "bold yellow",
+                        debug: "bold gray"
+                    }
+                }),
+                winston.format.printf(({ level, message }) => {
+                    return `[local-module] ${level}: ${message as string}`
+                })
+            )
+        })
+    ] as any[]
+
+    /* Configure logfile output. */
+    if (logdir != "") {
+        transports.push(
+            new DailyRotateFile({
+                filename: path.join(logdir, "local-module-%DATE%.log"),
+                utc: true,
+                auditFile: "",
+                zippedArchive: false,
+                format: winston.format.combine(winston.format.timestamp(), winston.format.json())
+            })
+        )
+    }
+
+    logger = winston.createLogger({
+        transports: transports,
+        level: loglvl
+    })
+
     /* For every configuration setting validate its value. */
     const result: Record<any, any> = {}
     for (const k of Object.keys(configParams)) {
-        const key = k as keyof typeof configParams
-        const val = env[configParams[key].envvar]
-        const validationResult = configParams[key].schema.validate(val)
-        if (validationResult.error !== undefined) {
-            return err(new InvalidEnvvarValue(configParams[key].envvar, val, validationResult.error.details))
+        const param = k as keyof typeof configParams
+        const rsltParse = parseParam(param, env)
+        if (rsltParse.isErr()) {
+            return err(rsltParse.error)
         }
-        result[key] = val
+        const val = rsltParse.value
+        result[param] = val
     }
     return ok(result as IApplicationSettings)
 }

@@ -1,5 +1,6 @@
-import * as Settings from "./settings"
 import { logger } from "./settings"
+import * as Settings from "./settings"
+import * as Utility from "./utility"
 import * as Dss from "./dss"
 import * as Cs from "./cs"
 import * as Applogic from "./applogic"
@@ -12,7 +13,9 @@ async function main() {
     const rsltParseApplicationSettings = Settings.parseApplicationSettings()
     if (rsltParseApplicationSettings.isErr()) {
         console.error(rsltParseApplicationSettings.error.message)
-        process.exit(1)
+        await Utility.sleepms(3000)
+        process.exitCode = 1
+        return
     }
     const cfg = rsltParseApplicationSettings.value
 
@@ -24,7 +27,9 @@ async function main() {
     const isOnline = await dssClient.isOnline({ waitSeconds: wait })
     if (!isOnline) {
         logger.error("DSS didn't respond. Abort.")
-        process.exit(1)
+        await Utility.sleepms(3000)
+        process.exitCode = 1
+        return
     }
     logger.info("DSS responded. Starting HTTP server ... ")
 
@@ -32,7 +37,9 @@ async function main() {
     const rsltMake = Cs.CsClient.make(cfg.csBaseUrl, cfg.csTokenUrl, cfg.csClientPfx, cfg.csClientPfxPassword, cfg.csCaPem)
     if (rsltMake.isErr()) {
         logger.error("Couldn't create CsClient. Abort.", rsltMake.error)
-        process.exit(1)
+        await Utility.sleepms(3000)
+        process.exitCode = 1
+        return
     }
     const csClient = rsltMake.value
 
