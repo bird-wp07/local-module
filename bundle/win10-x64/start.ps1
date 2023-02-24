@@ -13,7 +13,7 @@ if ($null -eq $env:WP07_LOCAL_MODULE_BASEURL) {
 }
 if ($null -eq $env:WP07_LOCAL_MODULE_LOGDIR) {
     $val = Get-Content "$scriptDir\CONFIG" | Select-String "^LOCAL_MODULE_LOGDIR=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
-    if (!($val)) {    
+    if ($val) {
         $env:WP07_LOCAL_MODULE_LOGDIR = Get-Content "$scriptDir\CONFIG" | Select-String "^LOCAL_MODULE_LOGDIR=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value} | Resolve-Path
     }
 }
