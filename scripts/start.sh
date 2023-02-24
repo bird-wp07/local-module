@@ -29,6 +29,11 @@ LM_ROOT="${LM_ROOT:-local-module}"
 # Runtime parameters derived from administrator settings, if not already set
 # via the environment
 WP07_LOCAL_MODULE_BASEURL="${WP07_LOCAL_MODULE_BASEURL:-"$LOCAL_MODULE_BASEURL"}"
+if [ -z "$WP07_LOCAL_MODULE_LOGDIR" ]; then
+    if [ ! -z $LOCAL_MODULE_LOGDIR ]; then
+        WP07_LOCAL_MODULE_LOGDIR="$(realpath "$LOCAL_MODULE_LOGDIR")"
+    fi
+fi
 WP07_DSS_BASEURL="${WP07_DSS_BASEURL:-"$DSS_BASEURL"}"
 WP07_CS_BASEURL="${WP07_CS_BASEURL:-"$CS_BASEURL"}"
 WP07_CS_TOKEN_URL="${WP07_CS_TOKEN_URL:-"$CS_TOKEN_URL"}"
@@ -136,6 +141,7 @@ start_lm() {
         cd "$LM_ROOT"
         [ -d "./node_modules" ] && nobuild=":nobuild"
         WP07_LOCAL_MODULE_BASEURL="$WP07_LOCAL_MODULE_BASEURL" \
+            WP07_LOCAL_MODULE_LOGDIR="$WP07_LOCAL_MODULE_LOGDIR" \
             WP07_DSS_BASEURL="$WP07_DSS_BASEURL" \
             WP07_CS_BASEURL="$WP07_CS_BASEURL" \
             WP07_CS_TOKEN_URL="$WP07_CS_TOKEN_URL" \

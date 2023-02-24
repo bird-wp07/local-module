@@ -12,7 +12,10 @@ if ($null -eq $env:WP07_LOCAL_MODULE_BASEURL) {
     $env:WP07_LOCAL_MODULE_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^LOCAL_MODULE_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
 }
 if ($null -eq $env:WP07_LOCAL_MODULE_LOGDIR) {
-    $env:WP07_LOCAL_MODULE_LOGDIR = Get-Content "$scriptDir\CONFIG" | Select-String "^LOCAL_MODULE_LOGDIR=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    $val = Get-Content "$scriptDir\CONFIG" | Select-String "^LOCAL_MODULE_LOGDIR=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    if (!($val)) {    
+        $env:WP07_LOCAL_MODULE_LOGDIR = Get-Content "$scriptDir\CONFIG" | Select-String "^LOCAL_MODULE_LOGDIR=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value} | Resolve-Path
+    }
 }
 if ($null -eq $env:WP07_DSS_BASEURL) {
     $env:WP07_DSS_BASEURL = Get-Content "$scriptDir\CONFIG" | Select-String "^DSS_BASEURL=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
@@ -26,7 +29,6 @@ if ($null -eq $env:WP07_CS_TOKEN_URL) {
 if ($null -eq $env:WP07_CS_CA_PEM) {
     $env:WP07_CS_CA_PEM = Get-Content "$scriptDir\CONFIG" | Select-String "^CS_CA_PEM=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value} | Resolve-Path
 }
-# TODO: Absolutpfad
 if ($null -eq $env:WP07_CS_CLIENT_PFX) {
     $env:WP07_CS_CLIENT_PFX = Get-Content "$scriptDir\CONFIG" | Select-String "^CS_CLIENT_PFX=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value} | Resolve-Path
 }

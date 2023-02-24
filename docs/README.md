@@ -50,7 +50,7 @@ Die beiliegende Datei *CONFIG* dient der Konfiguration des Lokalen Moduls. Folge
 
 - `LOCAL_MODULE_BASEURL`: Die Basis-URL des Lokalen Moduls in ausführlicher `SCHEMA://HOST:PORT` Schreibweise. Statt *localhost* muss explizit die Loopbackadresse *127.0.0.1* angegeben werden.
     - Beispiel: `http://127.0.0.1:2048`
-- `LOCAL_MODULE_LOGDIR`: Pfad des Ausgabeverzeichnisses für die vom Lokalen Modul zusätzlich zum Stdout generierten Logs (optional). Bei fehlendem Parameter werden kein Logdateien erzeugt. Logeinträge werden als einzeilige, '\n'-separierte JSON Objekte mit den Feldern *level*, *message* und *timestamp* (ISO 8601) ausgegeben.
+- `LOCAL_MODULE_LOGDIR`: Pfad des Ausgabeverzeichnisses für die vom Lokalen Modul zusätzlich zum Stdout generierten Logs (optional). Der Pfad wird relativ zur *start.exe* aufgelöst. Alternativ kann ein absoluter Pfad verwendet werden. Bei leerem Parameterwert werden keine Logdateien erzeugt. Logeinträge werden als einzeilige, '\n'-separierte JSON Objekte mit den Feldern *level*, *message* und *timestamp* (ISO 8601) ausgegeben.
 - `DSS_BASEURL`: Die Basis-URL des DSS Hintergrunddienstes in ausführlicher `SCHEMA://HOST:PORT` Schreibweise, wobei das Schema bzw. der Host auf *http* bzw. *127.0.0.1* festgelegt sind und nicht geändert werden können. Der Port kann frei gewählt werden.
     - Beispiel: `http://127.0.0.1:8089`
 - `CS_BASEURL`: Die Basis-URL des API des Zentralen Dienstes.
