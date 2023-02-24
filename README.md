@@ -24,7 +24,7 @@ Developer setup for UNIX systems (Windows/WSL, Linux, Mac).
         WP07_CS_CLIENT_PFX=cs-auth-mtls-client-certkey.p12
         WP07_CS_CLIENT_PFX_PASSWORD=______________
         ```
-    - Add the three files to the local ignore list ***.git/info/exclude***.
+    - Add the three files to the local ignore list ***.git/info/exclude***. See ***src/settings/settings.ts*** for details about the configuration parameters.
 3. Test the setup by running containerized tests: `npm run test0`.
 
 # Useful commands
