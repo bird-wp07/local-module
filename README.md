@@ -1,7 +1,7 @@
 
 # Integration Documentation
-This page is only the developer's documentation of the Local Module. If you are looking for the documentation about integrating and using the Local Module, please switch to [Integration Documentation](docs/README.md).
 
+This page is only the developer's documentation of the Local Module. If you are looking for the documentation about integrating and using the Local Module, please switch to [Integration Documentation](docs/README.md).
 
 # Developer Setup
 
