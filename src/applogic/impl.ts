@@ -5,7 +5,7 @@ import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
 import * as Cs from "../cs"
 import * as Utility from "../utility"
-import { EDocumentValidity, EIssuanceValidity, IAppLogic, IHealthStatus, IValidationResult, IRevocationResponse, ERevocationStatus } from "./base"
+import { EDocumentValidity, EIssuanceValidity, IAppLogic, IHealthStatus, IValidationResult, IRevocationResponse, ERevocationStatus, IIssueSignatureResponse } from "./base"
 import { Base64 } from "../utility"
 
 /**
@@ -69,13 +69,20 @@ export class AppLogic implements IAppLogic {
         return ok(digest)
     }
 
-    public async issueSignature(digestToBeSigned: Base64, issuerId: string, auditLog?: string): Promise<Result<Base64, Error>> {
+    public async issueSignature(digestToBeSigned: Base64, issuerId: string, auditLog?: string): Promise<Result<IIssueSignatureResponse, Error>> {
         const digestMethod = Cs.EDigestAlgorithm.SHA256
         const rsltIssueSignature = await this.csClient.issueSignature(digestToBeSigned, digestMethod, issuerId, auditLog)
         if (rsltIssueSignature.isErr()) {
             return err(rsltIssueSignature.error)
         }
-        return ok(rsltIssueSignature.value.cms)
+        const cms: Base64 = rsltIssueSignature.value.cms
+
+        const rsltExtract = Utility.extractSignatureValueFromCms(Buffer.from(cms, "base64"))
+        if (rsltExtract.isErr()) {
+            return err(rsltExtract.error)
+        }
+        const signatureValueDigest: Base64 = Utility.sha256sum(rsltExtract.value).toString("base64")
+        return ok({ cms: cms, signatureValueDigest: signatureValueDigest })
     }
 
     public async revokeSignature(signatureValueDigest: Base64, reason: string, auditLog?: string): Promise<Result<IRevocationResponse, Error>> {

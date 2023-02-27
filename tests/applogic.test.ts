@@ -33,7 +33,7 @@ describe("Application logic layer", () => {
         /* Issue */
         const rsltIssueSignature = await appImpl.issueSignature(dataToBeSigned, csIssuerId)
         expect(rsltIssueSignature.isErr()).to.be.false
-        const cms: Base64 = rsltIssueSignature._unsafeUnwrap()
+        const cms: Base64 = rsltIssueSignature._unsafeUnwrap().cms
 
         /* Merge */
         const rsltEmbedSignature = await appImpl.embedSignatureIntoPdf(pdf, timestamp, cms)

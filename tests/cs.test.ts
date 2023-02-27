@@ -56,7 +56,5 @@ describe("Central Service", () => {
             const revokeIssuanceResultNew = rsltRevokeIssuanceNew._unsafeUnwrap()
             expect(revokeIssuanceResultNew.status).to.be.equal(Cs.EIssuanceRevocationStatus.ISSUANCE_NOT_FOUND)
         })
-
-        test.skip("CsClient#revokeSignature")
     })
 })

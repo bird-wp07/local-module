@@ -65,6 +65,14 @@ export interface IIssueResponse {
      * Base64 encoded signature in CMS format.
      */
     cms: Base64
+
+    /**
+     * Base64 encoded SHA256 digest of the signature value used to identify
+     * the issuance. The signature value digest can be derived from the
+     * information contained within the CMS, but is still returned for
+     * convenience.
+     */
+    signatureValueDigest: Base64
 }
 
 export interface IMergePdfRequest {

@@ -60,7 +60,7 @@ export function extractSignatureValueFromCms(cms: Buffer): Result<Buffer, Error>
         const signatureValue = Buffer.from(signedDataStruct.signerInfos[0].signature.buffer)
         return ok(signatureValue)
     } catch (error: unknown) {
-        return err(new Error(JSON.stringify(error)))
+        return err(new Error(`${extractSignatureValueFromCms.name}: ${JSON.stringify(error)}`))
     }
 }
 

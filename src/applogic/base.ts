@@ -28,9 +28,8 @@ export abstract class IAppLogic {
      * @param digestToBeSigned - base64 encoded digest to be signed as returned from generateDataToBeSigned()
      * @param issuerId - unique ID to identify the issuer
      * @param auditLog - optional audit log
-     * @returns base64 encoded signature in CMS format
      */
-    abstract issueSignature(digestToBeSigned: Base64, issuerId: string, auditLog?: string): Promise<Result<Base64, Error>>
+    abstract issueSignature(digestToBeSigned: Base64, issuerId: string, auditLog?: string): Promise<Result<IIssueSignatureResponse, Error>>
 
     /**
      * Revoke an issuance.
@@ -71,6 +70,24 @@ export abstract class IAppLogic {
 export interface IHealthStatus {
     ok: boolean
     details?: any
+}
+
+/* Signature Issuance */
+/* ------------------ */
+
+export interface IIssueSignatureResponse {
+    /**
+     * Base64 encoded signature in CMS format.
+     */
+    cms: Base64
+
+    /**
+     * Base64 encoded SHA256 digest of the signature value used to identify
+     * the issuance. The signature value digest can be derived from the
+     * information contained within the CMS, but is still returned for
+     * convenience.
+     */
+    signatureValueDigest: Base64
 }
 
 /* Signature / issuance revocation */

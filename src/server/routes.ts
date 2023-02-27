@@ -94,7 +94,8 @@ function makeIssueController(impl: Applogic.IAppLogic): Express.RequestHandler {
             return next(rsltIssueSignature.error)
         }
         const responseBody: IIssueResponse = {
-            cms: rsltIssueSignature.value
+            cms: rsltIssueSignature.value.cms,
+            signatureValueDigest: rsltIssueSignature.value.signatureValueDigest
         }
         return res.status(200).json(responseBody)
     }
@@ -193,10 +194,10 @@ function makeSignController(impl: Applogic.IAppLogic): Express.RequestHandler {
         if (rsltIssueSignature.isErr()) {
             return next(rsltIssueSignature.error)
         }
-        const cms: Base64 = rsltIssueSignature.value
+        const issueSignatureResponse: Applogic.IIssueSignatureResponse = rsltIssueSignature.value
 
         /* Merge */
-        const rsltEmbedSignature = await impl.embedSignatureIntoPdf(pdf, timestamp, cms)
+        const rsltEmbedSignature = await impl.embedSignatureIntoPdf(pdf, timestamp, issueSignatureResponse.cms)
         if (rsltEmbedSignature.isErr()) {
             return next(rsltEmbedSignature.error)
         }

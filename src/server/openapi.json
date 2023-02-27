@@ -100,6 +100,9 @@
                   "properties": {
                     "cms": {
                       "$ref": "#/components/schemas/Cms"
+                    },
+                    "signatureValueDigest": {
+                      "$ref": "#/components/schemas/SignatureValueDigest"
                     }
                   }
                 }
@@ -383,6 +386,13 @@
         "description": "Base64 encoded signature in CMS format",
         "example": {
           "$ref": "#/x-constants/examples/cmsSignatureBase64"
+        }
+      },
+      "SignatureValueDigest": {
+        "type": "string",
+        "description": "Base64 encoded SHA256 digest of the signature value used to identify an issuance",
+        "example": {
+          "$ref": "#/x-constants/examples/signatureValueDigest"
         }
       },
       "IssuerId": {
