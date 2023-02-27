@@ -160,6 +160,12 @@ export interface ISignPdfResponse {
      * Base64 encoded signed PDF
      */
     bytes: Base64
+
+    /**
+     * Base64 encoded SHA256 Digest of the PDF signature's signature value.
+     * Used to identify and to revoke the issued signature.
+     */
+    signatureValueDigest: Base64
 }
 
 /**

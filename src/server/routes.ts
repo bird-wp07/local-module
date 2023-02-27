@@ -204,7 +204,8 @@ function makeSignController(impl: Applogic.IAppLogic): Express.RequestHandler {
         const signedPdf: Base64 = rsltEmbedSignature.value
 
         const responseBody: ISignPdfResponse = {
-            bytes: signedPdf
+            bytes: signedPdf,
+            signatureValueDigest: rsltIssueSignature.value.signatureValueDigest
         }
         return res.status(200).json(responseBody)
     }

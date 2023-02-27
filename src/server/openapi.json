@@ -235,6 +235,9 @@
                           "$ref": "#/components/schemas/AnyValue"
                         }
                       }
+                    },
+                    "signatureValueDigest": {
+                      "$ref": "#/components/schemas/SignatureValueDigest"
                     }
                   }
                 }
@@ -310,6 +313,9 @@
                     "bytes": {
                       "type": "string",
                       "description": "Base64 encoded signed PDF"
+                    },
+                    "signatureValueDigest": {
+                      "$ref": "#/components/schemas/SignatureValueDigest"
                     }
                   }
                 }

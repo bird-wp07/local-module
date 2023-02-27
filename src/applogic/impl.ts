@@ -233,7 +233,7 @@ export class AppLogic implements IAppLogic {
             }
         }
 
-        return ok(validationResult)
+        return ok({ ...validationResult, signatureValueDigest: signatureValueDigest })
     }
 
     /**

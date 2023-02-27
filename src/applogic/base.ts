@@ -137,6 +137,12 @@ export interface IValidationResult {
         status: EIssuanceValidity
         details?: any
     }
+
+    /**
+     * Base64 encoded SHA256 digest of the PDF's signature's signature value.
+     * Returned only if document is valid.
+     */
+    signatureValueDigest?: Base64
 }
 
 export enum EDocumentValidity {
