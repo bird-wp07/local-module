@@ -214,6 +214,7 @@ Response Body:
 ```
 {
     "cms": "<Base64 Repräsentation der ausgestellten Signatur im CMS Format>",
+    "signatureValueDigest": "<Base64 kodierter SHA256 Hash des Signaturwertes zur Identifikation der ausgestellten Signatur>"
 }
 ```
 
@@ -306,7 +307,8 @@ Response Body:
     "issuance": {
         "status": "ISSUANCE_OK" | "ERROR_ISSUANCE_NOT_FOUND" | "ERROR_ISSUANCE_REVOKED" | "ERROR_ISSUER_REVOKED" | "ERROR_DOCUMENT_INVALID",
         "details?": any
-    }
+    },
+    "signatureValueDigest": "<Base64 kodierter SHA256 Hash des Signaturwertes zur Identifikation der ausgestellten Signatur>"
 }
 ```
 
@@ -325,6 +327,7 @@ Response Body:
     * `ERROR_ISSUANCE_REVOKED`: Der zentrale Service konnte die entsprechende Signatur des Dokuments finden, sie wurde aber in der Zwischenzeit zurückgezogen. Das Dokument ist daher INVALIDE. Vorsicht: Das Dokument als solches, kann trotzdem ein valide signiertes Dokument sein, das eIDAS Richtlinien befolgt und nach diesen durchgehend vertrauenswürdig wäre, da das Signierzertifikat ggf. nicht zurückgezogen wurde.
     * `ERROR_ISSUER_REVOKED`: Der Aussteller der Signatur hat seine Berechtigung zur Ausstellung in der Zwischenzeit verloren. 
   * `details`: Optional werden Details des Überprüfungsschritts zurückgegeben
+* `documentSignatureDigest`: Eine eindeutige Repräsentation des ausgestellten Dokumentes über den Signaturwert. Technisch ist dies eine Base64 Repräsentation des SHA256 Hashes über die kryptografischen Signatur.
 
 
 # 5. Offene Punkte
