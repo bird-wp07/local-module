@@ -214,6 +214,7 @@ Response Body:
 ```
 {
     "cms": "<Base64 Repräsentation der ausgestellten Signatur im CMS Format>",
+    "signatureValueDigest": "<Base64 kodierter SHA256 Hash des Signaturwertes zur Identifikation der ausgestellten Signatur>"
 }
 ```
 
@@ -307,7 +308,7 @@ Response Body:
         "status": "ISSUANCE_OK" | "ERROR_ISSUANCE_NOT_FOUND" | "ERROR_ISSUANCE_REVOKED" | "ERROR_ISSUER_REVOKED" | "ERROR_DOCUMENT_INVALID",
         "details?": any
     },
-    "documentSignatureDigest": "<Base64 Repräsentation des Hashes des Signaturwertes>"
+    "signatureValueDigest": "<Base64 kodierter SHA256 Hash des Signaturwertes zur Identifikation der ausgestellten Signatur>"
 }
 ```
 
