@@ -36,6 +36,8 @@ export enum EIssuanceValidationPolicy {
 export interface IValidateIssuanceResponse {
     /**
      * Overall result. True if and only if all policy checks are successful
+     *
+     * TODO: What's details doing here?
      */
     valid: boolean
     results: [
@@ -43,16 +45,19 @@ export interface IValidateIssuanceResponse {
             policyId: EIssuanceValidationPolicy.ISSUANCE_EXISTS
             policyDescription: string
             passed: boolean
+            details: null
         },
         {
             policyId: EIssuanceValidationPolicy.ISSUANCE_NOT_REVOKED
             policyDescription: string
             passed: boolean | null
+            details: null
         },
         {
             policyId: EIssuanceValidationPolicy.ISSUER_NOT_REVOKED
             policyDescription: string
             passed: boolean | null
+            details: null
         }
     ]
 }
@@ -63,7 +68,8 @@ export const Schema_IValidateIssuanceResponse = Joi.object().keys({
         Joi.object({
             policyId: Joi.string().valid(...Object.values(EIssuanceValidationPolicy)),
             policyDescription: Joi.string().required(),
-            passed: Joi.boolean().allow(null).required()
+            passed: Joi.boolean().allow(null).required(),
+            details: Joi.allow(null)
         }).required()
     )
 })
