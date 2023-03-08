@@ -33,7 +33,7 @@ if ($null -eq $env:WP07_CS_TOKEN_URL) {
 if ($null -eq $env:WP07_CS_CA_PEM) {
     $val = Get-Content "$scriptDir\CONFIG" | Select-String "^CS_CA_PEM=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
     if ($val) {
-        $env:WP07_CTOKEN_URLS_CA_PEM = Get-Content "$scriptDir\CONFIG" | Select-String "^CS_CA_PEM=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value} | Resolve-Path
+        $env:WP07_CS_CA_PEM = Get-Content "$scriptDir\CONFIG" | Select-String "^CS_CA_PEM=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value} | Resolve-Path
     }
 }
 if ($null -eq $env:WP07_CS_CLIENT_PFX) {
