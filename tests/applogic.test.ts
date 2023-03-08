@@ -34,6 +34,7 @@ describe("Application logic layer", () => {
         const rsltIssueSignature = await appImpl.issueSignature(dataToBeSigned, csIssuerId)
         expect(rsltIssueSignature.isErr()).to.be.false
         const cms: Base64 = rsltIssueSignature._unsafeUnwrap().cms
+        const signatureValueDigest: Base64 = rsltIssueSignature._unsafeUnwrap().signatureValueDigest
 
         /* Merge */
         const rsltEmbedSignature = await appImpl.embedSignatureIntoPdf(pdf, timestamp, cms)
@@ -48,8 +49,6 @@ describe("Application logic layer", () => {
         expect(validationResult.issuance.status).to.be.equal(Applogic.EIssuanceValidity.ISSUANCE_OK)
 
         /* Revoke */
-        const signatureValue: Base64 = validationResult.document.details.DiagnosticData.Signature[0].SignatureValue as string
-        const signatureValueDigest: Base64 = Utility.sha256sum(Buffer.from(signatureValue, "base64")).toString("base64")
         const rsltRevoke = await appImpl.revokeSignature(signatureValueDigest, "test")
         expect(rsltRevoke.isErr()).to.be.false
         const revocationResult = rsltRevoke._unsafeUnwrap()

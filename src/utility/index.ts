@@ -48,9 +48,10 @@ export function sha256sum(buf: Buffer): Buffer {
 }
 
 /**
- * Extract the signature value from a CMS.
+ * Extract the signature value from a signature in CMS format.
  *
- * No validation of input is performed.
+ * This is no general purpose function and applies only to the signatures
+ * issued by the central service. No validation of input is performed.
  */
 export function extractSignatureValueFromCms(cms: Buffer): Result<Buffer, Error> {
     try {
