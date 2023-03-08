@@ -67,6 +67,19 @@ Die beiliegende Datei *CONFIG* dient der Konfiguration des Lokalen Moduls. Folge
 
 Alternativ können all genannten Werte über Umgebungsvariablen konfiguriert werden, deren Namen sich nur durch ein `WP07_` Präfix gegenüber ihren jeweiligen Konfigurationsparameter unterscheiden (z.B. wird der Wert des `DSS_BASEURL` Parameters aus der `WP07_DSS_BASEURL` Umgebungsvariablen übernommen, sofern diese existiert).
 
+##### 2.2.1.2.1 Betrieb ohne Verwendung geschützter HTTP Routen
+
+Zur Ausstellung von Signaturen sowie zu ihrem Widerruf stellt das Lokale Modul dezidierte HTTP Routen bereit, welche ihrerseits eine gesicherte mTLS Verbindung zum Zentralen Service aufbauen. Hierfür werden die entsprechenden Credentials und Zertifikatsdateien benötigt (siehe vorheriger Abschnitt). Soll das lokale Modul aber ohne Zugriff auf diese geschützten Routen verwendet werden, etwa als Dienst zur Validierung signierter Dokumente, so müssen hierfür lediglich die vier die Authentifizierung betreffenden Parameter entfernt oder deren Werte leer gelassen werden:
+
+```
+CS_TOKEN_URL=
+CS_CA_PEM=
+CS_CLIENT_PFX=
+CS_CLIENT_PFX_PASSWORD=
+```
+
+Wenn diese Parameter über Umgebungsvariablen definiert werden, so können diese undefiniert oder null-wertig sein.
+
 #### 2.2.1.3 Start
 
 Zum Starten des lokalen Moduls Rechtsklick auf 'start.ps1' und im Kontextmenü 'Mit PowerShell ausführen' wählen. Etwaige Meldungen des Windows Defender können ignoriert werden ("Abbrechen" klicken oder Fenster schließen). Eine Portfreigabe ist bei einem Zugriff vom selben Rechner aus nicht vonnöten.
