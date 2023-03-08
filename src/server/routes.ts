@@ -244,22 +244,24 @@ const errorHandler: Express.ErrorRequestHandler = (err: Error, _: Express.Reques
     return res.status(400).json(new ProcessingRequestError(err))
 }
 
-export function makeApp(): Express.Express {
+export function makeApp(exposeSecuredRoutes = true): Express.Express {
     const impl = Container.get(Applogic.IAppLogic)
 
     const app = Express.default()
-    // _expressApp.use(Express.urlencoded({ extended: true })) TODO: Do we need this?
     app.use(Express.json({ limit: HTTP_MAX_REQUEST_BODY_SIZE_BYTES }))
     app.use(swaggerUiPath, swaggerExpress.serve, swaggerExpress.setup(swaggerDocument))
 
     app.get("/system/health", makeHealthController(impl))
     app.post("/digest/pdf", makeDigestController(impl))
-    app.post("/issue", makeIssueController(impl))
     app.post("/merge/pdf", makeMergeController(impl))
     app.post("/validate/pdf", makeValidationController(impl))
-    app.post("/revoke", makeRevokeController(impl))
-    app.post("/sign/pdf", makeSignController(impl))
+    if (exposeSecuredRoutes) {
+        app.post("/issue", makeIssueController(impl))
+        app.post("/revoke", makeRevokeController(impl))
+        app.post("/sign/pdf", makeSignController(impl))
+    }
 
+    // TODO: Expose pretty error for undefined routes
     app.use(errorHandler)
 
     return app

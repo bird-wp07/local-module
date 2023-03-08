@@ -80,36 +80,48 @@ export const configParams = {
 
     /*
      * Central service's openid-connect auth token url.
+     *
+     * If this parameter is not set, the authenticated, mTLS secured
+     * routes won't be exposed by the HTTP api.
      */
     csTokenUrl: {
         envvar: "WP07_CS_TOKEN_URL",
-        schema: Joi.string().required()
+        schema: Joi.string().default("")
     },
 
     /*
      * Path to file containing mTLS client certificate and privkey in PKCS12
      * format. Used for requesting auth tokens.
+     *
+     * If this parameter is not set, the authenticated, mTLS secured
+     * routes won't be exposed by the HTTP api.
      */
     csClientPfx: {
         envvar: "WP07_CS_CLIENT_PFX",
-        schema: Joi.string().required()
+        schema: Joi.string().default("")
     },
 
     /*
      * Passphrase for the above file.
+     *
+     * If this parameter is not set, the authenticated, mTLS secured
+     * routes won't be exposed by the HTTP api.
      */
     csClientPfxPassword: {
         envvar: "WP07_CS_CLIENT_PFX_PASSWORD",
-        schema: Joi.string().required()
+        schema: Joi.string().default("")
     },
 
     /*
      * Path to file containing self-signed TLS server certificate in PEM
      * format. Used for requesting auth tokens.
+     *
+     * If this parameter is not set, the authenticated, mTLS secured
+     * routes won't be exposed by the HTTP api.
      */
     csCaPem: {
         envvar: "WP07_CS_CA_PEM",
-        schema: Joi.string().required()
+        schema: Joi.string().default("")
     }
 }
 

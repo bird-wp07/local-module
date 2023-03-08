@@ -27,14 +27,24 @@ export class CsClient implements ICsClient {
     baseurl: string
     tokenUrl: string
     authHttpsAgent: https.Agent
-    constructor(baseurl: string, tokenUrl: string, mtlsClientPfxFile: string, mtslClientPfxFilePassword: string, mtlsCaPemfile: string) {
+    constructor(baseurl: string, tokenUrl: string, mtlsClientPfxFile: string, mtlsClientPfxFilePassword: string, mtlsCaPemfile: string) {
         this.baseurl = baseurl
         this.tokenUrl = tokenUrl
-        this.authHttpsAgent = new https.Agent({
-            ca: fs.readFileSync(mtlsCaPemfile),
-            pfx: fs.readFileSync(mtlsClientPfxFile),
-            passphrase: mtslClientPfxFilePassword
-        })
+
+        /* In the absence of openid-connect credentials, do allow to use the
+         * unauthenticated routes. This is useful for when one does not mean
+         * to communicate with the central service directly or if only the
+         * validation funcionality is intended to be used.
+         */
+        if (!tokenUrl || !mtlsClientPfxFile || !mtlsClientPfxFilePassword || !mtlsCaPemfile) {
+            this.authHttpsAgent = new https.Agent()
+        } else {
+            this.authHttpsAgent = new https.Agent({
+                ca: fs.readFileSync(mtlsCaPemfile),
+                pfx: fs.readFileSync(mtlsClientPfxFile),
+                passphrase: mtlsClientPfxFilePassword
+            })
+        }
     }
 
     /**

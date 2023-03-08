@@ -34,14 +34,14 @@ async function main() {
     logger.info("DSS responded. Starting HTTP server ... ")
 
     /* Initialize central service client. */
-    const rsltMake = Cs.CsClient.make(cfg.csBaseUrl, cfg.csTokenUrl, cfg.csClientPfx, cfg.csClientPfxPassword, cfg.csCaPem)
-    if (rsltMake.isErr()) {
-        logger.error("Couldn't create CsClient. Abort.", rsltMake.error)
+    const rsltMakeCsClient = Cs.CsClient.make(cfg.csBaseUrl, cfg.csTokenUrl, cfg.csClientPfx, cfg.csClientPfxPassword, cfg.csCaPem)
+    if (rsltMakeCsClient.isErr()) {
+        logger.error("Couldn't create CsClient. Abort.", rsltMakeCsClient.error)
         await Utility.sleepms(3000)
         process.exitCode = 1
         return
     }
-    const csClient = rsltMake.value
+    const csClient = rsltMakeCsClient.value
 
     /* Ioc container setup. */
     Ioc.Container.bind(Dss.IDssClient).factory(() => dssClient)
@@ -52,7 +52,11 @@ async function main() {
     const split = cfg.lmBaseurl.split("://")[1].split(":")
     const port = Number(split[1])
     const hostname = split[0]
-    http.createServer(Server.makeApp()).listen(port, hostname, () => {
+    const exposeSecuredRoutes = !!cfg.csTokenUrl && !!cfg.csClientPfx && !!cfg.csClientPfxPassword && !!cfg.csCaPem
+    http.createServer(Server.makeApp(exposeSecuredRoutes)).listen(port, hostname, () => {
+        if (!exposeSecuredRoutes) {
+            logger.info(`One or more authentication credentials have not been provided. Secured routes will not be exposed.`)
+        }
         logger.info(`Listening on ${cfg.lmBaseurl}. See '${Server.swaggerUiPath}'.`)
 
         /* Send USR1 signal to process waiting for local module to start up.
