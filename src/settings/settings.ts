@@ -86,7 +86,7 @@ export const configParams = {
      */
     csTokenUrl: {
         envvar: "WP07_CS_TOKEN_URL",
-        schema: Joi.string().default("")
+        schema: Joi.string().allow("").default("")
     },
 
     /*
@@ -98,7 +98,7 @@ export const configParams = {
      */
     csClientPfx: {
         envvar: "WP07_CS_CLIENT_PFX",
-        schema: Joi.string().default("")
+        schema: Joi.string().allow("").default("")
     },
 
     /*
@@ -109,7 +109,7 @@ export const configParams = {
      */
     csClientPfxPassword: {
         envvar: "WP07_CS_CLIENT_PFX_PASSWORD",
-        schema: Joi.string().default("")
+        schema: Joi.string().allow("").default("")
     },
 
     /*
@@ -121,7 +121,7 @@ export const configParams = {
      */
     csCaPem: {
         envvar: "WP07_CS_CA_PEM",
-        schema: Joi.string().default("")
+        schema: Joi.string().allow("").default("")
     }
 }
 
