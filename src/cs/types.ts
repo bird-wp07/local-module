@@ -17,11 +17,30 @@ export interface IIssueSignatureRequest {
 }
 
 export interface IIssueSignatureResponse {
+    /**
+     * Signature in CMS format.
+     */
     cms: Base64
+    hashes: [
+        {
+            hashType: "SIGNATURE_HASH"
+
+            /**
+             * Base64 encoded SHA256 hash of signature value.
+             */
+            hash: Base64
+        }
+    ]
 }
 
 export const Schema_IIssueSignatureResponse = Joi.object().keys({
-    cms: Joi.string().base64().required()
+    cms: Joi.string().base64().required(),
+    hashes: Joi.array().items(
+        Joi.object().keys({
+            hashType: Joi.valid("SIGNATURE_HASH").required(),
+            hash: Joi.string().base64().required()
+        })
+    )
 })
 
 /* Signature / issuance validity checking */

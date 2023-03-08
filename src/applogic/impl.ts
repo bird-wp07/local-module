@@ -77,6 +77,7 @@ export class AppLogic implements IAppLogic {
         }
         const cms: Base64 = rsltIssueSignature.value.cms
 
+        // FIXME: use cms' signaturevaluedigest
         const rsltExtract = Utility.extractSignatureValueFromCms(Buffer.from(cms, "base64"))
         if (rsltExtract.isErr()) {
             return err(rsltExtract.error)

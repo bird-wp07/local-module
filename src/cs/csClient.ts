@@ -55,7 +55,6 @@ export class CsClient implements ICsClient {
      * Returns true iff the CS reponds to requests.
      */
     async isOnline(): Promise<boolean> {
-        // COMBAK: Eventually use the central service's /health endpoint.
         const config: AxiosRequestConfig = {
             method: "GET",
             url: "/swagger-ui/index.html",

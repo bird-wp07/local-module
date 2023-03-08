@@ -24,11 +24,7 @@ describe("Central Service", () => {
             const digestMethod = Cs.EDigestAlgorithm.SHA256
             const rsltIssueSignature = await csClient.issueSignature(digestToBeSigned, digestMethod, csIssuerId)
             expect(rsltIssueSignature.isErr()).to.be.false
-            const cms: Base64 = rsltIssueSignature._unsafeUnwrap().cms
-            const rsltExtractSignature = Utility.extractSignatureValueFromCms(Buffer.from(cms, "base64"))
-            expect(rsltExtractSignature.isErr()).to.be.false
-            const signatureValue: Buffer = rsltExtractSignature._unsafeUnwrap()
-            const signatureValueDigest: Base64 = Utility.sha256sum(signatureValue).toString("base64")
+            const signatureValueDigest: Base64 = rsltIssueSignature._unsafeUnwrap().hashes[0].hash
 
             /* Validate issuance */
             const rsltValidateIssuance = await csClient.validateIssuance(signatureValueDigest)
