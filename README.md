@@ -40,6 +40,7 @@ Developer setup for UNIX systems (Windows/WSL, Linux, Mac).
 
 ```
 .
+├── .github/                        - github pipelines for linux and windows bundles
 ├── bundle/
 │   └── win10-x64/                  - files contained in the windows bundle
 ├── dist/                           - compiled javascript output
