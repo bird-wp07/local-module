@@ -3,7 +3,7 @@
   "info": {
     "title": "WP07 Local Module - OpenAPI 3.0",
     "description": "",
-    "version": "0.2.3"
+    "version": "0.2.4"
   },
   "paths": {
     "/digest/pdf": {
@@ -59,7 +59,7 @@
     },
     "/issue": {
       "post": {
-        "summary": "Issues a signature",
+        "summary": "Issues a signature. This route is exposed only if authentication credentials have been provided at startup of the local module.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -276,7 +276,7 @@
     },
     "/sign/pdf": {
       "post": {
-        "summary": "One-stop solution: Given an unsigned PDF returns a signed PDF.",
+        "summary": "One-stop solution: Given an unsigned PDF returns a signed PDF. This route is exposed only if authentication credentials have been provided at startup of the local module.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -327,7 +327,7 @@
     },
     "/revoke": {
       "post": {
-        "summary": "Revoke an issued signature.",
+        "summary": "Revoke an issued signature. This route is exposed only if authentication credentials have been provided at startup of the local module.",
         "requestBody": {
           "content": {
             "application/json": {
