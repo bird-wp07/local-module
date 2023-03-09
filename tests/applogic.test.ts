@@ -41,7 +41,7 @@ describe("Application logic layer", () => {
         expect(rsltEmbedSignature.isErr()).to.be.false
         const signedPdf: Base64 = rsltEmbedSignature._unsafeUnwrap()
 
-        /* Verify */
+        /* Validate */
         const rsltValidate = await appImpl.validateSignedPdf(signedPdf)
         expect(rsltValidate.isErr()).to.be.false
         const validationResult = rsltValidate._unsafeUnwrap()
