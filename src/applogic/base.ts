@@ -38,7 +38,7 @@ export abstract class IAppLogic {
      * @param reason - reason for the revocation
      * @param auditLig - optional audit log
      */
-    abstract revokeSignature(signatureValueDigest: Base64, reason: string, auditLog?: string): Promise<Result<IRevocationResponse, Error>>
+    abstract revokeSignature(signatureValueDigest: Base64, reason: ERevocationReason, auditLog?: string): Promise<Result<IRevocationResponse, Error>>
 
     /**
      * Produces a signed PDF by merging the original PDF with its signature.
@@ -97,6 +97,12 @@ export interface IIssueSignatureResponse {
 
 /* Signature / issuance revocation */
 /* ------------------------------- */
+
+export enum ERevocationReason {
+    SECURITY_ISSUE = "SECURITY_ISSUE",
+    FORMAL_MISTAKE = "FORMAL_MISTAKE",
+    UNSPECIFIED = "UNSPECIFIED"
+}
 
 export enum ERevocationStatus {
     ISSUANCE_REVOKED = "ISSUANCE_REVOKED",

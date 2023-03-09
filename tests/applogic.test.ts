@@ -49,16 +49,24 @@ describe("Application logic layer", () => {
         expect(validationResult.issuance.status).to.be.equal(Applogic.EIssuanceValidity.ISSUANCE_OK)
 
         /* Revoke */
-        const rsltRevoke = await appImpl.revokeSignature(signatureValueDigest, "test")
+        const rsltRevoke = await appImpl.revokeSignature(signatureValueDigest, Applogic.ERevocationReason.FORMAL_MISTAKE)
         expect(rsltRevoke.isErr()).to.be.false
         const revocationResult = rsltRevoke._unsafeUnwrap()
         expect(revocationResult.status).to.be.equal(Applogic.ERevocationStatus.ISSUANCE_REVOKED)
 
+        /* Validate post revocation */
+        const rsltValidate2 = await appImpl.validateSignedPdf(signedPdf)
+        expect(rsltValidate2.isErr()).to.be.false
+        const validationResult2 = rsltValidate2._unsafeUnwrap()
+        expect(validationResult2.valid).to.be.false // COMBACK: Change once we have a trusted certificate
+        expect(validationResult2.issuance.status).to.be.equal(Applogic.EIssuanceValidity.ERROR_ISSUANCE_REVOKED)
+
         /* Revoke again */
-        const rsltRevoke2 = await appImpl.revokeSignature(signatureValueDigest, "test")
+        const rsltRevoke2 = await appImpl.revokeSignature(signatureValueDigest, Applogic.ERevocationReason.SECURITY_ISSUE)
         expect(rsltRevoke2.isErr()).to.be.false
         const revocationResult2 = rsltRevoke2._unsafeUnwrap()
-        // FIXME: w/f Felix
+
+        // FIXME: This should return an error indicating that the issuance has already been invoked.
         expect(revocationResult2.status).to.be.equal(Applogic.ERevocationStatus.ISSUANCE_REVOKED)
     })
 

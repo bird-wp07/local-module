@@ -141,12 +141,12 @@ export interface IRevocationRequest {
     /**
      * Reason for the revocation.
      */
-    reason: string
+    reason: Applogic.ERevocationReason
 }
 
 export const Schema_IRevocationRequest = Joi.object().keys({
     signatureValueDigest: Joi.string().base64().required(),
-    reason: Joi.string()
+    reason: Joi.string().valid(...Object.values(Applogic.ERevocationReason))
 })
 
 export type IRevocationResponse = Applogic.IRevocationResponse

@@ -96,6 +96,12 @@ export const Schema_IValidateIssuanceResponse = Joi.object().keys({
 /* Signature / issuance revocation */
 /* ------------------------------- */
 
+export enum ERevocationReason {
+    SECURITY_ISSUE = "SECURITY_ISSUE",
+    FORMAL_MISTAKE = "FORMAL_MISTAKE",
+    UNSPECIFIED = "UNSPECIFIED"
+}
+
 export enum EIssuanceRevocationStatus {
     ISSUANCE_REVOKED = "ISSUANCE_REVOKED",
     ISSUANCE_ALREADY_REVOKED = "ISSUANCE_ALREADY_REVOKED",

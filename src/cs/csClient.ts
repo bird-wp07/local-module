@@ -8,7 +8,8 @@ import {
     IValidateIssuanceResponse,
     IRevokeIssuanceResponse,
     Schema_IValidateIssuanceResponse,
-    EIssuanceRevocationStatus
+    EIssuanceRevocationStatus,
+    ERevocationReason
 } from "./types"
 import * as qs from "qs"
 import * as Utility from "../utility"
@@ -20,7 +21,7 @@ export abstract class ICsClient {
     abstract isOnline(): Promise<boolean>
     abstract issueSignature(digestToBeSigned: Base64, digestMethod: EDigestAlgorithm, issuerId: string, auditLog?: string): Promise<Result<IIssueSignatureResponse, Error>>
     abstract validateIssuance(signatureValueDigest: Base64): Promise<Result<IValidateIssuanceResponse, Error>>
-    abstract revokeIssuance(signatureValueDigest: Base64, revocationReason: string, auditLog?: string): Promise<Result<IRevokeIssuanceResponse, Error>>
+    abstract revokeIssuance(signatureValueDigest: Base64, revocationReason: ERevocationReason, auditLog?: string): Promise<Result<IRevokeIssuanceResponse, Error>>
 }
 
 export class CsClient implements ICsClient {
@@ -141,7 +142,7 @@ export class CsClient implements ICsClient {
         return ok(rsltHttpReq.value.data)
     }
 
-    async revokeIssuance(signatureValueDigest: Base64, revocationReason: string, auditLog?: string): Promise<Result<IRevokeIssuanceResponse, Error>> {
+    async revokeIssuance(signatureValueDigest: Base64, revocationReason: ERevocationReason, auditLog?: string): Promise<Result<IRevokeIssuanceResponse, Error>> {
         const rsltFetchAuthToken = await this.fetchAuthToken()
         if (rsltFetchAuthToken.isErr()) {
             return err(rsltFetchAuthToken.error)
@@ -162,7 +163,7 @@ export class CsClient implements ICsClient {
         }
         const rsltHttpReq = await Utility.httpReq(config)
 
-        // TODO: Write validation
+        // TODO: w/f TSystems.
         if (rsltHttpReq.isErr()) {
             if (rsltHttpReq.error instanceof AxiosError) {
                 const statuscode = rsltHttpReq.error.response?.status

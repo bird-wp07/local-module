@@ -33,21 +33,21 @@ describe("Central Service", () => {
             expect(verifySignatureResult.valid).to.be.true
 
             /* Revoke issuance */
-            const rsltRevokeIssuance = await csClient.revokeIssuance(signatureValueDigest, "Gutenberg")
+            const rsltRevokeIssuance = await csClient.revokeIssuance(signatureValueDigest, Cs.ERevocationReason.UNSPECIFIED)
             expect(rsltRevokeIssuance.isErr()).to.be.false
             const revokeIssuanceResult = rsltRevokeIssuance._unsafeUnwrap()
             expect(revokeIssuanceResult.status).to.be.equal(Cs.EIssuanceRevocationStatus.ISSUANCE_REVOKED)
 
             /* Revoke revoked issuance */
-            const rsltRevokeIssuance2 = await csClient.revokeIssuance(signatureValueDigest, "Gutenberg")
+            const rsltRevokeIssuance2 = await csClient.revokeIssuance(signatureValueDigest, Cs.ERevocationReason.SECURITY_ISSUE)
             expect(rsltRevokeIssuance2.isErr()).to.be.false
             const revokeIssuanceResult2 = rsltRevokeIssuance2._unsafeUnwrap()
-            // FIXME: w/f Felix, 409 anstatt 201 erwartet
+            // FIXME: w/f TSystems: returns 201 instead of 409, as announced
             expect(revokeIssuanceResult2.status).to.be.equal(Cs.EIssuanceRevocationStatus.ISSUANCE_REVOKED)
 
             /* Revoke unknown issuance */
             const signatureValueDigestNew: Base64 = Utility.sha256sum(Buffer.from(String(new Date()))).toString("base64")
-            const rsltRevokeIssuanceNew = await csClient.revokeIssuance(signatureValueDigestNew, "Gutenberg")
+            const rsltRevokeIssuanceNew = await csClient.revokeIssuance(signatureValueDigestNew, Cs.ERevocationReason.FORMAL_MISTAKE)
             expect(rsltRevokeIssuanceNew.isErr()).to.be.false
             const revokeIssuanceResultNew = rsltRevokeIssuanceNew._unsafeUnwrap()
             expect(revokeIssuanceResultNew.status).to.be.equal(Cs.EIssuanceRevocationStatus.ISSUANCE_NOT_FOUND)

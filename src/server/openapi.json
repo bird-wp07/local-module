@@ -347,8 +347,12 @@
                   },
                   "reason": {
                     "type": "string",
-                    "description": "Reason for the revocation.",
-                    "example": "Detected plagiarism"
+                    "enum": [
+                      "FORMAL_MISTAKE",
+                      "SECURITY_ISSUE",
+                      "UNSPECIFIED"
+                    ],
+                    "description": "Reason for the revocation."
                   }
                 }
               }

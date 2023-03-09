@@ -15,7 +15,8 @@ import {
     IRevocationResponse,
     ERevocationStatus,
     IIssueSignatureResponse,
-    IExtractAttachmentsResult
+    IExtractAttachmentsResult,
+    ERevocationReason
 } from "./base"
 import { Base64 } from "../utility"
 
@@ -91,7 +92,7 @@ export class AppLogic implements IAppLogic {
         return ok({ cms: cms, signatureValueDigest: signatureValueDigest })
     }
 
-    public async revokeSignature(signatureValueDigest: Base64, reason: string, auditLog?: string): Promise<Result<IRevocationResponse, Error>> {
+    public async revokeSignature(signatureValueDigest: Base64, reason: ERevocationReason, auditLog?: string): Promise<Result<IRevocationResponse, Error>> {
         const rsltRevokeSignature = await this.csClient.revokeIssuance(signatureValueDigest, reason, auditLog)
         if (rsltRevokeSignature.isErr()) {
             return err(rsltRevokeSignature.error)
@@ -222,18 +223,18 @@ export class AppLogic implements IAppLogic {
 
             /* Expose an issuance status code. We iterate over the policy array
              * and return the first offender we find. */
-            for (const p of csValidateIssuanceResult.results) {
+            outer: for (const p of csValidateIssuanceResult.results) {
                 if (!p.passed) {
                     switch (p.policyId) {
                         case Cs.EIssuanceValidationPolicy.ISSUANCE_EXISTS:
                             validationResult.issuance.status = EIssuanceValidity.ERROR_ISSUANCE_NOT_FOUND
-                            break
+                            break outer
                         case Cs.EIssuanceValidationPolicy.ISSUANCE_NOT_REVOKED:
                             validationResult.issuance.status = EIssuanceValidity.ERROR_ISSUANCE_REVOKED
-                            break
+                            break outer
                         case Cs.EIssuanceValidationPolicy.ISSUER_NOT_REVOKED:
                             validationResult.issuance.status = EIssuanceValidity.ERROR_ISSUER_UNAUTHORIZED
-                            break
+                            break outer
                     }
                 }
             }
