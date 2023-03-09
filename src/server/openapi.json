@@ -3,7 +3,7 @@
   "info": {
     "title": "WP07 Local Module - OpenAPI 3.0",
     "description": "",
-    "version": "0.2.5"
+    "version": "0.2.4"
   },
   "paths": {
     "/digest/pdf": {
@@ -418,17 +418,20 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "filename": {
-                      "type": "string",
-                      "description": "Filename of the attachment",
-                      "example": "books.xml"
-                    },
-                    "bytes": {
-                      "type": "string",
-                      "description": "Base64 encoded file data",
-                      "example": "PGJvb2s+SGFycnkgUG90dGVyPC9ib29rPg=="
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "filename": {
+                        "type": "string",
+                        "description": "Filename of the attachment",
+                        "example": "books.xml"
+                      },
+                      "bytes": {
+                        "type": "string",
+                        "description": "Base64 encoded file data",
+                        "example": "PGJvb2s+SGFycnkgUG90dGVyPC9ib29rPg=="
+                      }
                     }
                   }
                 }
