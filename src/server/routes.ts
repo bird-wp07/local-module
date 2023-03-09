@@ -25,7 +25,10 @@ import {
     EHealthStatus,
     IRevocationRequest,
     Schema_IRevocationRequest,
-    IRevocationResponse
+    IRevocationResponse,
+    Schema_IExtractRequest,
+    IExtractRequest,
+    IExtractResponse
 } from "./types"
 import * as Applogic from "../applogic"
 import { Container } from "typescript-ioc"
@@ -148,6 +151,27 @@ function makeValidationController(impl: Applogic.IAppLogic): Express.RequestHand
     return fn as Express.RequestHandler
 }
 
+function makeExtractController(impl: Applogic.IAppLogic): Express.RequestHandler {
+    const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
+        /* Validate incoming request. */
+        const validationResponse = Schema_IExtractRequest.validate(req.body)
+        if (validationResponse.error !== undefined) {
+            return next(validationResponse.error)
+        }
+        const body = req.body as IExtractRequest
+
+        /* Call implementation. */
+        const pdf = body.bytes
+        const rsltExtractAttachments = await impl.extractAttachments(pdf)
+        if (rsltExtractAttachments.isErr()) {
+            return next(rsltExtractAttachments.error)
+        }
+        const responseBody: IExtractResponse = rsltExtractAttachments.value
+        return res.status(200).json(responseBody)
+    }
+    return fn as Express.RequestHandler
+}
+
 function makeRevokeController(impl: Applogic.IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         /* Validate incoming request. */
@@ -240,7 +264,7 @@ const errorHandler: Express.ErrorRequestHandler = (err: Error, _: Express.Reques
         return res.status(400).json(new RequestBodyTooLarge())
     }
 
-    /* Default error indicating. */
+    /* Default error indicating that some went awry downstream. */
     return res.status(400).json(new ProcessingRequestError(err))
 }
 
@@ -255,6 +279,7 @@ export function makeApp(exposeSecuredRoutes = true): Express.Express {
     app.post("/digest/pdf", makeDigestController(impl))
     app.post("/merge/pdf", makeMergeController(impl))
     app.post("/validate/pdf", makeValidationController(impl))
+    app.post("/extract", makeExtractController(impl))
     if (exposeSecuredRoutes) {
         app.post("/issue", makeIssueController(impl))
         app.post("/revoke", makeRevokeController(impl))

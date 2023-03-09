@@ -118,6 +118,19 @@ export const Schema_IValidateSignedPdfRequest = Joi.object().keys({
 
 export type IValidateSignedPdfResponse = Applogic.IValidationResult
 
+export interface IExtractRequest {
+    /**
+     * Base64 encoded PDF
+     */
+    bytes: Base64
+}
+
+export const Schema_IExtractRequest = Joi.object().keys({
+    bytes: Joi.string().base64().required()
+})
+
+export type IExtractResponse = Applogic.IExtractAttachmentsResult
+
 export interface IRevocationRequest {
     /**
      * Base64 encoded SHA256 Digest of the signature value, whose issuance is
