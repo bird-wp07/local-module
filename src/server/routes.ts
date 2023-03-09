@@ -130,7 +130,7 @@ function makeMergeController(impl: Applogic.IAppLogic): Express.RequestHandler {
     return fn as Express.RequestHandler
 }
 
-function makeValidationController(impl: Applogic.IAppLogic): Express.RequestHandler {
+function makeValidateController(impl: Applogic.IAppLogic): Express.RequestHandler {
     const fn = async (req: Express.Request, res: Express.Response, next: Express.NextFunction): Promise<Express.Response | any> => {
         /* Validate incoming request. */
         const validationResponse = Schema_IValidateSignedPdfRequest.validate(req.body)
@@ -278,7 +278,7 @@ export function makeApp(exposeSecuredRoutes = true): Express.Express {
     app.get("/system/health", makeHealthController(impl))
     app.post("/digest/pdf", makeDigestController(impl))
     app.post("/merge/pdf", makeMergeController(impl))
-    app.post("/validate/pdf", makeValidationController(impl))
+    app.post("/validate/pdf", makeValidateController(impl))
     app.post("/extract", makeExtractController(impl))
     if (exposeSecuredRoutes) {
         app.post("/issue", makeIssueController(impl))
