@@ -32,7 +32,7 @@ export abstract class IAppLogic {
     abstract issueSignature(digestToBeSigned: Base64, issuerId: string, auditLog?: string): Promise<Result<IIssueSignatureResponse, Error>>
 
     /**
-     * Revoke an issuance.
+     * Revokes an issuance.
      *
      * @param signatureValueDigest - base64 encoded signature value of the issuance to be revoked
      * @param reason - reason for the revocation
@@ -56,6 +56,11 @@ export abstract class IAppLogic {
      * @param pdf - base64 encoded signed PDF as returned by embedSignatureIntoPdf()
      */
     abstract validateSignedPdf(pdf: Base64): Promise<Result<IValidationResult, Error>>
+
+    /**
+     * Extracts attachments from a PDF.
+     */
+    abstract extractAttachments(pdf: Base64): Promise<Result<IExtractAttachmentsResult, Error>>
 
     /**
      * Generic health check.
@@ -191,3 +196,17 @@ export enum EIssuanceValidity {
      */
     ERROR_ISSUER_UNAUTHORIZED = "ERROR_ISSUER_UNAUTHORIZED"
 }
+
+/* Attachment extraction */
+/* --------------------- */
+export type IExtractAttachmentsResult = {
+    /**
+     * Name of the attached file.
+     */
+    filename: string
+
+    /**
+     * Base64 encoded file data.
+     */
+    bytes: Base64
+}[]

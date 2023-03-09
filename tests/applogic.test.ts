@@ -61,4 +61,39 @@ describe("Application logic layer", () => {
         // FIXME: w/f Felix
         expect(revocationResult2.status).to.be.equal(Applogic.ERevocationStatus.ISSUANCE_REVOKED)
     })
+
+    test("Extract attachments", async () => {
+        const table = [
+            {
+                /* PDF with two attachments. */
+                filepath: "./tests/files/2-attachments.pdf",
+                attachmentFilenames: ["cars.csv", "mini.jpg"]
+            },
+            {
+                /* PDF with one attachment. */
+                filepath: "./tests/files/1-attachment.pdf",
+                attachmentFilenames: ["books.xml"]
+            },
+            {
+                /* PDF without attachments. */
+                filepath: "./tests/files/unsigned.pdf",
+                attachmentFilenames: []
+            },
+            {
+                /* Bogus input. */
+                filepath: "package.json",
+                attachmentFilenames: []
+            }
+        ]
+
+        for (const input of table) {
+            const pdf = fs.readFileSync(input.filepath).toString("base64")
+            const rsltExtractAttachments = await appImpl.extractAttachments(pdf)
+            const attachments = rsltExtractAttachments._unsafeUnwrap()
+            const filenames = attachments.map((a) => {
+                return a.filename
+            })
+            expect(filenames).to.have.members(input.attachmentFilenames)
+        }
+    })
 })

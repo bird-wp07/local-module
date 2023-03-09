@@ -1,3 +1,4 @@
+import * as Pdf from "pdf-lib"
 import * as ASN1 from "@lapo/asn1js"
 import * as ASNSchema from "@peculiar/asn1-schema"
 import { Result, ok, err } from "neverthrow"
@@ -5,7 +6,17 @@ import * as Ioc from "typescript-ioc"
 import * as Dss from "../dss"
 import * as Cs from "../cs"
 import * as Utility from "../utility"
-import { EDocumentValidity, EIssuanceValidity, IAppLogic, IHealthStatus, IValidationResult, IRevocationResponse, ERevocationStatus, IIssueSignatureResponse } from "./base"
+import {
+    EDocumentValidity,
+    EIssuanceValidity,
+    IAppLogic,
+    IHealthStatus,
+    IValidationResult,
+    IRevocationResponse,
+    ERevocationStatus,
+    IIssueSignatureResponse,
+    IExtractAttachmentsResult
+} from "./base"
 import { Base64 } from "../utility"
 
 /**
@@ -229,6 +240,43 @@ export class AppLogic implements IAppLogic {
         }
 
         return ok({ ...validationResult, signatureValueDigest: signatureValueDigest })
+    }
+
+    public async extractAttachments(pdf: Base64): Promise<Result<IExtractAttachmentsResult, Error>> {
+        /** HACK: Preliminary implementation. No validation, no error handling.
+         *        Based on from https://github.com/Hopding/pdf-lib/issues/534#issuecomment-662756915
+         */
+        try {
+            const pdfDoc = await Pdf.PDFDocument.load(Buffer.from(pdf, "base64"))
+            if (!pdfDoc.catalog.has(Pdf.PDFName.of("Names"))) {
+                return ok([])
+            }
+            const names = pdfDoc.catalog.lookup(Pdf.PDFName.of("Names"), Pdf.PDFDict)
+
+            if (!names.has(Pdf.PDFName.of("EmbeddedFiles"))) {
+                return ok([])
+            }
+            const embeddedFiles = names.lookup(Pdf.PDFName.of("EmbeddedFiles"), Pdf.PDFDict)
+
+            if (!embeddedFiles.has(Pdf.PDFName.of("Names"))) {
+                return ok([])
+            }
+            const efNames = embeddedFiles.lookup(Pdf.PDFName.of("Names"), Pdf.PDFArray)
+
+            const attachments: IExtractAttachmentsResult = []
+            for (let ii = 0; ii < efNames.size(); ii += 2) {
+                const filename = efNames.lookup(ii, Pdf.PDFString).decodeText()
+                const stream = efNames
+                    .lookup(ii + 1, Pdf.PDFDict)
+                    .lookup(Pdf.PDFName.of("EF"), Pdf.PDFDict)
+                    .lookup(Pdf.PDFName.of("F"), Pdf.PDFStream)
+                const bytes: Buffer = Buffer.from(Pdf.decodePDFRawStream(stream as Pdf.PDFRawStream).decode())
+                attachments.push({ filename: filename, bytes: bytes.toString("base64") })
+            }
+            return ok(attachments)
+        } catch (error: unknown) {
+            return ok([])
+        }
     }
 
     /**
