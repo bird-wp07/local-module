@@ -186,6 +186,13 @@ stop_dss() {
 
 # One-click start-all function for users of the linux bundle.
 serve_all() {
+    # Assert existence of required utils.
+    for dep in curl xz jq tar sed; do
+        if ! command -v >/dev/null 2>&1; then
+            log_err "Required program '$dep' is not installed. Abort."
+            exit 1
+        fi
+    done
     # The linux bundle contains a VERSION file to ensure that older version of
     # the local module can be built. To be able to use this script locally, we
     # allow running it without a VERSION file, which will default to the latest
