@@ -106,7 +106,6 @@ export enum ERevocationReason {
 
 export enum ERevocationStatus {
     ISSUANCE_REVOKED = "ISSUANCE_REVOKED",
-    ISSUANCE_ALREADY_REVOKED = "ISSUANCE_ALREADY_REVOKED",
     ISSUANCE_NOT_FOUND = "ISSUANCE_NOT_FOUND"
 }
 

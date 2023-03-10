@@ -56,7 +56,7 @@ export interface IValidateIssuanceResponse {
     /**
      * Overall result. True if and only if all policy checks are successful
      *
-     * TODO: What's details doing here?
+     * TODO: What's details doing?
      */
     valid: boolean
     results: [
@@ -69,13 +69,19 @@ export interface IValidateIssuanceResponse {
         {
             policyId: EIssuanceValidationPolicy.ISSUANCE_NOT_REVOKED
             policyDescription: string
+
+            /* null iff issuance does not exist */
             passed: boolean | null
+
             details: null
         },
         {
             policyId: EIssuanceValidationPolicy.ISSUER_NOT_REVOKED
             policyDescription: string
+
+            /* null iff issuance does not exist */
             passed: boolean | null
+
             details: null
         }
     ]
@@ -104,7 +110,6 @@ export enum ERevocationReason {
 
 export enum EIssuanceRevocationStatus {
     ISSUANCE_REVOKED = "ISSUANCE_REVOKED",
-    ISSUANCE_ALREADY_REVOKED = "ISSUANCE_ALREADY_REVOKED",
     ISSUANCE_NOT_FOUND = "ISSUANCE_NOT_FOUND"
 }
 

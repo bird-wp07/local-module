@@ -107,9 +107,6 @@ export class AppLogic implements IAppLogic {
             case Cs.EIssuanceRevocationStatus.ISSUANCE_NOT_FOUND:
                 status = ERevocationStatus.ISSUANCE_NOT_FOUND
                 break
-            case Cs.EIssuanceRevocationStatus.ISSUANCE_ALREADY_REVOKED:
-                status = ERevocationStatus.ISSUANCE_ALREADY_REVOKED
-                break
         }
         return ok({ status: status, revocationDate: revocationResult.revocationDate })
     }

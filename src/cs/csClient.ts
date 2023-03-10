@@ -163,15 +163,13 @@ export class CsClient implements ICsClient {
         }
         const rsltHttpReq = await Utility.httpReq(config)
 
-        // TODO: w/f TSystems.
+        // TODO: Validate response from cs.
+        //       Unfortunately, the responses we're getting are using RESTful
+        //       and RPC-like responses inconsistently, which is a big pita to
+        //       write validation schemas for.
         if (rsltHttpReq.isErr()) {
             if (rsltHttpReq.error instanceof AxiosError) {
                 const statuscode = rsltHttpReq.error.response?.status
-                if (statuscode === 409) {
-                    return ok({
-                        status: EIssuanceRevocationStatus.ISSUANCE_ALREADY_REVOKED
-                    })
-                }
                 if (statuscode === 404) {
                     return ok({
                         status: EIssuanceRevocationStatus.ISSUANCE_NOT_FOUND
@@ -180,6 +178,7 @@ export class CsClient implements ICsClient {
             }
             return err(rsltHttpReq.error)
         }
+
         return ok({
             status: EIssuanceRevocationStatus.ISSUANCE_REVOKED,
             revocationDate: new Date(rsltHttpReq.value.data.revocationDate as string)
