@@ -56,7 +56,7 @@ $dssRootPath = "$scriptDir\dss-demo-bundle-5.11"
 $dssServerConfigPath = "$dssRootPath\apache-tomcat-8.5.82\conf\server.xml" # apache config file
 $localModulePath = "$scriptDir\local-module"
 $nodeUrl = "https://nodejs.org/dist/v18.12.1/node-v18.12.1-win-x64.zip"
-$dssUrl = "https://github.com/bird-wp07/dss-demonstrations/releases/download/5.11/dss-demo-bundle-5.11.zip"
+$dssUrl = "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip"
 
 # Miscellaneous parameters
 # ------------------------

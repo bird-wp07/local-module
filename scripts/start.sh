@@ -74,7 +74,7 @@ install_jdk() {
     # directory, independent of the JDK version we're using.
     mkdir -p "$1"
     curl -Lso - "https://download.oracle.com/java/19/archive/jdk-19.0.1_linux-x64_bin.tar.gz" |
-    tar -xvzf - --strip-components 1 -C "$1"
+        tar -xvzf - --strip-components 1 -C "$1"
 }
 
 # Installs DSS into $1.
@@ -84,10 +84,10 @@ install_dss() {
     log_info "Installing DSS at '$1'."
     
     mkdir -p "$1"
-    curl -Ls "https://api.github.com/repos/bird-wp07/dss-demonstrations/releases/latest" |
-    jq -r '.assets[] | select(.browser_download_url | endswith("tar.gz")).browser_download_url' |
-    xargs -n1 curl -Lso - |
-    tar -xvzf - --strip-components 1 -C "$1"
+    curl -Ls  "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip" |
+        jq -r '.assets[] | select(.browser_download_url | endswith("tar.gz")).browser_download_url' |
+        xargs -n1 curl -Lso - |
+        tar -xvzf - --strip-components 1 -C "$1"
 }
 
 # Installs standalone node into $1. $PATH is not modified.
@@ -98,7 +98,7 @@ install_node() {
     
     mkdir -p "$1"
     curl -Lso - "https://nodejs.org/dist/v18.12.1/node-v18.12.1-linux-x64.tar.xz" |
-    tar -xvJf - --strip-components 1 -C "$1"
+        tar -xvJf - --strip-components 1 -C "$1"
 }
 
 # Installs local module into $1. $2 chooses a tag to install, defaulting to the latest release.
@@ -113,10 +113,10 @@ install_lm() {
     mkdir -p "$1"
     [ ! -z $2 ] && urlsuffix="tags/$2" || urlsuffix="latest"
     curl -Ls "https://api.github.com/repos/bird-wp07/local-module/releases/$urlsuffix" |
-    jq -r ".tarball_url" |
-    xargs -n1 curl -Lso - |
-    tar -xvzf - --strip-components 1 -C "$1"
-    
+        jq -r ".tarball_url" |
+        xargs -n1 curl -Lso - |
+        tar -xvzf - --strip-components 1 -C "$1"
+
     cd "$1"
     npm install
     npm run build
