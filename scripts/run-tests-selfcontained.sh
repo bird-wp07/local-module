@@ -22,7 +22,6 @@ run_container() {
     # TODO: Use git and shellmagic to dynamically generate this list.
     #       Separate versioned files from non-versioned files containing secrets.
     docker run -it --rm \
-        -v "$(realpath ./assets)":/root/assets \
         -v "$(realpath ./bundle)":/root/bundle \
         -v "$(realpath ./docs)":/root/docs \
         -v "$(realpath ./.eslintrc)":/root/.eslintrc \
