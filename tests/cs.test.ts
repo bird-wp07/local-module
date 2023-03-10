@@ -31,6 +31,12 @@ describe("Central Service", () => {
             expect(rsltValidateIssuance.isErr()).to.be.false
             const verifySignatureResult = rsltValidateIssuance._unsafeUnwrap()
             expect(verifySignatureResult.valid).to.be.true
+            const issuanceNotRevoked = verifySignatureResult.results.find((r) => r.policyId === Cs.EIssuanceValidationPolicy.ISSUANCE_NOT_REVOKED)!.passed
+            const issuanceExists = verifySignatureResult.results.find((r) => r.policyId === Cs.EIssuanceValidationPolicy.ISSUANCE_EXISTS)!.passed
+            const issuerNotRevoked = verifySignatureResult.results.find((r) => r.policyId === Cs.EIssuanceValidationPolicy.ISSUER_NOT_REVOKED)!.passed
+            expect(issuanceNotRevoked).to.be.true
+            expect(issuanceExists).to.be.true
+            expect(issuerNotRevoked).to.be.true
 
             /* Revoke issuance */
             const rsltRevokeIssuance = await csClient.revokeIssuance(signatureValueDigest, Cs.ERevocationReason.UNSPECIFIED)
@@ -38,19 +44,45 @@ describe("Central Service", () => {
             const revokeIssuanceResult = rsltRevokeIssuance._unsafeUnwrap()
             expect(revokeIssuanceResult.status).to.be.equal(Cs.EIssuanceRevocationStatus.ISSUANCE_REVOKED)
 
+            /* Validate issuance post revocation */
+            const rsltValidateIssuance2 = await csClient.validateIssuance(signatureValueDigest)
+            expect(rsltValidateIssuance2.isErr()).to.be.false
+            const verifySignatureResult2 = rsltValidateIssuance2._unsafeUnwrap()
+            expect(verifySignatureResult2.valid).to.be.false
+            const issuanceNotRevoked2 = verifySignatureResult2.results.find((r) => r.policyId === Cs.EIssuanceValidationPolicy.ISSUANCE_NOT_REVOKED)!.passed
+            const issuanceExists2 = verifySignatureResult2.results.find((r) => r.policyId === Cs.EIssuanceValidationPolicy.ISSUANCE_EXISTS)!.passed
+            const issuerNotRevoked2 = verifySignatureResult2.results.find((r) => r.policyId === Cs.EIssuanceValidationPolicy.ISSUER_NOT_REVOKED)!.passed
+            expect(issuanceNotRevoked2).to.be.false
+            expect(issuanceExists2).to.be.true
+            expect(issuerNotRevoked2).to.be.true
+
             /* Revoke revoked issuance */
             const rsltRevokeIssuance2 = await csClient.revokeIssuance(signatureValueDigest, Cs.ERevocationReason.SECURITY_ISSUE)
             expect(rsltRevokeIssuance2.isErr()).to.be.false
             const revokeIssuanceResult2 = rsltRevokeIssuance2._unsafeUnwrap()
-            // FIXME: w/f TSystems: returns 201 instead of 409, as announced
             expect(revokeIssuanceResult2.status).to.be.equal(Cs.EIssuanceRevocationStatus.ISSUANCE_REVOKED)
+        })
 
-            /* Revoke unknown issuance */
-            const signatureValueDigestNew: Base64 = Utility.sha256sum(Buffer.from(String(new Date()))).toString("base64")
-            const rsltRevokeIssuanceNew = await csClient.revokeIssuance(signatureValueDigestNew, Cs.ERevocationReason.FORMAL_MISTAKE)
-            expect(rsltRevokeIssuanceNew.isErr()).to.be.false
-            const revokeIssuanceResultNew = rsltRevokeIssuanceNew._unsafeUnwrap()
-            expect(revokeIssuanceResultNew.status).to.be.equal(Cs.EIssuanceRevocationStatus.ISSUANCE_NOT_FOUND)
+        test("Validate and revoke unknown signature", async () => {
+            const signatureValueDigest: Base64 = Utility.sha256sum(Buffer.from(String(new Date()))).toString("base64")
+
+            /* Revoke */
+            const rsltRevokeIssuance = await csClient.revokeIssuance(signatureValueDigest, Cs.ERevocationReason.FORMAL_MISTAKE)
+            expect(rsltRevokeIssuance.isErr()).to.be.false
+            const revokeIssuanceResult = rsltRevokeIssuance._unsafeUnwrap()
+            expect(revokeIssuanceResult.status).to.be.equal(Cs.EIssuanceRevocationStatus.ISSUANCE_NOT_FOUND)
+
+            /* Validate */
+            const rsltValidateIssuance = await csClient.validateIssuance(signatureValueDigest)
+            expect(rsltValidateIssuance.isErr()).to.be.false
+            const verifySignatureResult = rsltValidateIssuance._unsafeUnwrap()
+            expect(verifySignatureResult.valid).to.be.false
+            const issuanceNotRevoked = verifySignatureResult.results.find((r) => r.policyId === Cs.EIssuanceValidationPolicy.ISSUANCE_NOT_REVOKED)!.passed
+            const issuanceExists = verifySignatureResult.results.find((r) => r.policyId === Cs.EIssuanceValidationPolicy.ISSUANCE_EXISTS)!.passed
+            const issuerNotRevoked = verifySignatureResult.results.find((r) => r.policyId === Cs.EIssuanceValidationPolicy.ISSUER_NOT_REVOKED)!.passed
+            expect(issuanceExists).to.be.false
+            expect(issuanceNotRevoked).to.be.null
+            expect(issuerNotRevoked).to.be.null
         })
     })
 })

@@ -65,8 +65,6 @@ describe("Application logic layer", () => {
         const rsltRevoke2 = await appImpl.revokeSignature(signatureValueDigest, Applogic.ERevocationReason.SECURITY_ISSUE)
         expect(rsltRevoke2.isErr()).to.be.false
         const revocationResult2 = rsltRevoke2._unsafeUnwrap()
-
-        // FIXME: This should return an error indicating that the issuance has already been invoked.
         expect(revocationResult2.status).to.be.equal(Applogic.ERevocationStatus.ISSUANCE_REVOKED)
     })
 
