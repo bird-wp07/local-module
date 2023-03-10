@@ -58,7 +58,18 @@ export abstract class IAppLogic {
     abstract validateSignedPdf(pdf: Base64): Promise<Result<IValidationResult, Error>>
 
     /**
+     * Attach files to an existing PDF
+     *
+     * @param pdf - base64 encoded input PDF
+     * @param files - array of dicts containing file's data and the filename to embed
+     * @returns base64 encoded PDF with attachments
+     */
+    abstract attachFiles(pdf: Base64, files: { filename: string; bytes: Base64 }[]): Promise<Result<Base64, Error>>
+
+    /**
      * Extracts attachments from a PDF.
+     *
+     * @param pdf - base64 encoded PDF
      */
     abstract extractAttachments(pdf: Base64): Promise<Result<IExtractAttachmentsResult, Error>>
 

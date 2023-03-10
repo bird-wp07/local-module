@@ -68,6 +68,33 @@ describe("Application logic layer", () => {
         expect(revocationResult2.status).to.be.equal(Applogic.ERevocationStatus.ISSUANCE_REVOKED)
     })
 
+    test("Attach files to PDFs", async () => {
+        // FIXME: pdf-lib attachment embedding is broken
+        const xmlInput = "<xml>hello wörld</xml>"
+        const xmlAttachmentBytes = Buffer.from(xmlInput)
+        const pdfAttachmentBytes = fs.readFileSync("./tests/files/unsigned.pdf")
+
+        const pdf: Base64 = fs.readFileSync("./tests/files/unsigned.pdf").toString("base64")
+        const inputAttachments = [
+            {
+                filename: "myself.pdf",
+                bytes: pdfAttachmentBytes.toString("base64")
+            },
+            {
+                filename: "helloworld.xml",
+                bytes: xmlAttachmentBytes.toString("base64")
+            }
+        ]
+        const rsltAttachFiles = await appImpl.attachFiles(pdf, inputAttachments)
+        expect(rsltAttachFiles.isErr()).to.be.false
+        const pdfWithAttachments = rsltAttachFiles._unsafeUnwrap()
+
+        const rsltExtractAttachments = await appImpl.extractAttachments(pdfWithAttachments)
+        expect(rsltExtractAttachments.isErr()).to.be.false
+        const attachments = rsltExtractAttachments._unsafeUnwrap()
+        expect(attachments).to.have.members(inputAttachments)
+    })
+
     test("Extract attachments", async () => {
         const table = [
             {

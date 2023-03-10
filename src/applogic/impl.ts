@@ -240,6 +240,19 @@ export class AppLogic implements IAppLogic {
         return ok({ ...validationResult, signatureValueDigest: signatureValueDigest })
     }
 
+    public async attachFiles(pdf: Base64, files: { filename: string; bytes: Base64 }[]): Promise<Result<Base64, Error>> {
+        try {
+            const pdfDoc = await Pdf.PDFDocument.load(Buffer.from(pdf, "base64"))
+            for (const file of files) {
+                await pdfDoc.attach(Buffer.from(file.bytes, "base64"), file.filename)
+            }
+            const newPdf = Buffer.from(await pdfDoc.save()).toString("base64")
+            return ok(newPdf)
+        } catch (error: unknown) {
+            return err(new Error(`${this.attachFiles.name}: an error occurred during attachment of files`))
+        }
+    }
+
     public async extractAttachments(pdf: Base64): Promise<Result<IExtractAttachmentsResult, Error>> {
         /** HACK: Preliminary implementation. No validation, no error handling.
          *        Based on from https://github.com/Hopding/pdf-lib/issues/534#issuecomment-662756915
