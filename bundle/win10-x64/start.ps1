@@ -52,7 +52,7 @@ if ($null -eq $env:WP07_CS_CLIENT_PFX_PASSWORD) {
 # Installation paths
 # ------------------
 $nodeRootPath = "$scriptDir\node-v18.12.1-win-x64"
-$dssRootPath = "$scriptDir\dss-demo-bundle-5.11"
+$dssRootPath = "$scriptDir\dss-demo-bundle-5.11.1"
 $dssServerConfigPath = "$dssRootPath\apache-tomcat-8.5.82\conf\server.xml" # apache config file
 $localModulePath = "$scriptDir\local-module"
 $nodeUrl = "https://nodejs.org/dist/v18.12.1/node-v18.12.1-win-x64.zip"
