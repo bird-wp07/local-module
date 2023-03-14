@@ -112,7 +112,7 @@ Derzeit gibt es noch keine signierte Version der start.exe, daher werden ggf. Wa
 
     Eine detaillierte Auflistung und Erklärung der Konfigurationsparameter ist im entsprechenden Windowsabschnitt vorzufinden. Die Konfiguration unterscheidet sich zwischen den Betriebssystemen nicht.
 
-4. Starten des Lokalen Moduls durch Ausführen des Startupskripts. Hierbei werden alle benötigen Hintergrunddienste gestartet. Zum Betrieb werden neben den Linux Standardapplikationen `tar`, `curl`, `xz-utils`, `gzip` und `jq` benötigt. Bei einem Fehler während der Initialisierung aufgrund fehlender Programme empfehlen wir den gesamten Prozess in einem leeren Verzeichnis erneut durchzuführen.
+4. Starten des Lokalen Moduls durch Ausführen des Startupskripts. Hierbei werden alle benötigen Hintergrunddienste gestartet. Zum Betrieb werden neben den Linux Standardapplikationen `tar`, `curl`, `xz-utils`, `gzip`, `7z` und `jq` benötigt. Bei einem Fehler während der Initialisierung aufgrund fehlender Programme empfehlen wir den gesamten Prozess in einem leeren Verzeichnis erneut durchzuführen.
 
    ```sh
    ./start.sh
