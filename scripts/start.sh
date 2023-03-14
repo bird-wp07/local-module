@@ -83,11 +83,9 @@ install_dss() {
     [ -d "$1" ] && { log_info "DSS found at '$1'. Skipping install."; return; }
     log_info "Installing DSS at '$1'."
     
-    mkdir -p "$1"
-    curl -Ls  "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip" |
-        jq -r '.assets[] | select(.browser_download_url | endswith("tar.gz")).browser_download_url' |
-        xargs -n1 curl -Lso - |
-        tar -xvzf - --strip-components 1 -C "$1"
+    curl -Lso dss.zip "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip"
+    7z x dss.zip  # contains top-level dir 'dss-demo-bundle-5.11.1'
+    mv "dss-demo-bundle-5.11.1" "$1"
 }
 
 # Installs standalone node into $1. $PATH is not modified.
@@ -187,7 +185,7 @@ stop_dss() {
 # One-click start-all function for users of the linux bundle.
 serve_all() {
     # Assert existence of required utils.
-    for dep in curl xz jq tar sed; do
+    for dep in curl xz jq tar 7z sed; do
         if ! command -v >/dev/null 2>&1; then
             log_err "Required program '$dep' is not installed. Abort."
             exit 1

@@ -1,8 +1,8 @@
 # Dockerfile used to build images for development and self-contained testing.
 
 FROM ubuntu:latest
-RUN apt update -y && apt upgrade -y
-RUN apt install -y curl zsh bash xz-utils jq
+RUN apt update -y --fix-missing && apt upgrade -y
+RUN apt install -y curl zsh bash xz-utils jq p7zip-full
 WORKDIR /root
 ADD ./start.sh /root/start.sh
 
