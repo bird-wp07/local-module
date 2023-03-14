@@ -186,7 +186,7 @@ stop_dss() {
 serve_all() {
     # Assert existence of required utils.
     for dep in curl xz jq tar 7z sed; do
-        if ! command -v >/dev/null 2>&1; then
+        if ! command -v "$dep" >/dev/null 2>&1; then
             log_err "Required program '$dep' is not installed. Abort."
             exit 1
         fi
