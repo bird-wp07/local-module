@@ -11,7 +11,6 @@ export abstract class IDssClient {
     public abstract validateSignature(request: IValidateSignatureRequest): Promise<Result<IValidateSignatureResponse, Error>>
 }
 
-// TODO: Validierung für Dss' Reponse einbauen. (Fallnetz für Reverse Engineering)
 export class DssClient implements IDssClient {
     baseurl: string
     constructor(baseurl: string) {

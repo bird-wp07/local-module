@@ -147,7 +147,17 @@ export interface IValidateSignatureResponse {
                       BestSignatureTime: string // "best"
                       SigningTime: string // Claimed signing time
 
+                      /* E.g. Ministry of Truth, Oceania. */
                       SignedBy: string
+
+                      /* Scope of signature, referring to whether the byte
+                       * range covers the full document or just a part, as would
+                       * be the case after an incremental update.
+                       *
+                       * ???: Why does DSS return an array here? */
+                      SignatureScope: {
+                          scope: "FULL" | "PARTIAL"
+                      }[]
                   }
               }[]
             | null

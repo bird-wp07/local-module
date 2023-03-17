@@ -19,9 +19,14 @@ describe("Application logic layer", () => {
     })
 
     test("Happy path: Digest, sign, merge, verify, revoke", async () => {
+        /* NOTE: These tests assume that the development issuer id will be used,
+         *       which will produce signatures using a self-signed certificate,
+         *       instead of a trusted certificate. Thus all validations are
+         *       expected to return a negative result.
+         *
+         *       The self-signed signing certificate is valid from
+         *       2022-11-25T12:29:00Z to 2023-11-25T12:29:00Z */
         const pdfpath = "./tests/files/unsigned.pdf"
-        // NOTE: The signing certificate used by the cs is valid
-        //       from 2022-11-25T12:29:00Z to 2023-11-25T12:29:00Z
         const timestamp = new Date("2022-11-25T12:30:00Z")
         const pdf: Base64 = fs.readFileSync(pdfpath).toString("base64")
 
@@ -45,7 +50,8 @@ describe("Application logic layer", () => {
         const rsltValidate = await appImpl.validateSignedPdf(signedPdf)
         expect(rsltValidate.isErr()).to.be.false
         const validationResult = rsltValidate._unsafeUnwrap()
-        expect(validationResult.valid).to.be.false // COMBACK: Change once we have a trusted certificate
+        expect(validationResult.valid).to.be.false
+        expect(validationResult.document.status).to.be.equal(Applogic.EDocumentValidity.ERROR_DOCUMENT_UNTRUSTED)
         expect(validationResult.issuance.status).to.be.equal(Applogic.EIssuanceValidity.ISSUANCE_OK)
 
         /* Revoke */
@@ -66,6 +72,37 @@ describe("Application logic layer", () => {
         expect(rsltRevoke2.isErr()).to.be.false
         const revocationResult2 = rsltRevoke2._unsafeUnwrap()
         expect(revocationResult2.status).to.be.equal(Applogic.ERevocationStatus.ISSUANCE_REVOKED)
+    })
+
+    test("Catch manipulated PDFs", async () => {
+        {
+            /* Checks whether signed PDFs, which have been changed via incremental
+             * updates will be flagged as invalid. */
+            const signedPdf = fs.readFileSync("./tests/files/signed-trusted-manipulated-incremental.pdf", "base64")
+            const rsltValidate = await appImpl.validateSignedPdf(signedPdf)
+            expect(rsltValidate.isErr()).to.be.false
+            const validationResult = rsltValidate._unsafeUnwrap()
+            expect(validationResult.valid).to.be.false
+            expect(validationResult.document.status).to.be.equal(Applogic.EDocumentValidity.ERROR_DOCUMENT_INVALID)
+        }
+        {
+            /* Checks whether PDFs, which have been tampered with within the
+             * byte range covered by the signature, are flagged as invalid. */
+            const signedPdf = fs.readFileSync("./tests/files/signed-trusted-manipulated.pdf", "base64")
+            const rsltValidate = await appImpl.validateSignedPdf(signedPdf)
+            expect(rsltValidate.isErr()).to.be.false
+            const validationResult = rsltValidate._unsafeUnwrap()
+            expect(validationResult.valid).to.be.false
+
+            /* TODO: Manipulations inside and outside of the signature's byte range produduce different return statuses.
+             *       This is a consequence of the current, lazy implementation
+             *       of the DSS validation, which just checks whether we get a
+             *       TOTAL_PASSED result. It would be better, if *_UNTRUSTED
+             *       referred to problems with the signature and if
+             *       tempering with signed documents produced a
+             *       DOCUMENT_INVALID error. */
+            expect(validationResult.document.status).to.be.equal(Applogic.EDocumentValidity.ERROR_DOCUMENT_UNTRUSTED)
+        }
     })
 
     test.skip("Attach files to PDFs", async () => {

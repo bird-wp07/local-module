@@ -188,12 +188,21 @@ export class AppLogic implements IAppLogic {
             validationResult.valid = false
             validationResult.document.status = EDocumentValidity.ERROR_DOCUMENT_UNTRUSTED
             validationResult.document.details = dssValidateSignatureResult
+        } else if (signatures![0].Signature.SignatureScope[0].scope !== "FULL") {
+            /* Assert that the signature covers the full document range. DSS does
+             * allow incremental changes to the document (which don't invalidate
+             * the signature). Such changes will display a warning but will still
+             * return a TOTAL_PASSED result. */
+            validationResult.valid = false
+            validationResult.document.status = EDocumentValidity.ERROR_DOCUMENT_INVALID
+            validationResult.document.details = dssValidateSignatureResult
         }
 
         /* If the document content (TODO: reword; too vague) itself is invalid
          * we skip the validation of the signature issuance and return
-         * immediately. In case of an unsigned or multi-signature document
-         * there is no issuance to check in the first place. */
+         * immediately. In case of an unsigned or multi-signature document, or
+         * if the document was manipulated, there is no point in checking the
+         * issuance. */
         if (validationResult.document.status === EDocumentValidity.ERROR_DOCUMENT_INVALID) {
             validationResult.issuance.status = EIssuanceValidity.ERROR_DOCUMENT_INVALID
             return ok(validationResult)
