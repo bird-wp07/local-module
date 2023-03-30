@@ -48,6 +48,10 @@ if [ -z "$WP07_CS_CLIENT_PFX" ] && [ ! -z "$CS_CLIENT_PFX" ]; then
     WP07_CS_CLIENT_PFX="$(realpath "$CS_CLIENT_PFX")"
 fi
 WP07_CS_CLIENT_PFX_PASSWORD="${WP07_CS_CLIENT_PFX_PASSWORD:-"$CS_CLIENT_PFX_PASSWORD"}"
+WP07_PROXY_HOST="$PROXY_HOST"
+WP07_PROXY_PORT="$PROXY_PORT"
+WP07_PROXY_USER="$PROXY_USER"
+WP07_PROXY_PASSWORD="$PROXY_PASSWORD"
 DSS_PID_FILE=".dss.pid"
 
 # Configure logging. Depending on whether we're running inside a terminal use
@@ -188,6 +192,10 @@ start_lm() {
             WP07_CS_CA_PEM="$WP07_CS_CA_PEM" \
             WP07_CS_CLIENT_PFX="$WP07_CS_CLIENT_PFX" \
             WP07_CS_CLIENT_PFX_PASSWORD="$WP07_CS_CLIENT_PFX_PASSWORD" \
+            WP07_PROXY_HOST="$WP07_PROXY_HOST" \
+            WP07_PROXY_PORT="$WP07_PROXY_PORT" \
+            WP07_PROXY_USER="$WP07_PROXY_USER" \
+            WP07_PROXY_PASSWORD="$WP07_PROXY_PASSWORD" \
             PATH="$(realpath "$NODE_ROOT")/bin:$PATH" \
             npm run start"$nobuild"
     )

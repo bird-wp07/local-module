@@ -99,3 +99,29 @@ export function parseKeyValueFile(path: string): Result<Record<string, string>, 
 
     return ok(result)
 }
+
+/**
+ * Given proxy server information, returns a dict usable to instantiate
+ * hpagent.HttpsProxyAgent and hpagent.HttpProxyAgent.
+ */
+interface IProxyAgentPartialOptions {
+    proxy: string
+    proxyRequestOptions?: {
+        headers: {
+            "proxy-authorization": string
+        }
+    }
+}
+export function makePartialProxyAgentOptions(proxyHost: string, proxyPort: string, proxyUser?: string, proxyPassword?: string): IProxyAgentPartialOptions {
+    const result: IProxyAgentPartialOptions = {
+        proxy: `http://${proxyHost}:${proxyPort}`
+    }
+    if (proxyUser !== undefined && proxyPassword !== undefined) {
+        result.proxyRequestOptions = {
+            headers: {
+                "proxy-authorization": "Basic " + Buffer.from(`${proxyUser}:${proxyPassword}`).toString("base64")
+            }
+        }
+    }
+    return result
+}

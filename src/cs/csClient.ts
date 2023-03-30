@@ -14,8 +14,10 @@ import {
 import * as qs from "qs"
 import * as Utility from "../utility"
 import * as https from "https"
+import * as http from "http"
 import * as fs from "fs"
 import { EDigestAlgorithm } from "../dss"
+import * as hpagent from "hpagent"
 
 export abstract class ICsClient {
     abstract isOnline(): Promise<boolean>
@@ -27,24 +29,50 @@ export abstract class ICsClient {
 export class CsClient implements ICsClient {
     baseurl: string
     tokenUrl: string
-    authHttpsAgent: https.Agent
+    authHttpsAgent: https.Agent | hpagent.HttpsProxyAgent // used to fetch token using mTLS
+    httpsAgent: https.Agent | hpagent.HttpsProxyAgent
+    httpAgent: http.Agent | hpagent.HttpProxyAgent
     constructor(baseurl: string, tokenUrl: string, mtlsClientPfxFile: string, mtlsClientPfxFilePassword: string, mtlsCaPemfile: string) {
         this.baseurl = baseurl
         this.tokenUrl = tokenUrl
 
-        /* In the absence of openid-connect credentials, do allow to use the
-         * unauthenticated routes. This is useful for when one does not mean
-         * to communicate with the central service directly or if only the
-         * validation funcionality is intended to be used.
-         */
+        /* TODO: Expose proxy settings as regular application settings */
+        const proxyHost = process.env.WP07_PROXY_HOST
+        const proxyPort = process.env.WP07_PROXY_PORT
+        const proxyUser = process.env.WP07_PROXY_USER
+        const proxyPassword = process.env.WP07_PROXY_PASSWORD
+
+        /* Configure the https agents for the authentication route. */
         if (!tokenUrl || !mtlsClientPfxFile || !mtlsClientPfxFilePassword || !mtlsCaPemfile) {
+            /* In the absence of the mTLS or the openid-connect credentials, we
+             * still allow usage of the unauthenticated validation route. The access
+             * to the other routes is hidden from the user at the HTTP API level.
+             * To keep the code in here the same, we just assign a bogus https
+             * client.*/
             this.authHttpsAgent = new https.Agent()
         } else {
-            this.authHttpsAgent = new https.Agent({
+            const mtlsCredentials = {
                 ca: fs.readFileSync(mtlsCaPemfile),
                 pfx: fs.readFileSync(mtlsClientPfxFile),
                 passphrase: mtlsClientPfxFilePassword
-            })
+            }
+
+            if (proxyHost !== undefined && proxyPort !== undefined) {
+                const proxyAgentOpts = Utility.makePartialProxyAgentOptions(proxyHost, proxyPort, proxyUser, proxyPassword)
+                this.authHttpsAgent = new hpagent.HttpsProxyAgent({ ...proxyAgentOpts, ...mtlsCredentials })
+            } else {
+                this.authHttpsAgent = new https.Agent(mtlsCredentials)
+            }
+        }
+
+        /* Configure http(s) agents for regular routes. */
+        if (proxyHost !== undefined && proxyPort !== undefined) {
+            const proxyAgentOpts = Utility.makePartialProxyAgentOptions(proxyHost, proxyPort, proxyUser, proxyPassword)
+            this.httpsAgent = new hpagent.HttpsProxyAgent(proxyAgentOpts)
+            this.httpAgent = new hpagent.HttpProxyAgent(proxyAgentOpts)
+        } else {
+            this.httpsAgent = new https.Agent()
+            this.httpAgent = new http.Agent()
         }
     }
 
@@ -69,7 +97,9 @@ export class CsClient implements ICsClient {
         const config: AxiosRequestConfig = {
             method: "GET",
             url: "/swagger-ui/index.html",
-            baseURL: this.baseurl
+            baseURL: this.baseurl,
+            httpsAgent: this.httpsAgent,
+            httpAgent: this.httpAgent
         }
         const rsltHttpReq = await Utility.httpReq(config)
         if (rsltHttpReq.isErr()) {
@@ -100,7 +130,9 @@ export class CsClient implements ICsClient {
                 digestMethod: digestMethod,
                 issuerId: issuerId,
                 auditLog: auditLog
-            }
+            },
+            httpsAgent: this.httpsAgent,
+            httpAgent: this.httpAgent
         }
         const rsltHttpReq = await Utility.httpReq(config)
         if (rsltHttpReq.isErr()) {
@@ -126,7 +158,9 @@ export class CsClient implements ICsClient {
                 hash: signatureValueDigest,
                 hashType: "SIGNATURE_HASH"
             },
-            paramsSerializer: { serialize: (params) => qs.stringify(params) }
+            paramsSerializer: { serialize: (params) => qs.stringify(params) },
+            httpsAgent: this.httpsAgent,
+            httpAgent: this.httpAgent
         }
         const rsltHttpReq = await Utility.httpReq(config)
         if (rsltHttpReq.isErr()) {
@@ -159,7 +193,9 @@ export class CsClient implements ICsClient {
                 revocationReason: revocationReason,
                 hashType: "SIGNATURE_HASH",
                 auditLog: auditLog
-            }
+            },
+            httpsAgent: this.httpsAgent,
+            httpAgent: this.httpAgent
         }
         const rsltHttpReq = await Utility.httpReq(config)
 
