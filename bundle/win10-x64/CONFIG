@@ -6,3 +6,7 @@ CS_TOKEN_URL=https://225.96.234.35.bc.googleusercontent.com/realms/bird-cs-dev/p
 CS_CA_PEM=cs-auth-mtls-server-cert.pem
 CS_CLIENT_PFX=cs-auth-mtls-client-certkey.p12
 CS_CLIENT_PFX_PASSWORD=
+PROXY_HOST=
+PROXY_PORT=
+PROXY_USER=
+PROXY_PASSWORD=

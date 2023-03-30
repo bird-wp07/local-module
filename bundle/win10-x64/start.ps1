@@ -48,6 +48,30 @@ if ($null -eq $env:WP07_CS_CLIENT_PFX_PASSWORD) {
         $env:WP07_CS_CLIENT_PFX_PASSWORD = Get-Content "$scriptDir\CONFIG" | Select-String "^CS_CLIENT_PFX_PASSWORD=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
     }
 }
+if ($null -eq $env:WP07_PROXY_HOST) {
+    $val = Get-Content "$scriptDir\CONFIG" | Select-String "^PROXY_HOST=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    if ($val) {
+        $env:WP07_PROXY_HOST = Get-Content "$scriptDir\CONFIG" | Select-String "^PROXY_HOST=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    }
+}
+if ($null -eq $env:WP07_PROXY_PORT) {
+    $val = Get-Content "$scriptDir\CONFIG" | Select-String "^PROXY_PORT=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    if ($val) {
+        $env:WP07_PROXY_PORT = Get-Content "$scriptDir\CONFIG" | Select-String "^PROXY_PORT=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    }
+}
+if ($null -eq $env:WP07_PROXY_USER) {
+    $val = Get-Content "$scriptDir\CONFIG" | Select-String "^PROXY_USER=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    if ($val) {
+        $env:WP07_PROXY_USER = Get-Content "$scriptDir\CONFIG" | Select-String "^PROXY_USER=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    }
+}
+if ($null -eq $env:WP07_PROXY_PASSWORD) {
+    $val = Get-Content "$scriptDir\CONFIG" | Select-String "^PROXY_PASSWORD=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    if ($val) {
+        $env:WP07_PROXY_PASSWORD = Get-Content "$scriptDir\CONFIG" | Select-String "^PROXY_PASSWORD=(.*)$" | ForEach-Object{$_.Matches[0].Groups[1].Value}
+    }
+}
 
 # Installation paths
 # ------------------
@@ -106,6 +130,41 @@ function Stop-DSS {
     } else {
         Write-Host "Stop-Dss: Pidfile '$dssPidFilePath' not found."
     }
+}
+
+function dss_configure_proxy {
+    if ($null -eq $args[0]) {
+        $txt = @"
+proxy.http.enabled = false
+proxy.https.enabled = false
+
+"@
+    } else {
+        $proxy_host = $args[0]
+        $proxy_port = $args[1]
+        $txt = @"
+proxy.http.enabled = true
+proxy.http.host = $proxy_host
+proxy.http.port = $proxy_port
+proxy.https.enabled = true
+proxy.https.host = $proxy_host
+proxy.https.port = $proxy_port
+
+"@
+        if ($null -ne $args[2]) {
+            $proxy_basicauth_user = $args[2]
+            $proxy_basicauth_password = $args[3]
+            $txt = $txt + @"
+proxy.http.user = $proxy_basicauth_user
+proxy.http.password = $proxy_basicauth_password
+proxy.https.user = $proxy_basicauth_user
+proxy.https.password = $proxy_basicauth_password
+
+"@
+        }
+    }
+
+    Set-Content -Path "$dssRootPath\apache-tomcat-8.5.82\lib\dss-custom.properties" -Value $txt
 }
 
 # If needed, downloads missing dependencies (dss, standalone node, local
@@ -183,6 +242,7 @@ function main {
     Install-Dependencies all $version
 
     try {
+        dss_configure_proxy $env:WP07_PROXY_HOST $env:WP07_PROXY_PORT $env:WP07_PROXY_USER $env:WP07_PROXY_PASSWORD
         Start-DSS
 
         $env:Path = "$nodeRootPath;$env:Path"
