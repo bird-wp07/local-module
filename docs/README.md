@@ -65,6 +65,14 @@ Die beiliegende Datei *CONFIG* dient der Konfiguration des Lokalen Moduls. Folge
 
     Das Password wird nicht mit dem Bundle ausgeliefert.
 
+- `PROXY_HOST`: Optionale IP-Adresse eines Web Proxy Servers (z.B. lokal `127.244.0.1` oder im Intranet `192.168.14.21`).
+
+    Anmerkung: Der Proxy kann zum jetzigen Zustand _nicht_ zur initialen, einmaligen Installation aller Abhängigkeiten des Lokalen Moduls verwendet werden. Alle Proxy-Einstellungen betreffen nur den Regelbetrieb des Lokalen Moduls.
+
+- `PROXY_PORT`: Port des Proxy Servers (z.B. `9921`, `844`).
+- `PROXY_USER`: Benutzername für Basicauth Authentifizierung des Proxy Servers (z.B. `proxy_user_217`)
+- `PROXY_PASSWORD`: Klartextpasswort für Basicauth Authentifizierung des Proxy Servers (z.B. `59bcc3ad6775`).
+
 Alternativ können all genannten Werte über Umgebungsvariablen konfiguriert werden, deren Namen sich nur durch ein `WP07_` Präfix gegenüber ihren jeweiligen Konfigurationsparameter unterscheiden (z.B. wird der Wert des `DSS_BASEURL` Parameters aus der `WP07_DSS_BASEURL` Umgebungsvariablen übernommen, sofern diese existiert).
 
 ##### 2.2.1.2.1 Betrieb ohne Verwendung geschützter HTTP Routen
