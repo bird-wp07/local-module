@@ -17,6 +17,10 @@ CS_TOKEN_URL="https://225.96.234.35.bc.googleusercontent.com/realms/bird-cs-dev/
 CS_CA_PEM="cs-auth-mtls-server-cert.pem"
 CS_CLIENT_PFX="cs-auth-mtls-client-certkey.p12"
 CS_CLIENT_PFX_PASSWORD=
+PROXY_HOST=
+PROXY_PORT=
+PROXY_USER=
+PROXY_PASSWORD=
 
 set -e
 
@@ -68,7 +72,7 @@ install_jdk() {
     [ -z "$1" ] && { log_err "missing JDK output directory path"; return 1; }
     [ -d "$1" ] && { log_info "JDK found at '$1'. Skipping install."; return; }
     log_info "Installing JDK at '$1'."
-    
+
     # The archive contents' paths are prefixed with 'jdk-<VERSION>'. We remove
     # this prefix while unpacking for consistent naming of the JDK root
     # directory, independent of the JDK version we're using.
@@ -82,10 +86,48 @@ install_dss() {
     [ -z "$1" ] && { log_err "missing DSS output directory path"; return 1; }
     [ -d "$1" ] && { log_info "DSS found at '$1'. Skipping install."; return; }
     log_info "Installing DSS at '$1'."
-    
+
     curl -Lso dss.zip "https://ec.europa.eu/digital-building-blocks/artifact/repository/esignaturedss/eu/europa/ec/joinup/sd-dss/dss-demo-bundle/5.11.1/dss-demo-bundle-5.11.1.zip"
-    7z x dss.zip  # contains top-level dir 'dss-demo-bundle-5.11.1'
+
+    # The archive contains a top-level dir 'dss-demo-bundle-5.11.1', which we
+    # manually strip by renaming it, akin to tar's --strip-components.
+    7z x dss.zip
     mv "dss-demo-bundle-5.11.1" "$1"
+}
+
+# Configures proxy settings for outgoing DSS HTTP(S) connections (downloading
+# LOTLs etc.). May be passed
+#   - four arguments: proxy host, proxy port, basicauth user, basicauth password
+#   - two arguments:  proxy host, proxy port
+#   - no arguments:   disables usage of a proxy
+dss_configure_proxy() {
+    proxy_host="$1"
+    proxy_port="$2"
+    proxy_basicauth_user="$3"
+    proxy_basicauth_password="$4"
+
+    cfg_path="$DSS_ROOT/apache-tomcat-8.5.82/lib/dss-custom.properties"
+
+    if [ $# -eq 0 ]; then
+        cat >"$cfg_path" <<<"proxy.http.enabled = false
+proxy.https.enabled = false
+"
+    elif [ $# -ge 2 ]; then
+        cat >"$cfg_path" <<<"proxy.http.enabled = true
+proxy.http.host = $proxy_host
+proxy.http.port = $proxy_port
+proxy.https.enabled = true
+proxy.https.host = $proxy_host
+proxy.https.port = $proxy_port
+"
+        if [ $# -eq 4 ]; then
+        cat >>"$cfg_path" <<<"proxy.http.user = $proxy_basicauth_user
+proxy.http.password = $proxy_basicauth_password
+proxy.https.user = $proxy_basicauth_user
+proxy.https.password = $proxy_basicauth_password
+"
+        fi
+    fi
 }
 
 # Installs standalone node into $1. $PATH is not modified.
@@ -93,7 +135,7 @@ install_node() {
     [ -z "$1" ] && { log_err "missing Node output directory path"; return 1; }
     [ -d "$1" ] && { log_info "Node found at '$1'. Skipping install."; return; }
     log_info "Installing Node at '$1'."
-    
+
     mkdir -p "$1"
     curl -Lso - "https://nodejs.org/dist/v18.12.1/node-v18.12.1-linux-x64.tar.xz" |
         tar -xvJf - --strip-components 1 -C "$1"
@@ -107,7 +149,7 @@ install_lm() {
     [ -z "$1" ] && { log_err "missing local module output directory path"; return 1; }
     [ -d "$1" ] && { log_info "Local module found at '$1'. Skipping install."; return; }
     log_info "Installing local module at '$1'."
-    
+
     mkdir -p "$1"
     [ ! -z $2 ] && urlsuffix="tags/$2" || urlsuffix="latest"
     curl -Ls "https://api.github.com/repos/bird-wp07/local-module/releases/$urlsuffix" |
@@ -157,14 +199,14 @@ start_lm() {
 # file.
 start_dss() {
     [ -z "$JAVA_HOME" ] && ! command -v java >/dev/null && { log_err "java not found and \$JAVA_HOME undefined"; return 1; }
-    
+
     # HACK: Replace the server's default port by in-file substitution.
     #       Unfortunately, there is no easier method as we're not in control of
     #       the server's configuration.
     cfg_xml="$DSS_ROOT/apache-tomcat-8.5.82/conf/server.xml"
     dss_port="$(printf -- "$WP07_DSS_BASEURL" | cut -d: -f3-)"
     sed -i -E 's|(<Connector port=")([^"]+)(" protocol="HTTP/1.1")|\1'"$dss_port"'\3|g' "$cfg_xml"
-    
+
     if [ -z "$1" ]; then
         bash "$DSS_ROOT/apache-tomcat-8.5.82/bin/catalina.sh" run 2>&1
     else
@@ -197,13 +239,14 @@ serve_all() {
     # local module version tag.
     tag="$(cat VERSION 2>/dev/null)" || tag=""
     install_all "$tag"
-    
+
     # Ensure cleanup of DSS process.
     trap "stop_dss" EXIT
-    
-    # Start DSS in the background.
+
+    # Configure DSS proxy settings and launch it in the background.
+    dss_configure_proxy "$PROXY_HOST" "$PROXY_PORT" "$PROXY_USER" "$PROXY_PASSWORD"
     JAVA_HOME="$(realpath "$JDK_ROOT")" start_dss "$DSS_PID_FILE" >/dev/null
-    
+
     # Start LM.
     PATH="$(realpath "$NODE_ROOT")/bin:$PATH" \
         start_lm
